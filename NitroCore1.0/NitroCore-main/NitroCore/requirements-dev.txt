@@ -1,0 +1,22 @@
+# ====================================================================
+# NitroCore - Developer & Testing Tooling Only
+# ====================================================================
+-r requirements.txt
+
+# Testing & Metrics Frameworks
+pytest>=7.4.0
+pytest-cov>=4.1.0
+coverage>=7.3.0
+
+# Code Quality & Format Linter Engines
+black>=23.9.0
+flake8>=6.1.0
+
+# Packaging & Distribution Pipelines
+setuptools>=68.0.0
+wheel>=0.41.0
+twine>=4.0.2
+
+# Static Type Analysis Definitions
+types-setuptools>=68.0.0
+types-pyyaml>=6.0.12

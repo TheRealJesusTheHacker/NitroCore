@@ -1,0 +1,15 @@
+# ====================================================================
+# NitroCore Windows System Optimizer - Production Runtime Dependencies
+# ====================================================================
+
+# Low-level Windows API interaction extensions
+pywin32>=306
+
+# Process metrics, memory telemetry, and CPU prioritization tracking
+psutil>=5.9.0
+
+# Multi-format configuration parsing (JSON/YAML)
+pyyaml>=6.0.1
+
+# Icon generation and tray support
+pillow>=10.0.0
