@@ -1,100 +1,121 @@
-# NitroCore - Windows System Optimizer
+# ⚡ NitroCore — Windows System Optimizer
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
+[![Platform: Windows](https://img.shields.io/badge/platform-Windows-0078D6)](https://www.microsoft.com/windows)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-**NitroCore** is a professional Windows system optimization utility that helps boost gaming and application performance by cleaning temporary files, optimizing registry settings, managing services, and tuning system performance.
+**NitroCore tunes up your Windows PC so games run smoother and security tools run faster.**
 
-## 🚀 Features
+In plain terms: over time Windows collects junk files, runs background programs you don't need, and uses settings that favor battery life over speed. NitroCore cleans the junk, quiets the background noise, and flips the right switches — all from one simple dashboard. You don't need to know what the registry is. Just pick a profile, hit a button, and let it work.
 
-- **Registry Optimization**: Safely optimize Windows registry for better performance
-- **Temporary File Cleanup**: Remove temporary files and browser cache
-- **Disk Cleanup**: Free up disk space by cleaning system files
-- **Service Management**: Disable unnecessary services to improve performance
-- **Performance Tuning**: Apply Windows performance tweaks
-- **User-Friendly GUI**: Clean, intuitive tabbed interface
-- **Logging System**: Comprehensive logging for troubleshooting
-- **Error Handling**: Robust error handling with detailed feedback
-- **Progress Tracking**: Real-time progress updates during operations
-
-## 📋 Requirements
-
-- Python 3.8 or higher
-- Windows 7, 8, 10, or 11
-- Administrator privileges
-- PyYAML >= 6.0.0
-- psutil >= 5.8.0
-- pywin32 >= 300 (for Windows service management)
-
-## 🔧 Installation
-
-### From Source
-
-```bash
-git clone https://github.com/thedarkonejesus/Nitrocore.git
-cd NitroCore
-pip install -r requirements.txt
-python -m NitroCore.source.main
-```
-
-## 🎯 Quick Start
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/thedarkonejesus/Nitrocore.git
-   cd NitroCore
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Run as Administrator**:
-   ```bash
-   python -m NitroCore.source.main
-   ```
-
-## 📖 Usage
-
-### GUI Application
-
-Launch the application with:
-```bash
-python -m NitroCore.source.main
-```
-
-The application features several tabs:
-
-- **Registry**: Optimize Windows registry settings
-- **Temporary Files**: Clean temporary files and browser cache
-- **Disk Cleanup**: Remove system temporary files
-- **Services**: Manage background services
-- **Performance**: Apply system performance tweaks
-- **Status**: View detailed status and logs
-
-## 🔒 Security Considerations
-
-- **Administrator Privileges**: The application requires admin rights to modify system settings
-- **Backup**: Always create a system restore point before running optimizations
-- **Testing**: Test on a non-critical system first
-- **Logging**: All operations are logged for audit trail
-
-## ⚠️ Warnings
-
-- **System Modifications**: This tool modifies Windows registry and system files
-- **Data Loss Risk**: Be cautious with aggressive cleanup options
-- **Service Disruption**: Disabling certain services may affect system functionality
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## ⚖️ Disclaimer
-
-This tool is provided as-is without warranty. Use at your own risk and always maintain backups.
+> ### Screenshots
+> _Screenshot placeholder — dashboard preview coming here._
 
 ---
 
-**Made with ❤️ for Windows users**
+## ✨ Features
+
+- **🎮 Gaming & 🛡️ Cybersecurity profiles** — one-click optimization pipelines tuned for max FPS or for stable, patch-friendly security workloads.
+- **🧹 Temp & browser cache cleanup** — clears system temp folders and Chrome/Firefox caches, with a before/after MB-freed report.
+- **💽 Disk cleanup** — runs Windows' native cleanup plus DISM component cleanup; shows live drive-usage bars.
+- **⚙️ Registry tuning** — disables hibernation, sets the pagefile to automatic, and trims visual effects for snappier windows.
+- **🔇 Background service management** — stops and sets non-essential services (Update, BITS, Search) to manual on the Gaming profile; keeps patching alive on the Cybersecurity profile.
+- **🔋 Performance tuning** — switches to the Ultimate Performance power plan and raises priority on key system processes.
+- **📊 Live stats header** — CPU, RAM, disk, and power plan at a glance.
+- **🛟 Restore-point safety net** — offers to create a Windows restore point before anything risky.
+- **📝 Full operation logs** — every action is logged on screen and saved to `%APPDATA%\NitroCore\logs`.
+- **🥚 Hidden Fallout mode** — click the title 7 times. You'll see.
+
+---
+
+## 📥 Installation
+
+### Option A — Ready-to-run .exe (easiest)
+
+1. Download `NitroCoreOptimizer.exe` from the [Releases](https://github.com/TheRealJesusTheHacker/NitroCore1.0/releases) page.
+2. Right-click it → **Run as administrator**.
+3. That's it.
+
+### Option B — From source
+
+Requires Python 3.9+ on Windows.
+
+```bash
+git clone https://github.com/TheRealJesusTheHacker/NitroCore1.0.git
+cd NitroCore1.0/NitroCore-main/NitroCore
+pip install -r requirements.txt
+```
+
+Then **run as administrator**:
+
+```bash
+python main.py
+```
+
+> The app must run elevated — it can't tune the system without admin rights. It will tell you if you forgot.
+
+### Building the .exe yourself
+
+```bash
+pip install pyinstaller
+pyinstaller nitrocore.spec
+```
+
+The build requests admin rights automatically (`uac_admin`), so the .exe self-elevates.
+
+---
+
+## 🕹️ Usage walkthrough
+
+1. **Launch as administrator.** If you're not elevated, NitroCore will say so and exit.
+2. **Pick your profile** at the top:
+   - **Gaming** (orange) — aggressive: max performance, background services trimmed.
+   - **Cybersecurity** (teal) — stable: visual tweaks and cleanup, Windows Update stays on.
+3. **Explore the tabs** — Registry, Temp Files, Disk Cleanup, Services, Performance, Status. Each tab explains what it does and shows a risk level.
+4. **Run something.** You can run individual actions, or hit **Run All** to execute the full pipeline for your profile.
+5. **Say yes to the restore point.** Before anything that changes system settings, NitroCore asks if you want a restore point first. Always a good idea.
+6. **Watch the Status tab.** Every step logs what it did, how long it took, and how much space it freed.
+
+---
+
+## 🛟 Safety notes
+
+- **Admin rights are required.** The app exits with a clear message if you launch it without them.
+- **Restore points are offered, not forced.** Before registry edits, service changes, or disk cleanup, you'll get a dialog: _Create & Continue_, _Skip_, or _Cancel_. Nothing irreversible happens without you knowing.
+- **Your personal files are never touched** — except Downloads cleanup, which only removes files **older than 30 days** and asks you to confirm first.
+- **Logs live at** `%APPDATA%\NitroCore\logs\nitrocore.log` — if anything looks off, the full trail is there.
+
+---
+
+## ❓ FAQ
+
+**Is NitroCore safe to run?**
+Yes for normal use. It only touches temp files, caches, visual settings, power plans, and a small list of well-known background services. Risky steps are labeled by risk level and offer a restore point first.
+
+**Will it delete my documents, photos, or game saves?**
+No. Cleanup targets system temp folders and browser caches only. The one exception — old Downloads — asks for confirmation and only touches files 30+ days old.
+
+**Why does it need administrator?**
+Windows won't let any program change power plans, services, or system settings without admin rights. No admin = no tuning.
+
+**Which Windows versions work?**
+Windows 10 and 11, 64-bit.
+
+**Something broke — how do I undo it?**
+Boot into System Restore and roll back to the restore point NitroCore offered to create. That's exactly what it's for.
+
+**My antivirus flagged it. Is it a virus?**
+No. Optimizers that edit the registry and manage services trip heuristic scanners all the time. NitroCore is open source — every line is right here for you (or anyone) to read.
+
+**Does it phone home or collect data?**
+No. Everything runs locally on your machine. Logs stay on your disk.
+
+---
+
+## 📄 License
+
+MIT — do what you want, just don't blame me. See [LICENSE](LICENSE).
+
+---
+
+_Built by [JesusTheHacker](https://github.com/TheRealJesusTheHacker). Tune your rig. Stay dangerous._

@@ -8,6 +8,7 @@ import ctypes
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+from source.utils.platform import IS_WINDOWS
 from source.utils.config import Config
 from source.utils.lifecycle import LifecycleManager
 from source.gui.window import Window
@@ -23,6 +24,27 @@ def is_admin() -> bool:
         return ctypes.windll.shell32.IsUserAnAdmin() != 0
     except Exception:
         return False
+
+
+def show_blocking_message(title: str, text: str, icon: int = 0x10) -> None:
+    """Show a blocking message box on Windows; print to stderr elsewhere."""
+    if IS_WINDOWS:
+        try:
+            ctypes.windll.user32.MessageBoxW(0, text, title, icon)
+            return
+        except Exception:
+            pass
+    print(f"[{title}] {text}", file=sys.stderr)
+
+
+def play_beep() -> None:
+    """Best-effort system beep; silently ignored on non-Windows platforms."""
+    if not IS_WINDOWS:
+        return
+    try:
+        ctypes.windll.kernel32.Beep(800, 150)
+    except Exception:
+        pass
 
 
 class NitroCoreApplication:

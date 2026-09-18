@@ -2,25 +2,24 @@ import os
 import subprocess
 import psutil
 
+from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
+
+
 class PerformanceTuner:
     def __init__(self):
         self.high_perf_guid = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"
         self.ultimate_perf_guid = "e9a42b02-d5df-448d-aa00-03f14749eb61"
 
-    def _subprocess_flags(self):
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        return startupinfo, getattr(subprocess, "CREATE_NO_WINDOW", 0)
-
     def set_process_priority(self):
-        target_processes = ["explorer.exe", "dwm.exe"]
+        if not IS_WINDOWS:
+            return "Skipped: process priority tuning is Windows-only"
+        target_processes = ("explorer.exe", "dwm.exe")
         adjusted_count = 0
 
-        for proc in psutil.process_iter(["name", "pid"]):
+        for proc in psutil.process_iter(["name"]):
             try:
                 if proc.info["name"] and proc.info["name"].lower() in target_processes:
-                    p = psutil.Process(proc.info["pid"])
-                    p.nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS)
+                    proc.nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS)
                     adjusted_count += 1
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 continue
@@ -28,20 +27,19 @@ class PerformanceTuner:
         return f"Process Tuning: Adjusted {adjusted_count} system components to High Responsiveness"
 
     def optimize_power_plan(self):
-        startupinfo, creationflags = self._subprocess_flags()
+        if not IS_WINDOWS:
+            return "Skipped: power plans are Windows-only"
         run_kwargs = {
             "stdout": subprocess.PIPE,
             "stderr": subprocess.PIPE,
-            "startupinfo": startupinfo,
-            "creationflags": creationflags,
+            **hidden_subprocess_kwargs(),
         }
 
         try:
-            if os.name == "nt":
-                subprocess.run(
-                    ["powercfg", "-duplicatescheme", self.ultimate_perf_guid],
-                    **run_kwargs,
-                )
+            subprocess.run(
+                ["powercfg", "-duplicatescheme", self.ultimate_perf_guid],
+                **run_kwargs,
+            )
 
             subprocess.run(
                 ["powercfg", "/s", self.ultimate_perf_guid],

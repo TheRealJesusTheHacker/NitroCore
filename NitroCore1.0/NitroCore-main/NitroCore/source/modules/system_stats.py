@@ -3,9 +3,12 @@
 import os
 import re
 import subprocess
-from typing import Dict
+import time
+from typing import Dict, Optional
 
 import psutil
+
+from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
 
 _POWER_PLAN_NAMES = {
     "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c": "High Performance",
@@ -14,12 +17,17 @@ _POWER_PLAN_NAMES = {
     "a1841308-3541-4fab-bc81-715741643351": "Power Saver",
 }
 
+# Power plan changes rarely; cache it instead of spawning powercfg on every poll.
+_POWER_PLAN_TTL_SECONDS = 120.0
+
 
 class SystemStats:
     """Collects CPU, memory, disk, and power plan metrics."""
 
     def __init__(self):
         psutil.cpu_percent(interval=None)
+        self._power_plan_cache: Optional[str] = None
+        self._power_plan_cached_at: float = 0.0
 
     def snapshot(self) -> Dict[str, str]:
         cpu = psutil.cpu_percent(interval=None)
@@ -43,16 +51,31 @@ class SystemStats:
             return "N/A"
 
     def _active_power_plan(self) -> str:
+        now = time.monotonic()
+        if (
+            self._power_plan_cache is not None
+            and now - self._power_plan_cached_at < _POWER_PLAN_TTL_SECONDS
+        ):
+            return self._power_plan_cache
+        plan = self._query_power_plan()
+        self._power_plan_cache = plan
+        self._power_plan_cached_at = now
+        return plan
+
+    def invalidate_power_plan_cache(self) -> None:
+        """Force the next snapshot to re-query the active power plan."""
+        self._power_plan_cache = None
+
+    def _query_power_plan(self) -> str:
+        if not IS_WINDOWS:
+            return "N/A"
         try:
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             result = subprocess.run(
                 ["powercfg", "/getactivescheme"],
                 capture_output=True,
                 text=True,
-                startupinfo=startupinfo,
-                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                 timeout=5,
+                **hidden_subprocess_kwargs(),
             )
             match = re.search(
                 r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})",

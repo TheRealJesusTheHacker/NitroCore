@@ -1,24 +1,24 @@
-# PyUtils and PyGui Libraries
+# ⚡ NitroCore — app source
 
-A collection of Python utility and GUI libraries for common development tasks.
+This folder is the NitroCore application itself.
 
-## Features
+👉 **Full documentation, features, install steps, safety notes, and FAQ are in the [main README](../README.md).**
 
-- **PyUtils**: Core utilities including:
-  - Configuration loading/saving
-  - Logging with rotating files
-  - Input validation
-  - Hashing and encryption
-  - Retry mechanisms
-  - Memoization
+## Quick start (from source)
 
-- **PyGui**: Cross-platform GUI framework with:
-  - Window management
-  - Widget creation (buttons, labels, entries)
-  - Layout managers
-  - Event handling
-
-## Installation
+Requires Python 3.9+ on Windows. Run from this folder **as administrator**:
 
 ```bash
-pip install deep-hat-pyutils
+pip install -r requirements.txt
+python main.py
+```
+
+Without admin rights, the app will tell you and exit — it can't tune the system otherwise.
+
+## Layout
+
+- `main.py` — entry point, main window
+- `source/gui/` — dashboard UI (tabs, widgets, layout)
+- `source/modules/` — optimization modules (registry, temp, disk, services, performance)
+- `source/utils/` — logging, restore points, platform helpers, async worker
+- `assets/` — icons

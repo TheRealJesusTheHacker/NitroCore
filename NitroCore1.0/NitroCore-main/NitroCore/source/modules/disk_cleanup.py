@@ -3,14 +3,12 @@ import subprocess
 import psutil
 from datetime import datetime, timedelta
 
+from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
+
+
 class DiskCleanup:
     def __init__(self):
         self.min_disk_space_gb = 10.0
-
-    def _subprocess_flags(self):
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        return startupinfo, getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
     def get_disk_usage(self):
         """
@@ -36,16 +34,18 @@ class DiskCleanup:
         """
         Run Windows Disk Cleanup silently for the system drive, with DISM fallback.
         """
-        drive = os.environ.get("SystemDrive", "C:").rstrip(":")
-        startupinfo, creationflags = self._subprocess_flags()
+        if not IS_WINDOWS:
+            return "Skipped: system file cleanup is Windows-only"
+        run_kwargs = {
+            "stdout": subprocess.PIPE,
+            "stderr": subprocess.PIPE,
+            **hidden_subprocess_kwargs(),
+        }
         try:
             proc = subprocess.run(
-                ["cleanmgr", f"/autoclean:{drive}"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                ["cleanmgr", "/verylowdisk"],
                 timeout=300,
-                startupinfo=startupinfo,
-                creationflags=creationflags,
+                **run_kwargs,
             )
             if proc.returncode == 0:
                 return "Windows Native Cleanup executed successfully"
@@ -59,11 +59,8 @@ class DiskCleanup:
         try:
             proc = subprocess.run(
                 ["dism", "/Online", "/Cleanup-Image", "/StartComponentCleanup"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
                 timeout=600,
-                startupinfo=startupinfo,
-                creationflags=creationflags,
+                **run_kwargs,
             )
             if proc.returncode == 0:
                 return "DISM component cleanup completed successfully"

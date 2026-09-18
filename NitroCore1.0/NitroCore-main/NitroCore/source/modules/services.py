@@ -1,5 +1,9 @@
-import win32service
-import pywintypes
+try:
+    import win32service
+    import pywintypes
+except ImportError:  # Non-Windows platform: service methods degrade gracefully
+    win32service = None
+    pywintypes = None
 
 from source.utils.profiles import GAMING
 
@@ -24,19 +28,23 @@ class ServiceManager:
     def _optimize_services(self, service_names):
         results = []
 
+        if win32service is None:
+            return "Skipped: service management is Windows-only"
+
         try:
             scm_handle = win32service.OpenSCManager(None, None, win32service.SC_MANAGER_ALL_ACCESS)
-        except pywintypes.error:
+        except Exception:
             return "Services Optimization Error: Access Denied (Requires Administrator privileges)"
 
-        for service_name in service_names:
-            stop_res = self._stop_service_safely(scm_handle, service_name)
-            config_res = self._set_service_startup_safely(
-                scm_handle, service_name, win32service.SERVICE_DEMAND_START
-            )
-            results.append(f"{service_name}: {stop_res} | Config: {config_res}")
-
-        win32service.CloseServiceHandle(scm_handle)
+        try:
+            for service_name in service_names:
+                stop_res = self._stop_service_safely(scm_handle, service_name)
+                config_res = self._set_service_startup_safely(
+                    scm_handle, service_name, win32service.SERVICE_DEMAND_START
+                )
+                results.append(f"{service_name}: {stop_res} | Config: {config_res}")
+        finally:
+            win32service.CloseServiceHandle(scm_handle)
         return "\n".join(results)
 
     def _stop_service_safely(self, scm_handle, service_name):

@@ -1,6 +1,12 @@
 import os
 import subprocess
-import winreg
+
+from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
+
+try:
+    import winreg
+except ImportError:  # Non-Windows platform: registry methods degrade gracefully
+    winreg = None
 
 from source.utils.profiles import GAMING
 
@@ -8,19 +14,22 @@ class RegistryOptimizer:
     def __init__(self):
         self.optimization_rules = {
             'disable_hibernation': self._disable_hibernation,
-            'disable_pagefile': self._disable_pagefile,
+            'optimize_pagefile': self._optimize_pagefile,
             'optimize_performance': self._optimize_performance
         }
     
-    def _set_registry_value(self, hive, sub_key, value_name, value, value_type=winreg.REG_DWORD):
+    def _set_registry_value(self, hive, sub_key, value_name, value, value_type=None):
         """
-        Helper method using native memory APIs to modify the Windows Registry safely.
+        Helper method to modify the Windows Registry safely.
         Creates the key path if it does not already exist.
         """
+        if winreg is None:
+            return False
+        if value_type is None:
+            value_type = winreg.REG_DWORD
         try:
             # Open or create the key path with write permissions
             key = winreg.CreateKeyEx(hive, sub_key, 0, winreg.KEY_SET_VALUE)
-            # Set the value in memory instantly without spawning reg.exe
             winreg.SetValueEx(key, value_name, 0, value_type, value)
             winreg.CloseKey(key)
             return True
@@ -30,28 +39,29 @@ class RegistryOptimizer:
 
     def _disable_hibernation(self):
         """Disable hibernation to free up disk space and reduce OS storage overhead"""
+        if not IS_WINDOWS:
+            return "Skipped: hibernation control is Windows-only"
         try:
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             subprocess.run(
                 ["powercfg", "/hibernate", "off"],
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                startupinfo=startupinfo,
-                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                **hidden_subprocess_kwargs(),
             )
             return "Hibernation Disabled Successfully"
         except subprocess.CalledProcessError:
             return "Failed to disable hibernation (Requires Administrator privileges)"
         except Exception as e:
             return f"Error disabling hibernation: {str(e)}"
-    
-    def _disable_pagefile(self):
+
+    def _optimize_pagefile(self):
         """
-        Optimizes memory allocation by configuring the system to manage pagefiles, 
-        or removing it from a specific drive. Adjusting this can prevent unnecessary disk thrashing.
+        Configures the system to manage the pagefile automatically, which avoids
+        unnecessary disk thrashing from a fixed-size pagefile.
         """
+        if not IS_WINDOWS:
+            return "Skipped: pagefile control is Windows-only"
         try:
             # Modifies the system memory management layout via standard WMI command line
             cmd = "wmic computersystem where name=\"%computername%\" set AutomaticManagedPagefile=True"
@@ -62,6 +72,8 @@ class RegistryOptimizer:
     
     def _optimize_performance(self):
         """Apply native Windows registry performance adjustments for low visual latency"""
+        if winreg is None:
+            return "Skipped: registry tweaks are Windows-only"
         success_count = 0
         
         # Structure tweaks with explicit paths, names, values, and types

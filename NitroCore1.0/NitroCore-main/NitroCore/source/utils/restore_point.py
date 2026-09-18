@@ -2,27 +2,28 @@
 
 import subprocess
 
+from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
+
 
 def create_restore_point(description: str = "NitroCore Pre-Optimization") -> tuple[bool, str]:
     """
     Create a system restore point via PowerShell Checkpoint-Computer.
     Returns (success, message).
     """
+    if not IS_WINDOWS:
+        return False, "Restore points are only available on Windows."
     safe_desc = description.replace("'", "''")
     script = (
         f"Checkpoint-Computer -Description '{safe_desc}' "
         "-RestorePointType MODIFY_SETTINGS"
     )
     try:
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         result = subprocess.run(
             ["powershell", "-NoProfile", "-Command", script],
             capture_output=True,
             text=True,
             timeout=180,
-            startupinfo=startupinfo,
-            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            **hidden_subprocess_kwargs(),
         )
         if result.returncode == 0:
             return True, "System restore point created successfully."
