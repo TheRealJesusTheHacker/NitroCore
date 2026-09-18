@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  compile:
+    name: Compile check (all platforms)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Byte-compile every module
+        run: python -m compileall -q NitroCore
+      - name: Import smoke test (platform-safe modules)
+        run: |
+          cd NitroCore
+          python -c "import source.utils.platform as p; print('IS_WINDOWS =', p.IS_WINDOWS); print('hidden kwargs ok:', isinstance(p.hidden_subprocess_kwargs(), dict))"
+
+  compile-windows:
+    name: Compile check (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r NitroCore/requirements.txt
+      - name: Byte-compile every module
+        run: python -m compileall -q NitroCore
