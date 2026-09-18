@@ -136,6 +136,45 @@ class NitroCoreApplication:
         )
         purge_btn.pack(fill="x", ipady=12, pady=(20, 0))
 
+    def _run_headless_preview(self):
+        """Run the optimization pipeline in dry-run mode and print the report."""
+        from types import SimpleNamespace
+
+        from source.modules.registry import RegistryOptimizer
+        from source.modules.temp_files import TempFileCleaner
+        from source.modules.disk_cleanup import DiskCleanup
+        from source.modules.services import ServiceManager
+        from source.modules.performance import PerformanceTuner
+        from source.utils.preview import preview, PREVIEW_FOOTER
+        from source.utils.profiles import PROFILE_META, execute_step, get_pipeline
+
+        modules = SimpleNamespace(
+            registry=RegistryOptimizer(),
+            temp_cleaner=TempFileCleaner(),
+            disk_cleanup=DiskCleanup(),
+            services=ServiceManager(),
+            performance=PerformanceTuner(),
+        )
+        profile = Config.ACTIVE_PROFILE
+        label = PROFILE_META[profile]["label"]
+        pipboy = Config.PI_BOY_MODE
+
+        def say(line=""):
+            print(f">> {line}" if pipboy and line else line)
+
+        preview.start()
+        say(f"NitroCore dry run — {label} profile")
+        say("=" * 60)
+        for step_id, step_label in get_pipeline(profile):
+            say(f"--- {step_label} ---")
+            say(execute_step(step_id, profile, modules))
+        entries = preview.report()
+        say()
+        say(f"{len(entries)} change(s) previewed, 0 applied")
+        for index, entry in enumerate(entries, start=1):
+            say(f"  {index}. {entry}")
+        say(PREVIEW_FOOTER)
+
     def _run_pipboy_purge(self):
         from source.modules.registry import RegistryOptimizer
         from source.modules.temp_files import TempFileCleaner
@@ -176,6 +215,13 @@ class NitroCoreApplication:
 
     def run(self):
         Config.parse_arguments()
+
+        if Config.DRY_RUN:
+            # Headless preview: print the report to stdout, change nothing.
+            # Skips the admin gate and single-instance mutex — a read-only
+            # preview should never fight the user for elevation.
+            self._run_headless_preview()
+            return
 
         if not is_admin():
             ctypes.windll.user32.MessageBoxW(

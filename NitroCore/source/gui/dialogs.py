@@ -1,7 +1,8 @@
 """Premium-styled confirmation dialogs."""
 
 import tkinter as tk
-from typing import Literal, Optional
+from tkinter import scrolledtext
+from typing import List, Literal, Optional
 
 from source.gui.fonts import FontEngine
 
@@ -92,3 +93,101 @@ class RestorePointDialog:
     ) -> DialogResult:
         dialog = cls(parent, message=message)
         return dialog.result or "cancel"
+
+
+class PreviewReportDialog:
+    """Dark-themed scrollable modal listing everything a dry run would have changed."""
+
+    def __init__(
+        self,
+        parent: tk.Tk,
+        entries: List[str],
+        bg: str = "#2F3136",
+        fg: str = "#F2F3F5",
+        muted: str = "#B9BBBE",
+        accent: str = "#FF6B35",
+    ):
+        self.top = tk.Toplevel(parent)
+        self.top.title("Preview Report — no changes made")
+        self.top.configure(bg=bg)
+        self.top.resizable(False, False)
+        self.top.transient(parent)
+        self.top.grab_set()
+
+        parent.update_idletasks()
+        w, h = 600, 440
+        px = parent.winfo_x() + (parent.winfo_width() - w) // 2
+        py = parent.winfo_y() + (parent.winfo_height() - h) // 2
+        self.top.geometry(f"{w}x{h}+{px}+{py}")
+
+        tk.Label(
+            self.top,
+            text="Preview Report",
+            font=FontEngine.get("header"),
+            bg=bg,
+            fg=fg,
+        ).pack(anchor="w", padx=20, pady=(18, 4))
+
+        tk.Label(
+            self.top,
+            text=f"{len(entries)} change(s) previewed, 0 applied.",
+            font=FontEngine.get("body"),
+            bg=bg,
+            fg=accent,
+        ).pack(anchor="w", padx=20, pady=(0, 10))
+
+        text = scrolledtext.ScrolledText(
+            self.top,
+            font=FontEngine.get("log"),
+            bg="#1E1F22",
+            fg=fg,
+            insertbackground=fg,
+            relief="flat",
+            wrap="word",
+            state="disabled",
+            height=14,
+        )
+        text.pack(fill="both", expand=True, padx=20, pady=(0, 10))
+        text.configure(state="normal")
+        if entries:
+            for index, entry in enumerate(entries, start=1):
+                text.insert("end", f"{index}. {entry}\n")
+        else:
+            text.insert(
+                "end",
+                "Nothing to preview — the system already matches the target state.",
+            )
+        text.configure(state="disabled")
+
+        tk.Label(
+            self.top,
+            text="PREVIEW ONLY — no changes were made.",
+            font=FontEngine.get("body"),
+            bg=bg,
+            fg=muted,
+        ).pack(anchor="w", padx=20, pady=(0, 12))
+
+        tk.Button(
+            self.top,
+            text="Close",
+            font=FontEngine.get("button"),
+            bg=accent,
+            fg="#FFFFFF",
+            activebackground=accent,
+            activeforeground="#FFFFFF",
+            relief="flat",
+            padx=16,
+            pady=6,
+            command=self._close,
+        ).pack(anchor="e", padx=20, pady=(0, 16))
+
+        self.top.protocol("WM_DELETE_WINDOW", self._close)
+        parent.wait_window(self.top)
+
+    def _close(self) -> None:
+        self.top.grab_release()
+        self.top.destroy()
+
+    @classmethod
+    def show(cls, parent: tk.Tk, entries: List[str]) -> None:
+        cls(parent, entries)

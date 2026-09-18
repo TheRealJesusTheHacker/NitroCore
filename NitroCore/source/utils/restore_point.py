@@ -2,6 +2,7 @@
 
 import subprocess
 
+from source.utils.config import Config
 from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
 
 
@@ -10,6 +11,8 @@ def create_restore_point(description: str = "NitroCore Pre-Optimization") -> tup
     Create a system restore point via PowerShell Checkpoint-Computer.
     Returns (success, message).
     """
+    if Config.DRY_RUN:
+        return False, "Preview mode: restore point creation skipped (nothing will change)."
     if not IS_WINDOWS:
         return False, "Restore points are only available on Windows."
     safe_desc = description.replace("'", "''")

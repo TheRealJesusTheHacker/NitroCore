@@ -14,7 +14,7 @@ from source.gui.fonts import FontEngine
 from source.gui.stats_header import StatsHeader
 from source.gui.profile_selector import ProfileSelector
 from source.gui.progress_panel import ProgressPanel
-from source.gui.dialogs import RestorePointDialog
+from source.gui.dialogs import RestorePointDialog, PreviewReportDialog
 from source.modules.async_worker import AsyncWorker
 from source.modules.registry import RegistryOptimizer
 from source.modules.temp_files import TempFileCleaner
@@ -23,6 +23,7 @@ from source.modules.services import ServiceManager
 from source.modules.performance import PerformanceTuner
 from source.utils.config import Config
 from source.utils.logger import Logger
+from source.utils.preview import preview
 from source.utils.profiles import (
     PROFILE_META,
     execute_step,
@@ -195,6 +196,21 @@ class TabbedInterface:
         )
         self.run_all_btn.pack(side="right", ipady=4)
         self._action_buttons.append(self.run_all_btn)
+
+        self.preview_var = tk.BooleanVar(value=Config.DRY_RUN)
+        self.preview_check = tk.Checkbutton(
+            tab_bar.canvas,
+            text="Preview only \u2014 don\u2019t change anything",
+            variable=self.preview_var,
+            command=self._on_preview_toggled,
+            font=FontEngine.get("body"),
+            bg=self.bg_color,
+            fg=self.muted_color,
+            activebackground=self.bg_color,
+            activeforeground=self.fg_color,
+            selectcolor=self.panel_color,
+        )
+        self.preview_check.pack(side="right", padx=(0, 12))
 
         self.content_area = CustomFrame(self.parent, bg_color=self.panel_color)
         self.content_area.pack(fill="both", expand=True)
@@ -428,6 +444,8 @@ class TabbedInterface:
         self._busy = busy
         for btn in self._action_buttons:
             btn.set_enabled(not busy)
+        if hasattr(self, "preview_check"):
+            self.preview_check.configure(state="disabled" if busy else "normal")
 
     def _create_restore_then(self, action_label: str, continuation: Callable[[], None]) -> None:
         """Create a restore point asynchronously, then run continuation."""
@@ -453,7 +471,26 @@ class TabbedInterface:
 
         AsyncWorker.run_task(task, on_complete)
 
+    def _on_preview_toggled(self) -> None:
+        Config.DRY_RUN = bool(self.preview_var.get())
+        if Config.DRY_RUN:
+            self._append_log("Preview mode ON — runs will only show what would change.", "info")
+        else:
+            self._append_log("Preview mode OFF — runs will apply changes.", "info")
+
+    def _show_preview_report(self) -> None:
+        entries = preview.report()
+        self._append_log(
+            f"Preview complete: {len(entries)} change(s) previewed, 0 applied.",
+            "info",
+        )
+        PreviewReportDialog.show(self.root, entries)
+
     def _prompt_restore(self, action_label: str, continuation: Callable[[], None]) -> None:
+        if Config.DRY_RUN:
+            self._append_log("Preview mode: skipping restore point prompt.", "info")
+            continuation()
+            return
         choice = RestorePointDialog.ask(
             self.root,
             message=f"About to run: {action_label}\n\nCreate a system restore point first?",
@@ -469,6 +506,7 @@ class TabbedInterface:
     def _execute_async(self, label: str, task: Callable[[], str]) -> None:
         self._run_start_time = time.time()
         self._mb_freed = 0.0
+        preview.start()
         self._append_log(f"Starting: {label}", "info")
         self._set_busy(True)
         self.progress_panel.start(label, total_steps=1)
@@ -489,6 +527,8 @@ class TabbedInterface:
                         summary += f" · {self._mb_freed:.2f} MB freed"
                     self.progress_panel.finish(summary)
                 self._mb_freed = 0.0
+                if Config.DRY_RUN and result is not None:
+                    self._show_preview_report()
 
             self.root.after(0, update_ui)
 
@@ -583,6 +623,7 @@ class TabbedInterface:
         self._run_start_time = time.time()
         self._mb_freed = 0.0
         self._steps_completed = 0
+        preview.start()
         self.progress_panel.start(f"{profile_label} pipeline", total_steps=len(pipeline))
 
         def run_steps(index: int = 0) -> None:
@@ -598,6 +639,8 @@ class TabbedInterface:
                     self.progress_panel.finish(summary)
                     self._append_log(f"=== {profile_label} optimization complete ===", "success")
                     self._mb_freed = 0.0
+                    if Config.DRY_RUN:
+                        self._show_preview_report()
 
                 self.root.after(0, finish)
                 return

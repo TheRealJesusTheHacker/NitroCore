@@ -76,6 +76,16 @@ The build requests admin rights automatically (`uac_admin`), so the .exe self-el
 5. **Say yes to the restore point.** Before anything that changes system settings, NitroCore asks if you want a restore point first. Always a good idea.
 6. **Watch the Status tab.** Every step logs what it did, how long it took, and how much space it freed.
 
+### 👁️ Preview mode (dry run)
+
+Nervous about what it'll change? Turn on **"Preview only — don't change anything"** next to Run All, or launch with:
+
+```bash
+python main.py --dry-run
+```
+
+NitroCore will scan everything and print exactly what it *would* do — every registry value, every service change, every file it would delete — then finish with **"PREVIEW ONLY — no changes were made."** Nothing is modified, no restore point is created, and the preview doesn't even need admin rights.
+
 ---
 
 ## 🛟 Safety notes

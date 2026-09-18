@@ -1,7 +1,9 @@
 import os
 import subprocess
 
+from source.utils.config import Config
 from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
+from source.utils.preview import preview
 
 try:
     import winreg
@@ -10,6 +12,16 @@ except ImportError:  # Non-Windows platform: registry methods degrade gracefully
 
 from source.utils.profiles import GAMING
 
+_HIVE_NAMES = {}
+if winreg is not None:
+    _HIVE_NAMES = {
+        winreg.HKEY_CURRENT_USER: "HKCU",
+        winreg.HKEY_LOCAL_MACHINE: "HKLM",
+        winreg.HKEY_CLASSES_ROOT: "HKCR",
+        winreg.HKEY_USERS: "HKU",
+        winreg.HKEY_CURRENT_CONFIG: "HKCC",
+    }
+
 class RegistryOptimizer:
     def __init__(self):
         self.optimization_rules = {
@@ -17,6 +29,27 @@ class RegistryOptimizer:
             'optimize_pagefile': self._optimize_pagefile,
             'optimize_performance': self._optimize_performance
         }
+
+    @staticmethod
+    def _format_value(value):
+        """Render a registry value readably for preview descriptions."""
+        if value is None:
+            return "(not set)"
+        if isinstance(value, bytes):
+            return "0x" + value.hex()
+        return repr(value)
+
+    def _read_registry_value(self, hive, sub_key, value_name):
+        """Best-effort read of the current value (safe; used for previews)."""
+        if winreg is None:
+            return None
+        try:
+            key = winreg.OpenKey(hive, sub_key, 0, winreg.KEY_READ)
+            value, _ = winreg.QueryValueEx(key, value_name)
+            winreg.CloseKey(key)
+            return value
+        except OSError:
+            return None
     
     def _set_registry_value(self, hive, sub_key, value_name, value, value_type=None):
         """
@@ -25,6 +58,14 @@ class RegistryOptimizer:
         """
         if winreg is None:
             return False
+        if Config.DRY_RUN:
+            old_value = self._read_registry_value(hive, sub_key, value_name)
+            hive_name = _HIVE_NAMES.get(hive, str(hive))
+            preview.record(
+                f"Would set registry value {hive_name}\\{sub_key}\\{value_name} to "
+                f"{self._format_value(value)} (was {self._format_value(old_value)})"
+            )
+            return True
         if value_type is None:
             value_type = winreg.REG_DWORD
         try:
@@ -41,6 +82,9 @@ class RegistryOptimizer:
         """Disable hibernation to free up disk space and reduce OS storage overhead"""
         if not IS_WINDOWS:
             return "Skipped: hibernation control is Windows-only"
+        if Config.DRY_RUN:
+            preview.record("Would run: powercfg /hibernate off (disables hibernation)")
+            return "Hibernation: would be disabled (preview)"
         try:
             subprocess.run(
                 ["powercfg", "/hibernate", "off"],
@@ -62,6 +106,12 @@ class RegistryOptimizer:
         """
         if not IS_WINDOWS:
             return "Skipped: pagefile control is Windows-only"
+        if Config.DRY_RUN:
+            preview.record(
+                "Would enable automatic pagefile management "
+                "(wmic computersystem set AutomaticManagedPagefile=True)"
+            )
+            return "Pagefile: would be set to automatic management (preview)"
         try:
             # Modifies the system memory management layout via standard WMI command line
             cmd = "wmic computersystem where name=\"%computername%\" set AutomaticManagedPagefile=True"
@@ -114,7 +164,9 @@ class RegistryOptimizer:
             )
             if res:
                 success_count += 1
-                
+
+        if Config.DRY_RUN:
+            return f"Would apply {success_count}/{len(tweaks)} performance registry tweaks (preview)"
         return f"Applied {success_count}/{len(tweaks)} performance registry tweaks"
     
     def apply_all(self):
