@@ -37,6 +37,10 @@ class CustomLabel:
         """Exposes standard Tkinter layout packing parameters."""
         self.label.pack(**kwargs)
 
+    def pack_forget(self) -> None:
+        """Removes the label from layout without destroying it."""
+        self.label.pack_forget()
+
     def grid(self, **kwargs) -> None:
         """Exposes standard Tkinter grid layout parameters."""
         self.label.grid(**kwargs)
@@ -64,3 +68,5 @@ class CustomLabel:
             self.label.configure(justify=kwargs["justify"])
         if "anchor" in kwargs:
             self.label.configure(anchor=kwargs["anchor"])
+        if "wraplength" in kwargs:
+            self.label.configure(wraplength=kwargs["wraplength"])

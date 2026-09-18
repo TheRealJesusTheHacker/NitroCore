@@ -45,10 +45,12 @@ class TempFileCleaner:
                             if execute:
                                 # Attempt to clean up the directory shell if it's now empty
                                 os.rmdir(entry.path)
-                    except (PermissionError, FileNotFoundError):
-                        # Skip locked files (in-use logs/system locks) without overhead
+                    except OSError:
+                        # Skip locked files, in-use logs, and non-empty dirs
+                        # (e.g. rmdir on a folder that still holds skipped files)
+                        # without failing the whole cleanup run.
                         continue
-        except PermissionError:
+        except OSError:
             pass
             
         return files_deleted, bytes_saved

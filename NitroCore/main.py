@@ -235,7 +235,7 @@ class NitroCoreApplication:
         LifecycleManager.enforce_single_instance()
 
         self.app_window = Window(
-            title="NitroCore Windows Optimizer v1.0.0",
+            title="NitroCore Windows Optimizer v1.0.1",
             width=980,
             height=780,
             resizable=False,

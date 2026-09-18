@@ -67,15 +67,43 @@ class ProgressPanel:
         )
         self.summary_lbl.pack(anchor="w")
 
+        # Hide the bar and summary line while idle so the panel stays compact.
+        self._bar_visible = False
+        self._summary_visible = False
+        self.bar.pack_forget()
+        self.summary_lbl.pack_forget()
+
+    def _show_bar(self, visible: bool) -> None:
+        self._bar_visible = visible
+        if visible:
+            self.bar.pack(fill="x", pady=(6, 4))
+            if self._summary_visible:
+                # Re-pack the summary so it stays below the bar.
+                self.summary_lbl.pack_forget()
+                self.summary_lbl.pack(anchor="w")
+        else:
+            self.bar.pack_forget()
+
+    def _show_summary(self, visible: bool) -> None:
+        self._summary_visible = visible
+        if visible:
+            self.summary_lbl.pack(anchor="w")
+        else:
+            self.summary_lbl.pack_forget()
+
     def reset(self) -> None:
         self.status_lbl.configure(text="Ready", fg=self.muted_color)
         self.bar["value"] = 0
         self.summary_lbl.configure(text="")
+        self._show_bar(False)
+        self._show_summary(False)
 
     def start(self, label: str, total_steps: int = 1) -> None:
         self._total_steps = max(1, total_steps)
         self.status_lbl.configure(text=label, fg=self.fg_color)
         self.summary_lbl.configure(text="")
+        self._show_summary(False)
+        self._show_bar(True)
         self.bar["mode"] = "indeterminate" if total_steps == 1 else "determinate"
         if total_steps == 1:
             self.bar.start(12)
@@ -92,8 +120,10 @@ class ProgressPanel:
         self.bar.stop()
         self.bar["mode"] = "determinate"
         self.bar["value"] = 100
+        self._show_bar(True)
         self.status_lbl.configure(text="Complete", fg="#3BA55D")
         self.summary_lbl.configure(text=summary)
+        self._show_summary(True)
 
     def set_accent(self, accent_color: str) -> None:
         self.accent_color = accent_color
@@ -107,5 +137,7 @@ class ProgressPanel:
 
     def fail(self, message: str) -> None:
         self.bar.stop()
+        self._show_bar(True)
         self.status_lbl.configure(text=message, fg="#ED4245")
         self.summary_lbl.configure(text="")
+        self._show_summary(False)

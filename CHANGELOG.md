@@ -5,6 +5,22 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+## [1.0.1] — 2026-09-18
+
+### Fixed
+- Temp File Cleanup no longer fails outright when a temp subfolder still holds
+  locked or in-use files: the purger now skips unremovable entries (including
+  non-empty directories left behind) instead of aborting the whole run.
+- The "Preview only — don't change anything" toggle moved from the crowded tab
+  bar into the header row, so its label is never clipped between the Status tab
+  and the Run All button.
+
+### Changed
+- Long descriptions in tab headers and profile cards now wrap to a second line
+  instead of being cut off mid-sentence.
+- The progress bar and summary line stay hidden while idle so the dashboard
+  sits tighter; they appear only while an operation is running.
+
 ## [1.0.0] — 2026-09-18
 
 The first public-ready release.

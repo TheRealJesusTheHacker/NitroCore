@@ -79,7 +79,7 @@ class ProfileSelector:
             bg=self.card_color,
             fg=self.muted_color,
         )
-        desc.configure(anchor="w")
+        desc.configure(anchor="w", justify="left", wraplength=420)
         desc.pack(anchor="w", padx=14, pady=(4, 12))
 
         def select(_event=None, pid=profile_id):

@@ -119,16 +119,34 @@ class TabbedInterface:
         return "#CC5529" if self.accent_color == "#FF6B35" else "#00A888"
 
     def _build_shell(self) -> None:
+        header_row = CustomFrame(self.parent, bg_color=self.bg_color)
+        header_row.pack(fill="x", pady=(0, 4))
+
         header = CustomLabel(
-            parent=self.parent,
+            parent=header_row.canvas,
             text="NitroCore System Optimizer",
             font=FontEngine.get("title"),
             bg=self.bg_color,
             fg=self.fg_color,
         )
-        header.pack(anchor="w", pady=(0, 4))
+        header.pack(side="left")
         if self.on_title_click:
             header.bind("<Button-1>", self.on_title_click)
+
+        self.preview_var = tk.BooleanVar(value=Config.DRY_RUN)
+        self.preview_check = tk.Checkbutton(
+            header_row.canvas,
+            text="Preview only \u2014 don\u2019t change anything",
+            variable=self.preview_var,
+            command=self._on_preview_toggled,
+            font=FontEngine.get("body"),
+            bg=self.bg_color,
+            fg=self.muted_color,
+            activebackground=self.bg_color,
+            activeforeground=self.fg_color,
+            selectcolor=self.panel_color,
+        )
+        self.preview_check.pack(side="right")
 
         subtitle = CustomLabel(
             parent=self.parent,
@@ -197,21 +215,6 @@ class TabbedInterface:
         self.run_all_btn.pack(side="right", ipady=4)
         self._action_buttons.append(self.run_all_btn)
 
-        self.preview_var = tk.BooleanVar(value=Config.DRY_RUN)
-        self.preview_check = tk.Checkbutton(
-            tab_bar.canvas,
-            text="Preview only \u2014 don\u2019t change anything",
-            variable=self.preview_var,
-            command=self._on_preview_toggled,
-            font=FontEngine.get("body"),
-            bg=self.bg_color,
-            fg=self.muted_color,
-            activebackground=self.bg_color,
-            activeforeground=self.fg_color,
-            selectcolor=self.panel_color,
-        )
-        self.preview_check.pack(side="right", padx=(0, 12))
-
         self.content_area = CustomFrame(self.parent, bg_color=self.panel_color)
         self.content_area.pack(fill="both", expand=True)
 
@@ -257,7 +260,7 @@ class TabbedInterface:
             bg=self.panel_color,
             fg=self.muted_color,
         )
-        desc_lbl.configure(justify="left", anchor="w")
+        desc_lbl.configure(justify="left", anchor="w", wraplength=900)
         desc_lbl.pack(anchor="w", padx=16, pady=(0, 16))
 
     def _add_action_button(
