@@ -1,5 +1,6 @@
 # ⚡ NitroCore — Windows System Optimizer
 
+[![Latest release](https://img.shields.io/github/v/release/TheRealJesusTheHacker/NitroCore1.0)](https://github.com/TheRealJesusTheHacker/NitroCore1.0/releases)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows-0078D6)](https://www.microsoft.com/windows)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -23,6 +24,8 @@ In plain terms: over time Windows collects junk files, runs background programs 
 - **🔋 Performance tuning** — switches to the Ultimate Performance power plan and raises priority on key system processes.
 - **📊 Live stats header** — CPU, RAM, disk, and power plan at a glance.
 - **🛟 Restore-point safety net** — offers to create a Windows restore point before anything risky.
+- **👁️ Preview mode** — see every change NitroCore *would* make before it makes any of them. Nothing happens in secret.
+- **🔐 Verified downloads** — every release ships SHA256 hashes so you can confirm your `.exe` is legit.
 - **📝 Full operation logs** — every action is logged on screen and saved to `%APPDATA%\NitroCore\logs`.
 - **🥚 Hidden Fallout mode** — click the title 7 times. You'll see.
 
@@ -33,8 +36,14 @@ In plain terms: over time Windows collects junk files, runs background programs 
 ### Option A — Ready-to-run .exe (easiest)
 
 1. Download `NitroCoreOptimizer.exe` from the [Releases](https://github.com/TheRealJesusTheHacker/NitroCore1.0/releases) page.
-2. Right-click it → **Run as administrator**.
-3. That's it.
+2. **Verify it** (optional but smart) — compare against the hash in `SHA256SUMS.txt` from the same release:
+
+   ```powershell
+   certutil -hashfile NitroCoreOptimizer.exe SHA256
+   ```
+
+3. Right-click it → **Run as administrator**.
+4. That's it.
 
 ### Option B — From source
 
@@ -115,7 +124,7 @@ Windows 10 and 11, 64-bit.
 Boot into System Restore and roll back to the restore point NitroCore offered to create. That's exactly what it's for.
 
 **My antivirus flagged it. Is it a virus?**
-No. Optimizers that edit the registry and manage services trip heuristic scanners all the time. NitroCore is open source — every line is right here for you (or anyone) to read.
+No. Optimizers that edit the registry and manage services trip heuristic scanners all the time. NitroCore is open source — every line is right here for you (or anyone) to read. To be sure your download is genuine, check its SHA256 hash against the `SHA256SUMS.txt` published with each release. A code-signing certificate (which removes the "unknown publisher" warning) is on the roadmap.
 
 **Does it phone home or collect data?**
 No. Everything runs locally on your machine. Logs stay on your disk.

@@ -5,20 +5,19 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-09-18
+
+The first public-ready release.
+
 ### Added
 - Preview (dry-run) mode: a "Preview only — don't change anything" toggle in the
   GUI plus `python main.py --dry-run` on the CLI. Scans everything and reports
   exactly what would change, with "PREVIEW ONLY — no changes were made." at the
   end. No admin rights needed, no restore point created.
 - `SECURITY.md` with vulnerability reporting policy and telemetry-free pledge.
-- Release workflow now publishes `SHA256SUMS.txt` alongside the `.exe`.
+- Every release ships `SHA256SUMS.txt` so downloads can be verified.
 - GitHub Pages landing page (`docs/`) and draft winget manifests (`winget/`).
-
-## [1.0.0] — 2026-09-18
-
-The first public-ready release.
-
-### Added
+- Windows `.exe` built automatically by the release workflow (`NitroCoreOptimizer.exe`).
 - Restore-point dialog with plain-language confirmation before registry, service,
   and disk changes (`source/gui/dialogs.py`, wired into `source/gui/tabs.py`).
 - New `source/utils/platform.py`: centralizes every Windows-only assumption so the
