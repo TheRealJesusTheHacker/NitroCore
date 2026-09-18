@@ -42,7 +42,7 @@ Requires Python 3.9+ on Windows.
 
 ```bash
 git clone https://github.com/TheRealJesusTheHacker/NitroCore1.0.git
-cd NitroCore1.0/NitroCore-main/NitroCore
+cd NitroCore1.0/NitroCore
 pip install -r requirements.txt
 ```
 
