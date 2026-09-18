@@ -109,16 +109,35 @@ class RegistryOptimizer:
         if Config.DRY_RUN:
             preview.record(
                 "Would enable automatic pagefile management "
-                "(wmic computersystem set AutomaticManagedPagefile=True)"
+                "(PowerShell CIM: Set AutomaticManagedPagefile=True)"
             )
             return "Pagefile: would be set to automatic management (preview)"
-        try:
-            # Modifies the system memory management layout via standard WMI command line
-            cmd = "wmic computersystem where name=\"%computername%\" set AutomaticManagedPagefile=True"
-            subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            return "Pagefile configuration optimized to automatic management"
-        except Exception as e:
-            return f"Failed to optimize pagefile layout: {str(e)}"
+        # wmic was removed from Windows 11 (24H2+); use PowerShell CIM instead,
+        # with a wmic fallback for older systems where it still exists.
+        commands = [
+            [
+                "powershell", "-NoProfile", "-NonInteractive", "-Command",
+                "Get-CimInstance Win32_ComputerSystem | "
+                "Set-CimInstance -Property @{AutomaticManagedPagefile=$true}",
+            ],
+            "wmic computersystem where name=\"%computername%\" "
+            "set AutomaticManagedPagefile=True",
+        ]
+        last_error = None
+        for cmd in commands:
+            try:
+                subprocess.run(
+                    cmd,
+                    shell=isinstance(cmd, str),
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    **hidden_subprocess_kwargs(),
+                )
+                return "Pagefile configuration optimized to automatic management"
+            except Exception as e:
+                last_error = e
+        return f"Failed to optimize pagefile layout: {str(last_error)}"
     
     def _optimize_performance(self):
         """Apply native Windows registry performance adjustments for low visual latency"""

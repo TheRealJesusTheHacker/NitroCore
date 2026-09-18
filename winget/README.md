@@ -3,7 +3,7 @@
 # Directory layout there: manifests/t/TheRealJesusTheHacker/NitroCore/1.0.0/
 #
 # BEFORE SUBMITTING:
-# 1. Tag v1.0.0 in the NitroCore1.0 repo so the release workflow builds the .exe.
+# 1. Tag v1.0.0 in the NitroCore repo so the release workflow builds the .exe.
 # 2. Download SHA256SUMS.txt from that GitHub Release and replace <FILL_SHA256_BELOW>.
 # 3. Submit the three files below as a PR to microsoft/winget-pkgs.
 
@@ -26,7 +26,7 @@
 # Installers:
 # - Architecture: x64
 #   InstallerType: exe
-#   InstallerUrl: https://github.com/TheRealJesusTheHacker/NitroCore1.0/releases/download/v1.0.0/NitroCoreOptimizer.exe
+#   InstallerUrl: https://github.com/TheRealJesusTheHacker/NitroCore/releases/download/v1.0.0/NitroCoreOptimizer.exe
 #   InstallerSha256: <FILL_SHA256_BELOW>
 # ManifestType: installer
 # ManifestVersion: 1.6.0
@@ -49,6 +49,6 @@
 # - gaming
 # - windows-tweaker
 # - performance
-# ReleaseNotesUrl: https://github.com/TheRealJesusTheHacker/NitroCore1.0/releases/tag/v1.0.0
+# ReleaseNotesUrl: https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.0.0
 # ManifestType: defaultLocale
 # ManifestVersion: 1.6.0

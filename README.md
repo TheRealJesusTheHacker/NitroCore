@@ -1,6 +1,6 @@
 # ⚡ NitroCore — Windows System Optimizer
 
-[![Latest release](https://img.shields.io/github/v/release/TheRealJesusTheHacker/NitroCore1.0)](https://github.com/TheRealJesusTheHacker/NitroCore1.0/releases)
+[![Latest release](https://img.shields.io/github/v/release/TheRealJesusTheHacker/NitroCore)](https://github.com/TheRealJesusTheHacker/NitroCore/releases)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows-0078D6)](https://www.microsoft.com/windows)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -35,7 +35,7 @@ In plain terms: over time Windows collects junk files, runs background programs 
 
 ### Option A — Ready-to-run .exe (easiest)
 
-1. Download `NitroCoreOptimizer.exe` from the [Releases](https://github.com/TheRealJesusTheHacker/NitroCore1.0/releases) page.
+1. Download `NitroCoreOptimizer.exe` from the [Releases](https://github.com/TheRealJesusTheHacker/NitroCore/releases) page.
 2. **Verify it** (optional but smart) — compare against the hash in `SHA256SUMS.txt` from the same release:
 
    ```powershell
@@ -50,8 +50,8 @@ In plain terms: over time Windows collects junk files, runs background programs 
 Requires Python 3.9+ on Windows.
 
 ```bash
-git clone https://github.com/TheRealJesusTheHacker/NitroCore1.0.git
-cd NitroCore1.0/NitroCore
+git clone https://github.com/TheRealJesusTheHacker/NitroCore.git
+cd NitroCore/NitroCore
 pip install -r requirements.txt
 ```
 

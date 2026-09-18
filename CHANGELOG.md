@@ -5,6 +5,18 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+## [1.0.2] — 2026-09-18
+
+### Fixed
+- Pagefile optimization no longer fails on Windows 11 24H2+: `wmic` was removed
+  from Windows, so the step now uses PowerShell CIM
+  (`Get-CimInstance Win32_ComputerSystem | Set-CimInstance ...`) with a `wmic`
+  fallback for older systems.
+
+### Changed
+- Repository renamed from `NitroCore1.0` to `NitroCore` — the release tags carry
+  the version, so it no longer belongs in the name. All in-repo links updated.
+
 ## [1.0.1] — 2026-09-18
 
 ### Fixed
