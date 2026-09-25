@@ -9,6 +9,7 @@ import os
 from typing import Callable, Optional, Tuple
 
 from source.utils.paths import resource_path
+from source.gui import theme
 
 
 class Window:
@@ -23,7 +24,7 @@ class Window:
         width: int = 950,                # Optimized default canvas layout width
         height: int = 650,               # Optimized default canvas layout height
         resizable: bool = False,         # Clamp size to maintain your sleek layout ratios
-        bg_color: str = "#202225"        # Dominant rich charcoal slate app backdrop
+        bg_color: str = theme.BG          # Deep charcoal app backdrop (see theme.py)
     ):
         """Initialize high-DPI window structures and register hardware interface parameters."""
         # 1. Active Windows OS high-DPI awareness targeting

@@ -11,6 +11,7 @@ from source.gui.frame import CustomFrame
 from source.gui.button import CustomButton
 from source.gui.label import CustomLabel
 from source.gui.fonts import FontEngine
+from source.gui import theme
 from source.gui.stats_header import StatsHeader
 from source.gui.profile_selector import ProfileSelector
 from source.gui.progress_panel import ProgressPanel
@@ -48,10 +49,10 @@ class TabbedInterface:
         self,
         parent: tk.Widget,
         root: tk.Tk,
-        bg_color: str = "#202225",
-        panel_color: str = "#2F3136",
-        fg_color: str = "#F2F3F5",
-        muted_color: str = "#B9BBBE",
+        bg_color: str = theme.BG,
+        panel_color: str = theme.CARD,
+        fg_color: str = theme.TEXT,
+        muted_color: str = theme.MUTED,
         accent_color: str = "#FF6B35",
         on_title_click=None,
     ):
@@ -97,6 +98,10 @@ class TabbedInterface:
         self._apply_profile_accent(profile)
         if self.stats_header:
             self.stats_header.accent_color = self.accent_color
+        if hasattr(self, "_logo"):
+            self._draw_logo()
+        if hasattr(self, "preview_check"):
+            self.preview_check.set_accent(self.accent_color)
         if self.run_all_btn:
             self.run_all_btn.configure(bg=self.accent_color, activebackground=self._darken_accent())
             self.run_all_btn.label.configure(
@@ -116,46 +121,96 @@ class TabbedInterface:
         self._append_log(f"Profile switched to {PROFILE_META[profile]['label']}.", "info")
 
     def _darken_accent(self) -> str:
-        return "#CC5529" if self.accent_color == "#FF6B35" else "#00A888"
+        return theme.darken(self.accent_color, 0.8)
 
-    def _build_shell(self) -> None:
-        header_row = CustomFrame(self.parent, bg_color=self.bg_color)
-        header_row.pack(fill="x", pady=(0, 4))
+    def _draw_logo(self) -> None:
+        """Paint the accent brand mark (called again on profile accent swaps)."""
+        logo = self._logo
+        logo.delete("all")
+        theme.rounded_rect(logo, 2, 2, 38, 38, 10, fill=self.accent_color, outline="")
+        logo.create_text(20, 21, text="N", font=FontEngine.get("display"),
+                         fill="#FFFFFF")
 
-        header = CustomLabel(
-            parent=header_row.canvas,
-            text="NitroCore System Optimizer",
-            font=FontEngine.get("title"),
+    def _build_brand_header(self) -> None:
+        header = tk.Frame(self.parent, bg=self.bg_color)
+        header.pack(fill="x", pady=(0, theme.PAD_SM))
+
+        brand = tk.Frame(header, bg=self.bg_color)
+        brand.pack(side="left")
+
+        self._logo = tk.Canvas(brand, width=40, height=40, bg=self.bg_color,
+                               highlightthickness=0, bd=0)
+        self._logo.pack(side="left")
+        self._draw_logo()
+
+        title_col = tk.Frame(brand, bg=self.bg_color)
+        title_col.pack(side="left", padx=(theme.PAD_MD, 0))
+
+        title_lbl = CustomLabel(
+            parent=title_col,
+            text="NitroCore",
+            font=FontEngine.get("display"),
             bg=self.bg_color,
             fg=self.fg_color,
         )
-        header.pack(side="left")
-        if self.on_title_click:
-            header.bind("<Button-1>", self.on_title_click)
+        title_lbl.pack(anchor="w")
 
-        self.preview_var = tk.BooleanVar(value=Config.DRY_RUN)
-        self.preview_check = tk.Checkbutton(
-            header_row.canvas,
-            text="Preview only \u2014 don\u2019t change anything",
-            variable=self.preview_var,
-            command=self._on_preview_toggled,
-            font=FontEngine.get("body"),
+        tagline_lbl = CustomLabel(
+            parent=title_col,
+            text="WINDOWS SYSTEM OPTIMIZER",
+            font=FontEngine.get("caption"),
             bg=self.bg_color,
             fg=self.muted_color,
-            activebackground=self.bg_color,
-            activeforeground=self.fg_color,
-            selectcolor=self.panel_color,
         )
-        self.preview_check.pack(side="right")
+        tagline_lbl.pack(anchor="w")
+
+        if self.on_title_click:
+            title_lbl.bind("<Button-1>", self.on_title_click)
+            self._logo.bind("<Button-1>", self.on_title_click)
+
+        # Preview toggle, right-aligned.
+        right = tk.Frame(header, bg=self.bg_color)
+        right.pack(side="right")
+
+        toggle_text = tk.Frame(right, bg=self.bg_color)
+        toggle_text.pack(side="left", padx=(0, theme.PAD_MD))
+
+        CustomLabel(
+            parent=toggle_text,
+            text="Preview only",
+            font=FontEngine.get("body"),
+            bg=self.bg_color,
+            fg=self.fg_color,
+        ).pack(anchor="e")
+        CustomLabel(
+            parent=toggle_text,
+            text="See what would change \u2014 nothing gets touched",
+            font=FontEngine.get("small"),
+            bg=self.bg_color,
+            fg=self.muted_color,
+        ).pack(anchor="e")
+
+        self.preview_var = tk.BooleanVar(value=Config.DRY_RUN)
+        self.preview_check = theme.ToggleSwitch(
+            right,
+            self.preview_var,
+            command=self._on_preview_toggled,
+            bg=self.bg_color,
+            accent=self.accent_color,
+        )
+        self.preview_check.pack(side="left")
+
+    def _build_shell(self) -> None:
+        self._build_brand_header()
 
         subtitle = CustomLabel(
             parent=self.parent,
-            text="Boost gaming and security workloads with targeted Windows tuning.",
+            text="Tune Windows for gaming or security work \u2014 safely, step by step.",
             font=FontEngine.get("body"),
             bg=self.bg_color,
             fg=self.muted_color,
         )
-        subtitle.pack(anchor="w", pady=(0, 12))
+        subtitle.pack(anchor="w", pady=(0, theme.PAD_MD))
 
         self.stats_header = StatsHeader(
             parent=self.parent,
@@ -185,12 +240,12 @@ class TabbedInterface:
             accent_color=self.accent_color,
         )
 
-        tab_bar = CustomFrame(self.parent, bg_color=self.bg_color)
-        tab_bar.pack(fill="x", pady=(0, 8))
+        tab_bar = tk.Frame(self.parent, bg=self.bg_color)
+        tab_bar.pack(fill="x", pady=(0, theme.PAD_SM))
 
         for tab_id, tab_label in self.TAB_DEFS:
             btn = CustomButton(
-                parent=tab_bar.canvas,
+                parent=tab_bar,
                 text=tab_label,
                 command=lambda tid=tab_id: self._show_tab(tid),
                 font=FontEngine.get("body"),
@@ -198,12 +253,13 @@ class TabbedInterface:
                 fg=self.muted_color,
                 activebackground=self.accent_color,
                 activeforeground="#FFFFFF",
+                corner_radius=theme.RADIUS_MD,
             )
-            btn.pack(side="left", padx=(0, 4), ipady=4)
+            btn.pack(side="left", padx=(0, theme.PAD_XS))
             self._tab_buttons[tab_id] = btn
 
         self.run_all_btn = CustomButton(
-            parent=tab_bar.canvas,
+            parent=tab_bar,
             text=f"Run All ({PROFILE_META[Config.ACTIVE_PROFILE]['label']})",
             command=self._run_all_optimizations,
             font=FontEngine.get("button"),
@@ -211,11 +267,17 @@ class TabbedInterface:
             fg="#FFFFFF",
             activebackground=self._darken_accent(),
             activeforeground="#FFFFFF",
+            corner_radius=theme.RADIUS_MD,
+            padx=18,
         )
-        self.run_all_btn.pack(side="right", ipady=4)
+        self.run_all_btn.pack(side="right")
         self._action_buttons.append(self.run_all_btn)
 
-        self.content_area = CustomFrame(self.parent, bg_color=self.panel_color)
+        self.content_area = CustomFrame(
+            self.parent,
+            bg_color=self.panel_color,
+            border_color=theme.BORDER_SOFT,
+        )
         self.content_area.pack(fill="both", expand=True)
 
         self._build_registry_tab()
@@ -232,7 +294,7 @@ class TabbedInterface:
 
     def _add_tab_header(self, panel: CustomFrame, title: str, description: str, risk: str = "Medium") -> None:
         title_row = tk.Frame(panel.canvas, bg=self.panel_color)
-        title_row.pack(anchor="w", fill="x", padx=16, pady=(16, 8))
+        title_row.pack(anchor="w", fill="x", padx=theme.PAD_LG, pady=(theme.PAD_LG, theme.PAD_SM))
 
         title_lbl = CustomLabel(
             parent=title_row,
@@ -243,15 +305,15 @@ class TabbedInterface:
         )
         title_lbl.pack(side="left")
 
-        risk_colors = {"Low": "#3BA55D", "Medium": "#FAA61A", "High": "#ED4245"}
-        risk_lbl = CustomLabel(
-            parent=title_row,
-            text=f"  {risk} Risk",
-            font=FontEngine.get("body"),
+        risk_color = theme.RISK_COLORS.get(risk, self.muted_color)
+        risk_badge = theme.Badge(
+            title_row,
+            text=f"{risk} risk",
+            fg=risk_color,
             bg=self.panel_color,
-            fg=risk_colors.get(risk, self.muted_color),
+            font=FontEngine.get("small"),
         )
-        risk_lbl.pack(side="left")
+        risk_badge.pack(side="left", padx=(theme.PAD_MD, 0))
 
         desc_lbl = CustomLabel(
             parent=panel.canvas,
@@ -260,8 +322,8 @@ class TabbedInterface:
             bg=self.panel_color,
             fg=self.muted_color,
         )
-        desc_lbl.configure(justify="left", anchor="w", wraplength=900)
-        desc_lbl.pack(anchor="w", padx=16, pady=(0, 16))
+        desc_lbl.configure(justify="left", anchor="w", wraplength=880)
+        desc_lbl.pack(anchor="w", padx=theme.PAD_LG, pady=(0, theme.PAD_LG))
 
     def _add_action_button(
         self,
@@ -274,12 +336,17 @@ class TabbedInterface:
             text=text,
             command=command,
             font=FontEngine.get("button"),
-            bg="#40444B",
+            bg=theme.BTN_SECONDARY_BG,
             fg=self.fg_color,
             activebackground=self.accent_color,
             activeforeground="#FFFFFF",
+            corner_radius=theme.RADIUS_MD,
+            anchor="w",
+            padx=theme.PAD_LG,
+            pady=10,
+            border_color=theme.BORDER,
         )
-        btn.pack(fill="x", padx=16, pady=(0, 8), ipady=8)
+        btn.pack(fill="x", padx=theme.PAD_LG, pady=(0, theme.PAD_SM))
         self._action_buttons.append(btn)
         return btn
 
@@ -299,7 +366,7 @@ class TabbedInterface:
         self._add_tab_header(
             panel,
             "Temporary File Cleanup",
-            "Removes system temp files and browser caches to free memory and disk I/O.",
+            "Clear out system temp files and browser caches to free up disk space.",
             risk="Low",
         )
         self._add_action_button(panel, "Clean System Temp Files", self._run_temp_dirs)
@@ -311,7 +378,7 @@ class TabbedInterface:
         self._add_tab_header(
             panel,
             "Disk Cleanup",
-            "Review drive usage and run native Windows cleanup or prune old downloads.",
+            "See what's eating your disk space, then clean it up safely.",
             risk="Medium",
         )
 
@@ -357,46 +424,60 @@ class TabbedInterface:
         self._add_tab_header(
             panel,
             "Status & Logs",
-            "Real-time operation output. Logs are also saved to AppData\\NitroCore\\logs.",
+            "Watch every step as it runs. Full logs are saved to "
+            "AppData\\NitroCore\\logs.",
             risk="Low",
         )
 
-        log_frame = tk.Frame(panel.canvas, bg=self.panel_color)
-        log_frame.pack(fill="both", expand=True, padx=16, pady=(0, 8))
+        log_frame = tk.Frame(
+            panel.canvas,
+            bg=theme.BG_SUNKEN,
+            highlightthickness=1,
+            highlightbackground=theme.BORDER_SOFT,
+            padx=2,
+            pady=2,
+        )
+        log_frame.pack(fill="both", expand=True, padx=theme.PAD_LG, pady=(0, theme.PAD_SM))
 
         self.log_text = scrolledtext.ScrolledText(
             log_frame,
             font=FontEngine.get("log"),
-            bg="#1E1F22",
+            bg=theme.BG_SUNKEN,
             fg=self.fg_color,
             insertbackground=self.fg_color,
             relief="flat",
             wrap="word",
             state="disabled",
-            height=14,
+            height=12,
         )
         self.log_text.pack(fill="both", expand=True)
-        self.log_text.tag_config("success", foreground="#3BA55D")
-        self.log_text.tag_config("warning", foreground="#FAA61A")
-        self.log_text.tag_config("error", foreground="#ED4245")
-        self.log_text.tag_config("info", foreground="#B9BBBE")
+        self.log_text.tag_config("success", foreground=theme.SUCCESS)
+        self.log_text.tag_config("warning", foreground=theme.WARNING)
+        self.log_text.tag_config("error", foreground=theme.ERROR)
+        self.log_text.tag_config("info", foreground=theme.INFO)
 
         btn_row = tk.Frame(panel.canvas, bg=self.panel_color)
-        btn_row.pack(fill="x", padx=16, pady=(0, 16))
+        btn_row.pack(fill="x", padx=theme.PAD_LG, pady=(0, theme.PAD_LG))
 
         clear_btn = CustomButton(
             parent=btn_row,
             text="Clear Log",
             command=self._clear_log,
             font=FontEngine.get("body"),
-            bg="#40444B",
+            bg=theme.BTN_SECONDARY_BG,
             fg=self.fg_color,
             activebackground=self.accent_color,
             activeforeground="#FFFFFF",
+            corner_radius=theme.RADIUS_MD,
+            border_color=theme.BORDER,
         )
-        clear_btn.pack(side="left", ipady=4)
+        clear_btn.pack(side="left")
 
-        self._append_log("NitroCore ready. Select a profile and run an optimization.", "info")
+        self._append_log(
+            "Welcome to NitroCore \u2014 pick a profile above, then run an "
+            "optimization. Every step will show up here.",
+            "info",
+        )
 
     def _show_tab(self, tab_id: str) -> None:
         self._active_tab = tab_id
@@ -477,9 +558,9 @@ class TabbedInterface:
     def _on_preview_toggled(self) -> None:
         Config.DRY_RUN = bool(self.preview_var.get())
         if Config.DRY_RUN:
-            self._append_log("Preview mode ON — runs will only show what would change.", "info")
+            self._append_log("Preview mode on \u2014 runs will show what would change, nothing else.", "info")
         else:
-            self._append_log("Preview mode OFF — runs will apply changes.", "info")
+            self._append_log("Preview mode off \u2014 runs will apply changes.", "info")
 
     def _show_preview_report(self) -> None:
         entries = preview.report()
@@ -496,7 +577,10 @@ class TabbedInterface:
             return
         choice = RestorePointDialog.ask(
             self.root,
-            message=f"About to run: {action_label}\n\nCreate a system restore point first?",
+            message=(
+                f"Heads up \u2014 {action_label} will change some Windows settings.\n\n"
+                "Want me to create a restore point first, just in case?"
+            ),
         )
         if choice == "cancel":
             self._append_log(f"Cancelled: {action_label}", "warning")
@@ -570,7 +654,7 @@ class TabbedInterface:
     def _refresh_disk_usage(self) -> None:
         usage = self.disk_cleanup.get_disk_usage()
         if not usage:
-            self.disk_usage_lbl.configure(text="No fixed drives detected.")
+            self.disk_usage_lbl.configure(text="No fixed drives found \u2014 nothing to show here yet.")
             return
 
         lines = ["Drive Usage:"]

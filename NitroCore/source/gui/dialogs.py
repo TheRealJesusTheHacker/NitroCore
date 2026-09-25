@@ -1,25 +1,38 @@
-"""Premium-styled confirmation dialogs."""
+"""Themed confirmation dialogs for NitroCore."""
 
 import tkinter as tk
 from tkinter import scrolledtext
 from typing import List, Literal, Optional
 
+from source.gui import theme
+from source.gui.button import CustomButton
 from source.gui.fonts import FontEngine
 
 DialogResult = Literal["create", "skip", "cancel"]
 
 
+def _icon_badge(parent: tk.Widget, bg: str, glyph: str, color: str) -> tk.Canvas:
+    """A small circular badge with a glyph — friendlier than a bare title."""
+    canvas = tk.Canvas(parent, width=40, height=40, bg=bg,
+                       highlightthickness=0, bd=0)
+    canvas.create_oval(2, 2, 38, 38, fill=color, outline="")
+    canvas.create_text(20, 21, text=glyph, font=FontEngine.get("header"),
+                       fill="#FFFFFF")
+    return canvas
+
+
 class RestorePointDialog:
-    """Dark-themed modal offering restore point creation before optimizations."""
+    """Themed modal offering restore point creation before optimizations."""
 
     def __init__(
         self,
         parent: tk.Tk,
         title: str = "Safety Check",
-        message: str = "NitroCore will modify system settings. Create a restore point first?",
-        bg: str = "#2F3136",
-        fg: str = "#F2F3F5",
-        muted: str = "#B9BBBE",
+        message: str = "This will change some Windows settings. "
+                       "Want me to create a restore point first, just in case?",
+        bg: str = theme.CARD,
+        fg: str = theme.TEXT,
+        muted: str = theme.MUTED,
         accent: str = "#FF6B35",
     ):
         self.result: Optional[DialogResult] = None
@@ -32,18 +45,23 @@ class RestorePointDialog:
         self.top.grab_set()
 
         parent.update_idletasks()
-        w, h = 440, 200
+        w, h = 460, 230
         px = parent.winfo_x() + (parent.winfo_width() - w) // 2
         py = parent.winfo_y() + (parent.winfo_height() - h) // 2
         self.top.geometry(f"{w}x{h}+{px}+{py}")
 
+        title_row = tk.Frame(self.top, bg=bg)
+        title_row.pack(fill="x", padx=20, pady=(18, 6))
+
+        _icon_badge(title_row, bg, "!", accent).pack(side="left")
+
         tk.Label(
-            self.top,
+            title_row,
             text=title,
             font=FontEngine.get("header"),
             bg=bg,
             fg=fg,
-        ).pack(anchor="w", padx=20, pady=(18, 6))
+        ).pack(side="left", padx=(12, 0))
 
         tk.Label(
             self.top,
@@ -51,31 +69,31 @@ class RestorePointDialog:
             font=FontEngine.get("body"),
             bg=bg,
             fg=muted,
-            wraplength=400,
+            wraplength=410,
             justify="left",
-        ).pack(anchor="w", padx=20, pady=(0, 16))
+        ).pack(anchor="w", padx=20, pady=(0, 18))
 
         btn_row = tk.Frame(self.top, bg=bg)
-        btn_row.pack(fill="x", padx=20, pady=(0, 16))
+        btn_row.pack(fill="x", padx=20, pady=(0, 18))
 
-        for text, result, color in [
-            ("Create & Continue", "create", accent),
-            ("Skip", "skip", "#40444B"),
-            ("Cancel", "cancel", "#40444B"),
+        for text, result, is_primary in [
+            ("Create & Continue", "create", True),
+            ("Skip", "skip", False),
+            ("Cancel", "cancel", False),
         ]:
-            tk.Button(
+            btn = CustomButton(
                 btn_row,
                 text=text,
-                font=FontEngine.get("button"),
-                bg=color,
-                fg="#FFFFFF" if color == accent else fg,
-                activebackground=color,
-                activeforeground="#FFFFFF",
-                relief="flat",
-                padx=12,
-                pady=6,
                 command=lambda r=result: self._close(r),
-            ).pack(side="left", padx=(0, 8))
+                font=FontEngine.get("button"),
+                bg=accent if is_primary else theme.BTN_SECONDARY_BG,
+                fg="#FFFFFF" if is_primary else fg,
+                activebackground=theme.darken(accent, 0.85) if is_primary else accent,
+                activeforeground="#FFFFFF",
+                corner_radius=theme.RADIUS_MD,
+                border_color=None if is_primary else theme.BORDER,
+            )
+            btn.pack(side="left", padx=(0, 8))
 
         self.top.protocol("WM_DELETE_WINDOW", lambda: self._close("cancel"))
         parent.wait_window(self.top)
@@ -89,22 +107,23 @@ class RestorePointDialog:
     def ask(
         cls,
         parent: tk.Tk,
-        message: str = "NitroCore will modify system settings. Create a restore point first?",
+        message: str = "This will change some Windows settings. "
+                       "Want me to create a restore point first, just in case?",
     ) -> DialogResult:
         dialog = cls(parent, message=message)
         return dialog.result or "cancel"
 
 
 class PreviewReportDialog:
-    """Dark-themed scrollable modal listing everything a dry run would have changed."""
+    """Themed scrollable modal listing everything a dry run would have changed."""
 
     def __init__(
         self,
         parent: tk.Tk,
         entries: List[str],
-        bg: str = "#2F3136",
-        fg: str = "#F2F3F5",
-        muted: str = "#B9BBBE",
+        bg: str = theme.CARD,
+        fg: str = theme.TEXT,
+        muted: str = theme.MUTED,
         accent: str = "#FF6B35",
     ):
         self.top = tk.Toplevel(parent)
@@ -115,18 +134,23 @@ class PreviewReportDialog:
         self.top.grab_set()
 
         parent.update_idletasks()
-        w, h = 600, 440
+        w, h = 620, 460
         px = parent.winfo_x() + (parent.winfo_width() - w) // 2
         py = parent.winfo_y() + (parent.winfo_height() - h) // 2
         self.top.geometry(f"{w}x{h}+{px}+{py}")
 
+        title_row = tk.Frame(self.top, bg=bg)
+        title_row.pack(fill="x", padx=20, pady=(18, 4))
+
+        _icon_badge(title_row, bg, "\u2713", theme.SUCCESS).pack(side="left")
+
         tk.Label(
-            self.top,
+            title_row,
             text="Preview Report",
             font=FontEngine.get("header"),
             bg=bg,
             fg=fg,
-        ).pack(anchor="w", padx=20, pady=(18, 4))
+        ).pack(side="left", padx=(12, 0))
 
         tk.Label(
             self.top,
@@ -139,7 +163,7 @@ class PreviewReportDialog:
         text = scrolledtext.ScrolledText(
             self.top,
             font=FontEngine.get("log"),
-            bg="#1E1F22",
+            bg=theme.BG_SUNKEN,
             fg=fg,
             insertbackground=fg,
             relief="flat",
@@ -155,31 +179,31 @@ class PreviewReportDialog:
         else:
             text.insert(
                 "end",
-                "Nothing to preview — the system already matches the target state.",
+                "All clear \u2014 your system already matches the target state, "
+                "so there's nothing to change.",
             )
         text.configure(state="disabled")
 
         tk.Label(
             self.top,
-            text="PREVIEW ONLY — no changes were made.",
-            font=FontEngine.get("body"),
+            text="PREVIEW ONLY \u2014 no changes were made.",
+            font=FontEngine.get("small"),
             bg=bg,
             fg=muted,
         ).pack(anchor="w", padx=20, pady=(0, 12))
 
-        tk.Button(
+        close_btn = CustomButton(
             self.top,
             text="Close",
+            command=self._close,
             font=FontEngine.get("button"),
             bg=accent,
             fg="#FFFFFF",
-            activebackground=accent,
+            activebackground=theme.darken(accent, 0.85),
             activeforeground="#FFFFFF",
-            relief="flat",
-            padx=16,
-            pady=6,
-            command=self._close,
-        ).pack(anchor="e", padx=20, pady=(0, 16))
+            corner_radius=theme.RADIUS_MD,
+        )
+        close_btn.pack(anchor="e", padx=20, pady=(0, 18))
 
         self.top.protocol("WM_DELETE_WINDOW", self._close)
         parent.wait_window(self.top)

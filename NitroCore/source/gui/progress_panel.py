@@ -1,8 +1,9 @@
-"""Progress bar and operation status panel."""
+"""Progress bar and operation status panel — a slim status card."""
 
 import tkinter as tk
 import tkinter.ttk as ttk
 
+from source.gui import theme
 from source.gui.label import CustomLabel
 from source.gui.fonts import FontEngine
 
@@ -10,13 +11,16 @@ from source.gui.fonts import FontEngine
 class ProgressPanel:
     """Shows step label, progress bar, and completion summary."""
 
+    IDLE_TEXT = "Ready when you are."
+    DONE_TEXT = "All done"
+
     def __init__(
         self,
         parent: tk.Widget,
         root: tk.Tk,
-        bg_color: str = "#202225",
-        fg_color: str = "#F2F3F5",
-        muted_color: str = "#B9BBBE",
+        bg_color: str = theme.BG,
+        fg_color: str = theme.TEXT,
+        muted_color: str = theme.MUTED,
         accent_color: str = "#FF6B35",
     ):
         self.bg_color = bg_color
@@ -26,14 +30,21 @@ class ProgressPanel:
         self._total_steps = 1
         self.root = root
 
-        self.frame = tk.Frame(parent, bg=bg_color)
-        self.frame.pack(fill="x", pady=(0, 8))
+        self.frame = tk.Frame(
+            parent,
+            bg=theme.CARD,
+            highlightthickness=1,
+            highlightbackground=theme.BORDER_SOFT,
+            padx=theme.PAD_LG,
+            pady=theme.PAD_MD,
+        )
+        self.frame.pack(fill="x", pady=(0, theme.PAD_MD))
 
         self.status_lbl = CustomLabel(
             parent=self.frame,
-            text="Ready",
+            text=self.IDLE_TEXT,
             font=FontEngine.get("body"),
-            bg=bg_color,
+            bg=theme.CARD,
             fg=muted_color,
         )
         self.status_lbl.pack(anchor="w")
@@ -42,12 +53,12 @@ class ProgressPanel:
         style.theme_use("clam")
         style.configure(
             "Nitro.Horizontal.TProgressbar",
-            troughcolor="#1E1F22",
+            troughcolor=theme.BG_SUNKEN,
             background=accent_color,
             darkcolor=accent_color,
             lightcolor=accent_color,
-            bordercolor="#1E1F22",
-            thickness=8,
+            bordercolor=theme.BG_SUNKEN,
+            thickness=10,
         )
 
         self.bar = ttk.Progressbar(
@@ -56,14 +67,14 @@ class ProgressPanel:
             mode="determinate",
             maximum=100,
         )
-        self.bar.pack(fill="x", pady=(6, 4))
+        self.bar.pack(fill="x", pady=(8, 4))
 
         self.summary_lbl = CustomLabel(
             parent=self.frame,
             text="",
-            font=FontEngine.get("body"),
-            bg=bg_color,
-            fg=fg_color,
+            font=FontEngine.get("small"),
+            bg=theme.CARD,
+            fg=muted_color,
         )
         self.summary_lbl.pack(anchor="w")
 
@@ -76,7 +87,7 @@ class ProgressPanel:
     def _show_bar(self, visible: bool) -> None:
         self._bar_visible = visible
         if visible:
-            self.bar.pack(fill="x", pady=(6, 4))
+            self.bar.pack(fill="x", pady=(8, 4))
             if self._summary_visible:
                 # Re-pack the summary so it stays below the bar.
                 self.summary_lbl.pack_forget()
@@ -92,7 +103,7 @@ class ProgressPanel:
             self.summary_lbl.pack_forget()
 
     def reset(self) -> None:
-        self.status_lbl.configure(text="Ready", fg=self.muted_color)
+        self.status_lbl.configure(text=self.IDLE_TEXT, fg=self.muted_color)
         self.bar["value"] = 0
         self.summary_lbl.configure(text="")
         self._show_bar(False)
@@ -121,7 +132,7 @@ class ProgressPanel:
         self.bar["mode"] = "determinate"
         self.bar["value"] = 100
         self._show_bar(True)
-        self.status_lbl.configure(text="Complete", fg="#3BA55D")
+        self.status_lbl.configure(text=self.DONE_TEXT, fg=theme.SUCCESS)
         self.summary_lbl.configure(text=summary)
         self._show_summary(True)
 
@@ -138,6 +149,6 @@ class ProgressPanel:
     def fail(self, message: str) -> None:
         self.bar.stop()
         self._show_bar(True)
-        self.status_lbl.configure(text=message, fg="#ED4245")
+        self.status_lbl.configure(text=message, fg=theme.ERROR)
         self.summary_lbl.configure(text="")
         self._show_summary(False)

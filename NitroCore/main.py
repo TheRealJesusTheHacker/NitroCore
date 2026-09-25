@@ -17,6 +17,7 @@ from source.gui.frame import CustomFrame
 from source.gui.button import CustomButton
 from source.gui.label import CustomLabel
 from source.gui.tabs import TabbedInterface
+from source.gui import theme
 
 
 def is_admin() -> bool:
@@ -73,8 +74,8 @@ class NitroCoreApplication:
             FontEngine.initialize()
             self._build_pipboy_layout(bg_color, fg_color)
         else:
-            bg_color = "#202225"
-            fg_color = "#F2F3F5"
+            bg_color = theme.BG
+            fg_color = theme.TEXT
             self.app_window.canvas.configure(bg=bg_color)
             self.main_panel.canvas.configure(bg=bg_color)
             FontEngine.initialize()
@@ -242,8 +243,8 @@ class NitroCoreApplication:
         )
         FontEngine.initialize()
 
-        self.main_panel = CustomFrame(self.app_window.canvas)
-        self.main_panel.pack(fill="both", expand=True, padx=20, pady=16)
+        self.main_panel = CustomFrame(self.app_window.canvas, bg_color=theme.BG)
+        self.main_panel.pack(fill="both", expand=True, padx=20, pady=12)
 
         self.draw_dashboard()
         self.app_window.add_close_callback(self._on_shutdown)

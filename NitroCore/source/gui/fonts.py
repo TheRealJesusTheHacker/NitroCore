@@ -16,9 +16,14 @@ class FontEngine:
 
         family = "Consolas" if Config.PI_BOY_MODE else "Segoe UI"
 
+        # Type scale — one family, clear hierarchy. Roles, not sizes, at call sites.
+        cls._registry["display"] = tkfont.Font(family=family, size=18, weight="bold")
         cls._registry["title"] = tkfont.Font(family=family, size=15, weight="bold")
-        cls._registry["header"] = tkfont.Font(family=family, size=11, weight="bold")
+        cls._registry["header"] = tkfont.Font(family=family, size=12, weight="bold")
+        cls._registry["subheader"] = tkfont.Font(family=family, size=10, weight="bold")
         cls._registry["body"] = tkfont.Font(family=family, size=10, weight="normal")
+        cls._registry["small"] = tkfont.Font(family=family, size=9, weight="normal")
+        cls._registry["caption"] = tkfont.Font(family=family, size=8, weight="bold")
         cls._registry["button"] = tkfont.Font(family=family, size=11, weight="bold")
         cls._registry["log"] = tkfont.Font(family="Consolas", size=9, weight="normal")
 

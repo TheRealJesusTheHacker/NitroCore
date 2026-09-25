@@ -22,7 +22,8 @@ class CustomEntry:
         show: Optional[str] = None,
         bg_color: str = "#1E1F22",       # Deep background dark theme matching
         fg_color: str = "#F2F3F5",       # Bright slate text output
-        placeholder_color: str = "#4E5058" # Muted grey placeholder shade
+        placeholder_color: str = "#4E5058", # Muted grey placeholder shade
+        accent_color: str = "#FF6B35",   # Focus ring color
     ):
         """Initialize core variable registers and bind hardware window event handlers."""
         self.parent = parent
@@ -30,6 +31,7 @@ class CustomEntry:
         self.placeholder_color = placeholder_color
         self.fg_color = fg_color
         self.show_char = show
+        self.accent_color = accent_color
         
         # Track placeholder state separately to keep data manipulation clean
         self.is_showing_placeholder = False
@@ -58,8 +60,20 @@ class CustomEntry:
             self._apply_placeholder_state()
             
         # Physical device interaction hook loops
-        self.widget.bind("<FocusIn>", self._clear_placeholder)
-        self.widget.bind("<FocusOut>", self._restore_placeholder)
+        self.widget.bind("<FocusIn>", self._on_focus_in)
+        self.widget.bind("<FocusOut>", self._on_focus_out)
+
+    def _on_focus_in(self, event=None) -> None:
+        self._clear_placeholder(event)
+        self.widget.configure(
+            highlightthickness=1,
+            highlightbackground=self.accent_color,
+            highlightcolor=self.accent_color,
+        )
+
+    def _on_focus_out(self, event=None) -> None:
+        self._restore_placeholder(event)
+        self.widget.configure(highlightthickness=0)
 
     def pack(self, **kwargs) -> None:
         self.widget.pack(**kwargs)

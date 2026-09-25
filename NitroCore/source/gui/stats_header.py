@@ -1,8 +1,9 @@
-"""Live system stats header bar."""
+"""Live system stats header bar — a row of stat cards."""
 
 import tkinter as tk
 from typing import Optional
 
+from source.gui import theme
 from source.gui.frame import CustomFrame
 from source.gui.label import CustomLabel
 from source.gui.fonts import FontEngine
@@ -14,14 +15,21 @@ class StatsHeader:
 
     POLL_MS = 2000
 
+    STAT_DEFS = [
+        ("cpu", "CPU", "Processor load"),
+        ("ram", "Memory", "RAM in use"),
+        ("disk", "Disk", "Busiest drive"),
+        ("power", "Power", "Active plan"),
+    ]
+
     def __init__(
         self,
         parent: tk.Widget,
         root: tk.Tk,
-        bg_color: str = "#202225",
-        card_color: str = "#2F3136",
-        fg_color: str = "#F2F3F5",
-        muted_color: str = "#B9BBBE",
+        bg_color: str = theme.BG,
+        card_color: str = theme.CARD,
+        fg_color: str = theme.TEXT,
+        muted_color: str = theme.MUTED,
         accent_color: str = "#FF6B35",
     ):
         self.root = root
@@ -35,37 +43,40 @@ class StatsHeader:
         self._poll_id: Optional[str] = None
 
         container = CustomFrame(parent, bg_color=bg_color)
-        container.pack(fill="x", pady=(0, 12))
+        container.pack(fill="x", pady=(0, theme.PAD_MD))
         self.container = container
 
         inner = tk.Frame(container.canvas, bg=bg_color)
         inner.pack(fill="x")
 
-        for key, title in [
-            ("cpu", "CPU"),
-            ("ram", "RAM"),
-            ("disk", "DISK"),
-            ("power", "POWER"),
-        ]:
-            self._add_stat_card(inner, key, title)
+        for key, title, hint in self.STAT_DEFS:
+            self._add_stat_card(inner, key, title, hint)
 
         self.refresh()
 
-    def _add_stat_card(self, parent: tk.Widget, key: str, title: str) -> None:
-        card = tk.Frame(parent, bg=self.card_color, padx=12, pady=8)
-        card.pack(side="left", fill="x", expand=True, padx=(0, 6))
+    def _add_stat_card(self, parent: tk.Widget, key: str, title: str, hint: str) -> None:
+        card = theme.Card(
+            parent,
+            bg=self.bg_color,
+            card_bg=self.card_color,
+            border_color=theme.BORDER_SOFT,
+            radius=theme.RADIUS_LG,
+            padx=theme.PAD_LG,
+            pady=theme.PAD_MD,
+        )
+        card.pack(side="left", fill="x", expand=True, padx=(0, theme.PAD_SM))
 
         title_lbl = CustomLabel(
-            parent=card,
+            parent=card.canvas,
             text=title,
-            font=FontEngine.get("body"),
+            font=FontEngine.get("caption"),
             bg=self.card_color,
             fg=self.muted_color,
         )
         title_lbl.pack(anchor="w")
 
         value_lbl = CustomLabel(
-            parent=card,
+            parent=card.canvas,
             text="—",
             font=FontEngine.get("header"),
             bg=self.card_color,
@@ -73,6 +84,15 @@ class StatsHeader:
         )
         value_lbl.pack(anchor="w", pady=(2, 0))
         self._value_labels[key] = value_lbl
+
+        hint_lbl = CustomLabel(
+            parent=card.canvas,
+            text=hint,
+            font=FontEngine.get("small"),
+            bg=self.card_color,
+            fg=theme.FAINT,
+        )
+        hint_lbl.pack(anchor="w")
 
     def refresh(self) -> None:
         try:

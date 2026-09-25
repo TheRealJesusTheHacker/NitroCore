@@ -5,6 +5,28 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+### Changed — GUI design overhaul
+- New single design system (`source/gui/theme.py`): one dark palette, one
+  spacing scale, shared `Card`, `Badge`, and `ToggleSwitch` primitives, plus
+  color helpers (`darken`, `tint`, `mix`).
+- Buttons are now rounded canvas-drawn controls with real hover, pressed, and
+  disabled states (clicks fire on release, like native buttons).
+- New branded header: accent "N" logo mark, display title, and a friendly
+  on/off switch replacing the "Preview only" checkbox.
+- Stat cards, profile cards, and the progress panel are now bordered cards;
+  the active profile shows an accent ring, a tinted fill, and a selection dot.
+- Tab risk levels ("High risk" etc.) are now tinted pill badges; action
+  buttons are left-aligned with subtle borders; the log view sits in a sunken
+  bordered frame.
+- Friendlier microcopy throughout ("Ready when you are.", "All done",
+  "Welcome to NitroCore — pick a profile above…"), with no behavior changes.
+- Dialogs restyled with icon badges and rounded buttons; the restore-point
+  prompt now reads in plain language.
+- Focus ring added to text entries; the system-tray icon is now a rounded
+  accent badge matching the in-app brand.
+- Extended the type scale (`display`, `subheader`, `small`, `caption`) in
+  `FontEngine`; all existing roles unchanged.
+
 ## [1.0.2] — 2026-09-18
 
 ### Fixed

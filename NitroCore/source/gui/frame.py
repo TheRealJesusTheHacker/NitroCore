@@ -19,17 +19,20 @@ class CustomFrame:
         parent: tk.Widget,
         bg_color: str = "#2F3136",      # Discord-style deep panel background
         borderwidth: int = 0,            # Zeroed out border by default for smooth panels
-        relief: str = "flat"            # Flat uniform visual layer design
+        relief: str = "flat",            # Flat uniform visual layer design
+        border_color: Optional[str] = None,  # Subtle 1px border when set
     ):
         """Initialize backend canvas layout panel containers."""
         self.bg_color = bg_color
-        
+
         # Core underlying widget initialization
         self.widget = tk.Frame(
             parent,
             bg=self.bg_color,
             borderwidth=borderwidth,
-            relief=relief
+            relief=relief,
+            highlightthickness=1 if border_color else 0,
+            highlightbackground=border_color or bg_color,
         )
 
     @property
