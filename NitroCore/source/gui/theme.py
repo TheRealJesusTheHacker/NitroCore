@@ -257,8 +257,8 @@ class ToggleSwitch(tk.Canvas):
         self.variable = variable
         self.command = command
         self.accent = accent
-        self._w = width
-        self._h = height
+        self._tw = width
+        self._th = height
         self._enabled = True
         self.bind("<Button-1>", self._on_click)
         self._draw()
@@ -274,18 +274,18 @@ class ToggleSwitch(tk.Canvas):
     def _draw(self) -> None:
         self.delete("all")
         is_on = bool(self.variable.get())
-        radius = self._h // 2
+        radius = self._th // 2
         if not self._enabled:
             track = DISABLED_BG
             knob_fill = FAINT
         else:
             track = self.accent if is_on else BORDER
             knob_fill = "#FFFFFF"
-        rounded_rect(self, 1, 1, self._w - 1, self._h - 1, radius - 1,
+        rounded_rect(self, 1, 1, self._tw - 1, self._th - 1, radius - 1,
                      fill=track, outline="")
         knob_r = radius - 5
-        cy = self._h / 2
-        cx = (self._w - radius - 1) if is_on else (radius + 1)
+        cy = self._th / 2
+        cx = (self._tw - radius - 1) if is_on else (radius + 1)
         self.create_oval(cx - knob_r, cy - knob_r, cx + knob_r, cy + knob_r,
                          fill=knob_fill, outline="")
 

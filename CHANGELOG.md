@@ -3,6 +3,15 @@
 All notable changes to NitroCore are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.1] - 2026-09-25
+
+### Fixed
+- Critical crash-on-launch fix: the new `ToggleSwitch` widget in the v1.1.0 GUI
+  redesign stored its size in `self._w` / `self._h`, clobbering tkinter's internal
+  Tcl widget-name attribute — the app died with `TclError: invalid command name`
+  before the window ever drew. Renamed to `self._tw` / `self._th`. The v1.1.0
+  release is broken on every machine; everyone should upgrade to v1.1.1.
+
 ## [1.1.0] - 2026-09-25
 
 ### Fixed — bug bounty security & safety fixes
