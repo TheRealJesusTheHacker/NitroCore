@@ -33,15 +33,17 @@ def sanitize_input(input_str: str) -> str:
 
 def hash_password_secure(password: str, salt: bytes = None) -> tuple[str, bytes]:
     """
-    Secures data payloads using SHA-256 with an automated unique salt iteration layer.
-    Returns a tuple of: (hex_digest_string, salt_bytes)
+    Hash a password with PBKDF2-HMAC-SHA256 (600,000 iterations, random 16-byte
+    salt) per OWASP recommendations. Returns (hex_digest, salt).
+
+    NOTE: currently unused by the application. Do not use the old single-round
+    SHA-256 construction for passwords anywhere — it offers no brute-force
+    resistance.
     """
     if salt is None:
-        salt = os.urandom(16)  # Generate a cryptographically secure random 16-byte salt
-    
-    hash_engine = hashlib.sha256()
-    hash_engine.update(salt + password.encode('utf-8'))
-    return hash_engine.hexdigest(), salt
+        salt = os.urandom(16)  # Cryptographically secure random 16-byte salt
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 600_000)
+    return digest.hex(), salt
 
 
 def retry_on_failure(max_retries: int = 3, delay: float = 1.0) -> Callable:
@@ -105,6 +107,41 @@ def validate_path(path: Union[str, Path]) -> bool:
         return p.exists()
     except Exception:
         return False
+
+
+def is_reparse_point(entry) -> bool:
+    """
+    Return True if a scandir DirEntry is a reparse point (symlink or NTFS
+    junction). Cleanup code must NEVER recurse into these: a junction inside
+    a temp/Downloads tree can point outside it, and deleting through it would
+    destroy files the user never asked us to touch.
+
+    Fail-closed: if we cannot determine the type, treat it as a reparse
+    point (skip it).
+    """
+    is_junction = getattr(entry, "is_junction", None)
+    if callable(is_junction):
+        # Python 3.12+: explicit junction detection.
+        try:
+            if is_junction():
+                return True
+        except OSError:
+            return True
+    try:
+        attrs = getattr(entry.stat(follow_symlinks=False), "st_file_attributes", 0)
+        FILE_ATTRIBUTE_REPARSE_POINT = 0x400
+        if attrs & FILE_ATTRIBUTE_REPARSE_POINT:
+            return True
+    except OSError:
+        return True
+    # Plain symlinks: is_file()/is_dir() with follow_symlinks=False already
+    # return False for these, but check explicitly for clarity.
+    try:
+        if entry.is_symlink():
+            return True
+    except OSError:
+        return True
+    return False
 
 
 def ensure_directory_exists(path: Union[str, Path]) -> None:

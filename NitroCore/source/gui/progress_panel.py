@@ -103,6 +103,9 @@ class ProgressPanel:
             self.summary_lbl.pack_forget()
 
     def reset(self) -> None:
+        # L-4: stop the indeterminate animation — hiding the bar is not
+        # enough, it keeps spinning in the background.
+        self.bar.stop()
         self.status_lbl.configure(text=self.IDLE_TEXT, fg=self.muted_color)
         self.bar["value"] = 0
         self.summary_lbl.configure(text="")

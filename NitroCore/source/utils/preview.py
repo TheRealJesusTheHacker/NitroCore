@@ -6,7 +6,10 @@ done via the shared ``preview`` recorder below. The caller (GUI or CLI)
 starts a recording before a run and renders ``preview.report()`` afterwards.
 
 Recordings are ordered by execution. Runs are serialized by the UI's busy
-flag, so a single process-wide recorder is sufficient.
+flag, so a single process-wide recorder is sufficient. NOTE (L-10): this
+assumption holds only while every entry point honors the busy flag — any
+path that launches a pipeline without setting it could interleave entries
+from concurrent runs.
 """
 
 from typing import List

@@ -31,6 +31,9 @@ a fix will be prioritized and you will be credited in the release notes
 
 - NitroCore is open source (MIT). Every release ships with SHA256 hashes so
   you can verify your download.
+- Release binaries are currently **unsigned** (M-7) — Windows SmartScreen will
+  warn on first run; verify the SHA256SUMS.txt before trusting the binary.
+  Code signing is a planned manual release step.
 - NitroCore collects no telemetry and makes no network connections. If you
   ever observe unexpected network activity from a NitroCore binary, treat it
   as a security issue and report it immediately — it is not intended behavior.

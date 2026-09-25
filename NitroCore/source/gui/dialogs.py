@@ -9,6 +9,7 @@ from source.gui.button import CustomButton
 from source.gui.fonts import FontEngine
 
 DialogResult = Literal["create", "skip", "cancel"]
+RestoreFailedResult = Literal["retry", "continue", "abort"]
 
 
 def _icon_badge(parent: tk.Widget, bg: str, glyph: str, color: str) -> tk.Canvas:
@@ -112,6 +113,222 @@ class RestorePointDialog:
     ) -> DialogResult:
         dialog = cls(parent, message=message)
         return dialog.result or "cancel"
+
+
+class ConfirmDialog:
+    """Themed modal asking the user to confirm or cancel a risky action.
+
+    Returns True when the user confirms, False on cancel or window close.
+    Pass danger=True to paint the confirm button red for destructive actions.
+    """
+
+    def __init__(
+        self,
+        parent: tk.Tk,
+        title: str = "Are you sure?",
+        message: str = "",
+        confirm_text: str = "Confirm",
+        cancel_text: str = "Cancel",
+        glyph: str = "?",
+        danger: bool = False,
+        bg: str = theme.CARD,
+        fg: str = theme.TEXT,
+        muted: str = theme.MUTED,
+        accent: str = "#FF6B35",
+    ):
+        self.result = False
+        confirm_bg = theme.ERROR if danger else accent
+
+        self.top = tk.Toplevel(parent)
+        self.top.title(title)
+        self.top.configure(bg=bg)
+        self.top.resizable(False, False)
+        self.top.transient(parent)
+        self.top.grab_set()
+
+        parent.update_idletasks()
+        w, h = 460, 250
+        px = parent.winfo_x() + (parent.winfo_width() - w) // 2
+        py = parent.winfo_y() + (parent.winfo_height() - h) // 2
+        self.top.geometry(f"{w}x{h}+{px}+{py}")
+
+        title_row = tk.Frame(self.top, bg=bg)
+        title_row.pack(fill="x", padx=20, pady=(18, 6))
+
+        _icon_badge(title_row, bg, glyph, confirm_bg).pack(side="left")
+
+        tk.Label(
+            title_row,
+            text=title,
+            font=FontEngine.get("header"),
+            bg=bg,
+            fg=fg,
+        ).pack(side="left", padx=(12, 0))
+
+        tk.Label(
+            self.top,
+            text=message,
+            font=FontEngine.get("body"),
+            bg=bg,
+            fg=muted,
+            wraplength=410,
+            justify="left",
+        ).pack(anchor="w", padx=20, pady=(0, 18))
+
+        btn_row = tk.Frame(self.top, bg=bg)
+        btn_row.pack(fill="x", padx=20, pady=(0, 18))
+
+        confirm_btn = CustomButton(
+            btn_row,
+            text=confirm_text,
+            command=lambda: self._close(True),
+            font=FontEngine.get("button"),
+            bg=confirm_bg,
+            fg="#FFFFFF",
+            activebackground=theme.darken(confirm_bg, 0.85),
+            activeforeground="#FFFFFF",
+            corner_radius=theme.RADIUS_MD,
+        )
+        confirm_btn.pack(side="left", padx=(0, 8))
+
+        cancel_btn = CustomButton(
+            btn_row,
+            text=cancel_text,
+            command=lambda: self._close(False),
+            font=FontEngine.get("button"),
+            bg=theme.BTN_SECONDARY_BG,
+            fg=fg,
+            activebackground=accent,
+            activeforeground="#FFFFFF",
+            corner_radius=theme.RADIUS_MD,
+            border_color=theme.BORDER,
+        )
+        cancel_btn.pack(side="left")
+
+        self.top.protocol("WM_DELETE_WINDOW", lambda: self._close(False))
+        parent.wait_window(self.top)
+
+    def _close(self, result: bool) -> None:
+        self.result = result
+        self.top.grab_release()
+        self.top.destroy()
+
+    @classmethod
+    def ask(
+        cls,
+        parent: tk.Tk,
+        title: str = "Are you sure?",
+        message: str = "",
+        confirm_text: str = "Confirm",
+        cancel_text: str = "Cancel",
+        glyph: str = "?",
+        danger: bool = False,
+    ) -> bool:
+        dialog = cls(
+            parent,
+            title=title,
+            message=message,
+            confirm_text=confirm_text,
+            cancel_text=cancel_text,
+            glyph=glyph,
+            danger=danger,
+        )
+        return dialog.result
+
+
+class RestoreFailedDialog:
+    """Shown when a requested restore point could not be created (M-1).
+
+    The pipeline must NOT proceed silently — the user picks: retry the
+    restore point, continue without the safety net, or abort entirely.
+    """
+
+    def __init__(
+        self,
+        parent: tk.Tk,
+        reason: str,
+        bg: str = theme.CARD,
+        fg: str = theme.TEXT,
+        muted: str = theme.MUTED,
+        accent: str = "#FF6B35",
+    ):
+        self.result: RestoreFailedResult = "abort"
+
+        self.top = tk.Toplevel(parent)
+        self.top.title("Restore Point Failed")
+        self.top.configure(bg=bg)
+        self.top.resizable(False, False)
+        self.top.transient(parent)
+        self.top.grab_set()
+
+        parent.update_idletasks()
+        w, h = 480, 290
+        px = parent.winfo_x() + (parent.winfo_width() - w) // 2
+        py = parent.winfo_y() + (parent.winfo_height() - h) // 2
+        self.top.geometry(f"{w}x{h}+{px}+{py}")
+
+        title_row = tk.Frame(self.top, bg=bg)
+        title_row.pack(fill="x", padx=20, pady=(18, 6))
+
+        _icon_badge(title_row, bg, "!", theme.WARNING).pack(side="left")
+
+        tk.Label(
+            title_row,
+            text="Restore Point Failed",
+            font=FontEngine.get("header"),
+            bg=bg,
+            fg=fg,
+        ).pack(side="left", padx=(12, 0))
+
+        tk.Label(
+            self.top,
+            text=(
+                "I couldn't create the restore point:\n"
+                f"{reason}\n\n"
+                "Without it there's no safety net if something goes wrong. "
+                "How do you want to proceed?"
+            ),
+            font=FontEngine.get("body"),
+            bg=bg,
+            fg=muted,
+            wraplength=430,
+            justify="left",
+        ).pack(anchor="w", padx=20, pady=(0, 18))
+
+        btn_row = tk.Frame(self.top, bg=bg)
+        btn_row.pack(fill="x", padx=20, pady=(0, 18))
+
+        for text, result, is_primary in [
+            ("Try Again", "retry", True),
+            ("Continue Without It", "continue", False),
+            ("Abort", "abort", False),
+        ]:
+            btn = CustomButton(
+                btn_row,
+                text=text,
+                command=lambda r=result: self._close(r),
+                font=FontEngine.get("button"),
+                bg=accent if is_primary else theme.BTN_SECONDARY_BG,
+                fg="#FFFFFF" if is_primary else fg,
+                activebackground=theme.darken(accent, 0.85) if is_primary else accent,
+                activeforeground="#FFFFFF",
+                corner_radius=theme.RADIUS_MD,
+                border_color=None if is_primary else theme.BORDER,
+            )
+            btn.pack(side="left", padx=(0, 8))
+
+        self.top.protocol("WM_DELETE_WINDOW", lambda: self._close("abort"))
+        parent.wait_window(self.top)
+
+    def _close(self, result: RestoreFailedResult) -> None:
+        self.result = result
+        self.top.grab_release()
+        self.top.destroy()
+
+    @classmethod
+    def ask(cls, parent: tk.Tk, reason: str) -> RestoreFailedResult:
+        dialog = cls(parent, reason)
+        return dialog.result
 
 
 class PreviewReportDialog:

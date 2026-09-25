@@ -66,6 +66,21 @@ class PerformanceTuner:
             pass
         return ""
 
+    def _ultimate_scheme_present(self) -> bool:
+        """M-3: check `powercfg /l` for the Ultimate Performance GUID so we
+        don't clone a duplicate scheme on every click."""
+        try:
+            result = subprocess.run(
+                ["powercfg", "/l"],
+                capture_output=True,
+                text=True,
+                timeout=15,
+                **hidden_subprocess_kwargs(),
+            )
+            return self.ultimate_perf_guid.lower() in result.stdout.lower()
+        except Exception:
+            return False
+
     def optimize_power_plan(self):
         if not IS_WINDOWS:
             return "Skipped: power plans are Windows-only"
@@ -84,10 +99,13 @@ class PerformanceTuner:
         }
 
         try:
-            subprocess.run(
-                ["powercfg", "-duplicatescheme", self.ultimate_perf_guid],
-                **run_kwargs,
-            )
+            # Only duplicate the scheme when it isn't already registered —
+            # duplicatescheme always creates a NEW entry (M-3).
+            if not self._ultimate_scheme_present():
+                subprocess.run(
+                    ["powercfg", "-duplicatescheme", self.ultimate_perf_guid],
+                    **run_kwargs,
+                )
 
             subprocess.run(
                 ["powercfg", "/s", self.ultimate_perf_guid],

@@ -49,9 +49,9 @@ class Logger:
         )
         file_handler.setFormatter(formatter)
         
-        # 3. QueueHandler Wrap (The Secret to Max Multi-Threading Performance)
-        # Instead of writing directly to the disk file on the current execution thread, 
-        # Python pushes log entries to an internal memory queue, making log calls near-instantaneous.
+        # Handlers write directly on the calling thread. The stdlib logging
+        # machinery is thread-safe (handler locks), so concurrent module
+        # logging cannot corrupt the file — no QueueHandler needed.
         self.logger.addHandler(console_handler)
         self.logger.addHandler(file_handler)
         

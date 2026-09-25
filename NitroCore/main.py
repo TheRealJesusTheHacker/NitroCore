@@ -5,9 +5,11 @@ NitroCore Windows System Optimizer - Primary Application Entry Point.
 import os
 import sys
 import ctypes
+import tkinter as tk
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+from source import __version__
 from source.utils.platform import IS_WINDOWS
 from source.utils.config import Config
 from source.utils.lifecycle import LifecycleManager
@@ -18,6 +20,8 @@ from source.gui.button import CustomButton
 from source.gui.label import CustomLabel
 from source.gui.tabs import TabbedInterface
 from source.gui import theme
+from source.gui.dialogs import ConfirmDialog, RestorePointDialog, RestoreFailedDialog
+from source.utils.restore_point import create_restore_point
 
 
 def is_admin() -> bool:
@@ -55,6 +59,9 @@ class NitroCoreApplication:
         self.app_window = None
         self.main_panel = None
         self.tabbed_ui = None
+        # H-1: busy guard for the Pip-Boy purge button.
+        self._pipboy_busy = False
+        self._purge_btn = None
 
     def draw_dashboard(self):
         """Assembles the visible components based on the active config state."""
@@ -100,6 +107,17 @@ class NitroCoreApplication:
         header_lbl = CustomLabel(self.main_panel.canvas, text=header_text, font=FontEngine.get("log"))
         header_lbl.configure(fg=fg_color, bg=bg_color, justify="left")
         header_lbl.pack(fill="x", pady=(0, 20))
+        # L-9: a way back out — click the header to leave Pip-Boy mode.
+        header_lbl.bind("<Button-1>", self._exit_pipboy)
+
+        exit_hint = CustomLabel(
+            self.main_panel.canvas,
+            text="(click the header above to return to the normal interface)",
+            font=FontEngine.get("small"),
+        )
+        exit_hint.configure(fg="#1a5c1a", bg=bg_color)
+        exit_hint.pack(anchor="w")
+        exit_hint.bind("<Button-1>", self._exit_pipboy)
 
         stats_box = CustomFrame(self.main_panel.canvas)
         stats_box.canvas.configure(bg=bg_color)
@@ -136,6 +154,14 @@ class NitroCoreApplication:
             relief="solid",
         )
         purge_btn.pack(fill="x", ipady=12, pady=(20, 0))
+        self._purge_btn = purge_btn
+
+    def _exit_pipboy(self, event=None):
+        """L-9: leave Pip-Boy mode and return to the normal interface."""
+        Config.PI_BOY_MODE = False
+        Config.CLICK_COUNTER = 0
+        self.app_window.canvas.title(f"NitroCore Windows Optimizer v{__version__}")
+        self.draw_dashboard()
 
     def _run_headless_preview(self):
         """Run the optimization pipeline in dry-run mode and print the report."""
@@ -177,12 +203,106 @@ class NitroCoreApplication:
         say(PREVIEW_FOOTER)
 
     def _run_pipboy_purge(self):
+        """H-1: the Pip-Boy purge button is no longer a fire-and-forget
+        destructive pipeline. It now requires explicit confirmation, offers a
+        restore point, honors preview mode, and refuses to double-fire."""
         from source.modules.registry import RegistryOptimizer
         from source.modules.temp_files import TempFileCleaner
         from source.modules.disk_cleanup import DiskCleanup
         from source.modules.services import ServiceManager
         from source.modules.performance import PerformanceTuner
         from source.modules.async_worker import AsyncWorker
+
+        if self._pipboy_busy:
+            print(">> [VATS] Purge already in progress — hold your horses, vault dweller.")
+            return
+
+        proceed = ConfirmDialog.ask(
+            self.app_window.canvas,
+            title="Whoa there, vault dweller",
+            message=(
+                "That big red button runs the FULL NitroCore pipeline for real — "
+                "registry tweaks, temp/cache cleanup, Windows Update and BITS "
+                "service changes, power plan switch, the works.\n\n"
+                "This isn't a toy. Still want to do this?"
+            ),
+            confirm_text="Purge it",
+            cancel_text="Never mind",
+            glyph="!",
+            danger=True,
+        )
+        if not proceed:
+            print(">> [VATS] Purge aborted. Probably wise.")
+            return
+
+        if Config.DRY_RUN:
+            print(">> [VATS] PREVIEW MODE — purge simulated, nothing touched.")
+            self._pipboy_run(preview_only=True)
+            return
+
+        self._pipboy_restore_prompt()
+
+    def _pipboy_restore_prompt(self):
+        choice = RestorePointDialog.ask(
+            self.app_window.canvas,
+            message=(
+                "Heads up — the System Purge will change some Windows settings.\n\n"
+                "Want me to create a restore point first, just in case?"
+            ),
+        )
+        if choice == "cancel":
+            print(">> [VATS] Purge aborted.")
+            return
+        if choice == "skip":
+            self._pipboy_run()
+            return
+
+        print(">> [VATS] Creating restore point...")
+
+        def task():
+            return create_restore_point("NitroCore - Pip-Boy Purge")
+
+        def on_complete(result):
+            def ui():
+                ok = bool(result) and result[0]
+                msg = result[1] if result else "Restore point creation failed."
+                print(f">> [VATS] {msg}")
+                if not ok:
+                    # M-1: failed restore point blocks the purge unless the
+                    # user explicitly accepts the risk.
+                    action = RestoreFailedDialog.ask(self.app_window.canvas, msg)
+                    if action == "retry":
+                        self._pipboy_restore_prompt()
+                        return
+                    if action == "abort":
+                        print(">> [VATS] Purge aborted.")
+                        return
+                    print(">> [VATS] Continuing without a restore point. Bold.")
+                self._pipboy_run()
+
+            try:
+                self.app_window.canvas.after(0, ui)
+            except tk.TclError:
+                pass
+
+        from source.modules.async_worker import AsyncWorker
+        AsyncWorker.run_task(task, on_complete)
+
+    def _pipboy_run(self, preview_only: bool = False):
+        from source.modules.registry import RegistryOptimizer
+        from source.modules.temp_files import TempFileCleaner
+        from source.modules.disk_cleanup import DiskCleanup
+        from source.modules.services import ServiceManager
+        from source.modules.performance import PerformanceTuner
+        from source.modules.async_worker import AsyncWorker
+
+        self._pipboy_busy = True
+        if self._purge_btn is not None:
+            self._purge_btn.set_enabled(False)
+
+        if preview_only:
+            from source.utils.preview import preview as _preview
+            _preview.start()
 
         print(">> [VATS] STARTING SYSTEM RAD PURGE MULTIPLIER...")
 
@@ -202,15 +322,36 @@ class NitroCoreApplication:
             for label, result in results:
                 print(f">> [{label}]")
                 print(result)
+            if preview_only:
+                from source.utils.preview import preview
+                entries = preview.report()
+                print(f">> [VATS] {len(entries)} change(s) previewed, 0 applied.")
+                for index, entry in enumerate(entries, start=1):
+                    print(f">>   {index}. {entry}")
             print(">> [VATS] PURGE COMPLETE")
 
-        AsyncWorker.run_task(task)
+        def on_complete(_result):
+            def ui():
+                self._pipboy_busy = False
+                try:
+                    if self._purge_btn is not None and self._purge_btn.winfo_exists():
+                        self._purge_btn.set_enabled(True)
+                except tk.TclError:
+                    pass
+
+            try:
+                self.app_window.canvas.after(0, ui)
+            except tk.TclError:
+                pass
+
+        AsyncWorker.run_task(task, on_complete)
 
     def _handle_secret_clicks(self, event):
         Config.CLICK_COUNTER += 1
         if Config.CLICK_COUNTER >= 7:
             Config.PI_BOY_MODE = True
-            ctypes.windll.kernel32.Beep(800, 150)
+            Config.CLICK_COUNTER = 0  # L-9: reset so re-entry needs 7 fresh clicks
+            play_beep()
             self.app_window.canvas.title("PIP-BOY 3000 - ROB-CO INDUSTRIES")
             self.draw_dashboard()
 
@@ -225,18 +366,18 @@ class NitroCoreApplication:
             return
 
         if not is_admin():
-            ctypes.windll.user32.MessageBoxW(
-                0,
-                "NitroCore requires Administrative Privileges to modify system registries.",
+            # L-1: non-Windows-safe message path — ctypes.windll crashes on
+            # Linux/macOS (MessageBoxW exists only on Windows).
+            show_blocking_message(
                 "Access Denied",
-                0x10 | 0x0,
+                "NitroCore requires Administrative Privileges to modify system registries.",
             )
             sys.exit(0)
 
         LifecycleManager.enforce_single_instance()
 
         self.app_window = Window(
-            title="NitroCore Windows Optimizer v1.0.1",
+            title=f"NitroCore Windows Optimizer v{__version__}",
             width=980,
             height=780,
             resizable=False,

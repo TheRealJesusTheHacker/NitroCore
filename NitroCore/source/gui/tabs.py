@@ -15,7 +15,12 @@ from source.gui import theme
 from source.gui.stats_header import StatsHeader
 from source.gui.profile_selector import ProfileSelector
 from source.gui.progress_panel import ProgressPanel
-from source.gui.dialogs import RestorePointDialog, PreviewReportDialog
+from source.gui.dialogs import (
+    ConfirmDialog,
+    PreviewReportDialog,
+    RestoreFailedDialog,
+    RestorePointDialog,
+)
 from source.modules.async_worker import AsyncWorker
 from source.modules.registry import RegistryOptimizer
 from source.modules.temp_files import TempFileCleaner
@@ -360,6 +365,7 @@ class TabbedInterface:
             risk="High",
         )
         self._add_action_button(panel, "Apply Registry Optimizations", self._run_registry)
+        self._add_action_button(panel, "Restore Previous Registry Values", self._run_registry_undo)
 
     def _build_temp_files_tab(self) -> None:
         panel = self._make_tab_panel("temp_files")
@@ -531,6 +537,15 @@ class TabbedInterface:
         if hasattr(self, "preview_check"):
             self.preview_check.configure(state="disabled" if busy else "normal")
 
+    def _safe_after(self, ms: int, func: Callable[[], None]) -> None:
+        """Schedule func on the UI thread; silently no-op if the window is
+        already gone (L-5 — worker callbacks racing teardown)."""
+        try:
+            if self.root.winfo_exists():
+                self.root.after(ms, func)
+        except tk.TclError:
+            pass
+
     def _create_restore_then(self, action_label: str, continuation: Callable[[], None]) -> None:
         """Create a restore point asynchronously, then run continuation."""
         self._append_log("Creating system restore point...", "info")
@@ -542,16 +557,32 @@ class TabbedInterface:
 
         def on_complete(result: Optional[tuple[bool, str]]) -> None:
             def update() -> None:
-                if result is None:
-                    self._append_log("Restore point creation failed.", "warning")
-                else:
-                    ok, msg = result
-                    self._append_log(msg, "success" if ok else "warning")
+                ok = bool(result) and result[0]
+                reason = result[1] if result else "Restore point creation failed."
+                self._append_log(reason, "success" if ok else "warning")
                 self.progress_panel.reset()
                 self._set_busy(False)
-                continuation()
+                if ok:
+                    continuation()
+                    return
+                # M-1: a failed restore point BLOCKS the pipeline. Ask the
+                # user whether to retry, continue without the safety net,
+                # or abort — never silently proceed.
+                action = RestoreFailedDialog.ask(self.root, reason)
+                if action == "retry":
+                    self._create_restore_then(action_label, continuation)
+                elif action == "continue":
+                    self._append_log(
+                        "Continuing without a restore point — no safety net.",
+                        "warning",
+                    )
+                    continuation()
+                else:
+                    self._append_log(
+                        f"Aborted: {action_label} (no restore point)", "warning"
+                    )
 
-            self.root.after(0, update)
+            self._safe_after(0, update)
 
         AsyncWorker.run_task(task, on_complete)
 
@@ -617,7 +648,7 @@ class TabbedInterface:
                 if Config.DRY_RUN and result is not None:
                     self._show_preview_report()
 
-            self.root.after(0, update_ui)
+            self._safe_after(0, update_ui)
 
         AsyncWorker.run_task(task, on_complete)
 
@@ -636,6 +667,10 @@ class TabbedInterface:
             lambda: self.registry.apply_for_profile(profile),
             require_restore=True,
         )
+
+    def _run_registry_undo(self) -> None:
+        # M-4: one-click restore of the previous registry snapshot.
+        self._run_async("Registry Undo", self.registry.restore_last_undo)
 
     def _run_temp_dirs(self) -> None:
         self._run_async("System Temp Cleanup", self.temp_cleaner.clean_temp_directories)
@@ -676,7 +711,34 @@ class TabbedInterface:
         )
 
     def _run_disk_downloads(self) -> None:
-        self._run_async("Downloads Cleanup", self.disk_cleanup.clean_downloads)
+        # H-2: explicit confirmation before touching user files, then the
+        # normal restore-point prompt. Deleted files go to the Recycle Bin
+        # (see DiskCleanup.clean_downloads), so this is recoverable.
+        if self._busy:
+            return
+        proceed = ConfirmDialog.ask(
+            self.root,
+            title="Clean old Downloads?",
+            message=(
+                "This moves files in your Downloads folder that haven't been "
+                "touched in 30+ days to the Recycle Bin.\n\n"
+                "They stay recoverable from the Recycle Bin — but please make "
+                "sure there's nothing in there you still need first."
+            ),
+            confirm_text="Move to Recycle Bin",
+            cancel_text="Keep My Files",
+            glyph="!",
+            danger=True,
+        )
+        if not proceed:
+            self._append_log("Cancelled: Downloads Cleanup", "warning")
+            return
+        self._prompt_restore(
+            "Downloads Cleanup",
+            lambda: self._execute_async(
+                "Downloads Cleanup", self.disk_cleanup.clean_downloads
+            ),
+        )
 
     def _run_services(self) -> None:
         profile = Config.ACTIVE_PROFILE
@@ -729,11 +791,11 @@ class TabbedInterface:
                     if Config.DRY_RUN:
                         self._show_preview_report()
 
-                self.root.after(0, finish)
+                self._safe_after(0, finish)
                 return
 
             step_id, step_label = pipeline[index]
-            self.root.after(0, lambda i=index, sl=step_label: self.progress_panel.set_step(i + 1, sl))
+            self._safe_after(0, lambda i=index, sl=step_label: self.progress_panel.set_step(i + 1, sl))
 
             def task() -> str:
                 return execute_step(step_id, profile, self._modules)
@@ -750,7 +812,7 @@ class TabbedInterface:
                             self._append_log(line)
                     run_steps(index + 1)
 
-                self.root.after(0, update_ui)
+                self._safe_after(0, update_ui)
 
             AsyncWorker.run_task(task, on_complete)
 

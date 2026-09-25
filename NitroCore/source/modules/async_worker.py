@@ -17,12 +17,18 @@ class AsyncWorker:
         def thread_target():
             try:
                 result = task_func(*args, **kwargs)
-                if on_complete:
-                    on_complete(result)
             except Exception:
                 traceback.print_exc()
-                if on_complete:
-                    on_complete(None)
+                result = None
+            if on_complete:
+                # L-5: guard the callback itself — if the GUI was torn down
+                # mid-run, the completion callback can raise (e.g. TclError).
+                # Report it once instead of invoking on_complete a second time
+                # and killing the worker thread with a duplicate exception.
+                try:
+                    on_complete(result)
+                except Exception:
+                    traceback.print_exc()
 
         worker_thread = threading.Thread(target=thread_target, daemon=True)
         worker_thread.start()

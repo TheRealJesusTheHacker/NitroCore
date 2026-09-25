@@ -3,7 +3,7 @@ GUI Module - Thread-safe, modern flat-styled UI components for NitroCore.
 Exposes optimized widget canvas systems and layout frameworks cleanly.
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 __author__ = "NitroCore Team"
 
 # 1. Import your fully optimized, modern flat-styled components cleanly

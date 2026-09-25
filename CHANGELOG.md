@@ -5,6 +5,54 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+### Fixed — bug bounty security & safety fixes
+- H-1: the Pip-Boy "System Purge" button no longer runs the full destructive
+  pipeline with one click. It now asks for explicit confirmation (themed
+  `ConfirmDialog`), offers a restore point, respects preview mode, and can't
+  double-fire while a run is active. Entering Pip-Boy mode still takes 7
+  clicks; clicking the header exits back to the normal UI.
+- H-2: "Clean Old Downloads" now asks for explicit confirmation and a
+  restore point before touching user files; deleted files are moved to the
+  Recycle Bin (via `SHFileOperation`) instead of being permanently destroyed,
+  and files that can't be recycled are left in place and reported.
+- H-3: recursive cleanup in temp files and Downloads now skips NTFS
+  junctions, symlinks, and reparse points (fail-closed) so a junction can
+  never redirect deletion outside the intended tree.
+- M-1: a failed restore-point creation now BLOCKS the pipeline. The user gets
+  a "Restore Point Failed" dialog with Retry / Continue Without It / Abort —
+  the run never silently proceeds without its safety net.
+- M-2: service optimization now logs an explicit security warning whenever
+  Windows Update (wuauserv) or BITS is set to Manual, in both live and
+  preview runs.
+- M-3: `powercfg /l` is checked for the Ultimate Performance scheme before
+  duplicating, so repeated clicks no longer clone power plans.
+- M-4: every registry write snapshots the previous value first; snapshots
+  persist to timestamped JSON undo files under
+  `%APPDATA%\NitroCore\registry_undo\`, and a new "Restore Previous Registry
+  Values" button restores the most recent snapshot (one-click undo).
+- M-5: `setup.py` now points at the real `source/` package layout and the
+  correct GitHub URL (`TheRealJesusTheHacker/NitroCore`); a `VERSION` file
+  (`1.0.2`) is the single version source.
+- M-6: runtime and build dependencies are exactly pinned (`requirements.txt`,
+  PyInstaller in release CI) for reproducible privileged builds.
+- M-7: `upx=False` in the PyInstaller spec (UPX trips AV heuristics); dead
+  `yaml` hidden import removed; releases documented as unsigned with
+  SHA256SUMS verification until code signing is configured (see SECURITY.md).
+- L-2: removed the misleading "QueueHandler" comment in the logger — handlers
+  are direct (thread-safe via stdlib locking), and the docs now say so.
+- L-3: `hash_password_secure()` now uses PBKDF2-HMAC-SHA256 (600k iterations)
+  instead of single-round SHA-256 (still unused by the app).
+- L-4: progress panel `reset()` stops the indeterminate bar animation.
+- L-5: worker completion callbacks are guarded against GUI teardown
+  (`_safe_after`, TclError-safe `after`, no double `on_complete` in
+  `AsyncWorker`).
+- L-6: service stop now polls `QueryServiceStatus` until STOPPED (15s) and
+  reports the observed state instead of fire-and-forget.
+- L-7: `cleanmgr` failures (return code + stderr) are logged before the DISM
+  fallback instead of being swallowed.
+- L-8: removed dead spec metadata; version strings unified on 1.0.2.
+- L-9: Pip-Boy mode exits via header click; click counter resets on entry.
+
 ### Changed — GUI design overhaul
 - New single design system (`source/gui/theme.py`): one dark palette, one
   spacing scale, shared `Card`, `Badge`, and `ToggleSwitch` primitives, plus

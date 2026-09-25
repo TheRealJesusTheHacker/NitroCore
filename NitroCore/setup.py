@@ -32,11 +32,11 @@ setup(
     name="nitrocore-optimizer",
     version=VERSION,
     author="NitroCore Team",
-    author_email="support@nitrocore.io",
+    author_email="sentinelsafeguard@outlook.com",
     description="Professional, thread-safe Windows system optimization utility framework.",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    url="https://github.com/your-username/NitroCore",
+    url="https://github.com/TheRealJesusTheHacker/NitroCore",
     license="MIT",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -53,9 +53,11 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    # Automatically tells setuptools that all source logic is nested neatly inside 'src/'
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    # Automatically tells setuptools that all source logic lives in 'source/'
+    # (M-5: was incorrectly pointed at a nonexistent 'src/' layout, which
+    # built empty packages)
+    packages=find_packages(where="source"),
+    package_dir={"": "source"},
     
     # Bundle core manifest text parameters alongside binary wheels
     package_data={
@@ -66,7 +68,7 @@ setup(
     python_requires=">=3.8",
     keywords=["windows", "optimizer", "performance", "cleanup", "registry", "services"],
     project_urls={
-        "GitHub": "https://github.com/your-username/NitroCore",
-        "Bug Reports": "https://github.com/your-username/NitroCore/issues",
+        "GitHub": "https://github.com/TheRealJesusTheHacker/NitroCore",
+        "Bug Reports": "https://github.com/TheRealJesusTheHacker/NitroCore/issues",
     },
 )

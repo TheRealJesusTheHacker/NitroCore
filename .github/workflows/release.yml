@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r NitroCore/requirements.txt
-          pip install pyinstaller
+          pip install pyinstaller==6.11.1
       - name: Build with PyInstaller
         run: |
           cd NitroCore

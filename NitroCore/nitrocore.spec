@@ -9,7 +9,7 @@ a = Analysis(
     datas=[
         ('assets/icon.ico', 'assets'),
     ],
-    hiddenimports=['yaml', 'psutil', 'win32service', 'win32serviceutil', 'pywintypes'],
+    hiddenimports=['psutil', 'win32service', 'win32serviceutil', 'pywintypes'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -32,13 +32,20 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    # M-7: UPX packing disabled — UPX is a known AV-heuristic trigger and can
+    # break PyInstaller onefile binaries. Slightly larger exe, far fewer
+    # false positives.
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
+    # M-7: no code signature yet. Releases are verified via the published
+    # SHA256SUMS.txt. Signing (even an OV cert) is a manual release step —
+    # see SECURITY.md "Release signing". Until then, SmartScreen will warn
+    # on first run; that is expected.
     codesign_identity=None,
     entitlements_file=None,
     icon='assets/icon.ico',

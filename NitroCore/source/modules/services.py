@@ -5,9 +5,20 @@ except ImportError:  # Non-Windows platform: service methods degrade gracefully
     win32service = None
     pywintypes = None
 
+import time
+
 from source.utils.config import Config
 from source.utils.preview import preview
 from source.utils.profiles import GAMING
+
+# Services whose startup change degrades OS security patching. Users must be
+# told explicitly what they're trading away (M-2).
+_SECURITY_SENSITIVE_SERVICES = ("wuauserv", "BITS")
+_SECURITY_WARNING = (
+    "SECURITY NOTE: Windows Update (wuauserv) and BITS were set to Manual — "
+    "security patches will NOT install automatically until you re-enable them "
+    "(Services app -> Windows Update -> Automatic)."
+)
 
 class ServiceManager:
     def __init__(self):
@@ -80,6 +91,8 @@ class ServiceManager:
                     f"Would stop service '{service_name}'{current} "
                     f"and set its startup type to Manual"
                 )
+            if any(s in _SECURITY_SENSITIVE_SERVICES for s in service_names):
+                preview.record(_SECURITY_WARNING)
             return (
                 f"Services: would stop and reconfigure {len(service_names)} "
                 f"service(s), 0 changed (preview)"
@@ -99,6 +112,8 @@ class ServiceManager:
                 results.append(f"{service_name}: {stop_res} | Config: {config_res}")
         finally:
             win32service.CloseServiceHandle(scm_handle)
+        if any(s in _SECURITY_SENSITIVE_SERVICES for s in service_names):
+            results.append(_SECURITY_WARNING)
         return "\n".join(results)
 
     def _stop_service_safely(self, scm_handle, service_name):
@@ -113,13 +128,34 @@ class ServiceManager:
                 return "Already Stopped"
 
             win32service.ControlService(svc_handle, win32service.SERVICE_CONTROL_STOP)
+            # L-6: ControlService is fire-and-forget. Poll until the service
+            # actually reaches STOPPED (or a stop-pending timeout) so the
+            # reported result reflects reality.
+            stopped = self._wait_for_stop(svc_handle, timeout_s=15.0)
             win32service.CloseServiceHandle(svc_handle)
-            return "Stopped Successfully"
+            return "Stopped Successfully" if stopped else "Stop Requested (timed out waiting for STOPPED)"
 
         except pywintypes.error as e:
             if e.winerror == 1060:
                 return "Not Found on System"
             return f"Stop Failed ({e.strerror})"
+
+    @staticmethod
+    def _wait_for_stop(svc_handle, timeout_s: float = 15.0) -> bool:
+        """Poll QueryServiceStatus until SERVICE_STOPPED or timeout."""
+        deadline = time.monotonic() + timeout_s
+        while time.monotonic() < deadline:
+            try:
+                state = win32service.QueryServiceStatus(svc_handle)[1]
+            except Exception:
+                return False
+            if state == win32service.SERVICE_STOPPED:
+                return True
+            if state != win32service.SERVICE_STOP_PENDING:
+                # Service settled in a non-stopped state (e.g. paused).
+                return False
+            time.sleep(0.5)
+        return False
 
     def _set_service_startup_safely(self, scm_handle, service_name, startup_type):
         try:

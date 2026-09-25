@@ -4,6 +4,7 @@ import glob
 
 from source.utils.config import Config
 from source.utils.preview import preview
+from source.utils.helpers import is_reparse_point
 
 class TempFileCleaner:
     def __init__(self):
@@ -36,6 +37,10 @@ class TempFileCleaner:
                                 os.remove(entry.path)
                             files_deleted += 1
                             bytes_saved += file_size
+                        elif is_reparse_point(entry):
+                            # H-3: never recurse into junctions/symlinks — they
+                            # can point outside the tree being purged.
+                            continue
                         elif entry.is_dir(follow_symlinks=False):
                             # Recursively purge subdirectories
                             sub_files, sub_bytes = self._fast_dir_purge(entry.path, execute=execute)
