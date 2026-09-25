@@ -3,7 +3,7 @@
 All notable changes to NitroCore are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.1.0] - 2026-09-25
 
 ### Fixed — bug bounty security & safety fixes
 - H-1: the Pip-Boy "System Purge" button no longer runs the full destructive
