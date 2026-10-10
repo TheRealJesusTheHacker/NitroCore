@@ -16,7 +16,9 @@ class TempFileCleaner:
         
     def _fast_dir_purge(self, target_dir, execute=True):
         """
-        High-performance, non-recursive file and directory purger using os.scandir.
+        High-performance recursive file and directory purger using os.scandir.
+        Recurses into subdirectories but never into reparse points (symlinks /
+        NTFS junctions), which are skipped fail-closed.
         When execute=False, only scans (read-only) and counts what would be removed.
         Returns a tuple: (deleted_file_count, bytes_saved)
         """
