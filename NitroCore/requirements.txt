@@ -14,5 +14,3 @@ pywin32==310
 # Process metrics, memory telemetry, and CPU prioritization tracking
 psutil==7.0.0
 
-# Icon generation and tray support
-pillow==12.3.0
