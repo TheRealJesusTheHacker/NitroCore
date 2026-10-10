@@ -333,6 +333,15 @@ class NitroCoreApplication:
         def on_complete(_result):
             def ui():
                 self._pipboy_busy = False
+                # The pipeline may have switched the power plan; drop the
+                # cached value so the header re-queries instead of showing
+                # the stale plan for up to 120s.
+                try:
+                    from source.modules.system_stats import invalidate_all_power_plan_caches
+                except ImportError:
+                    pass
+                else:
+                    invalidate_all_power_plan_caches()
                 try:
                     if self._purge_btn is not None and self._purge_btn.winfo_exists():
                         self._purge_btn.set_enabled(True)
