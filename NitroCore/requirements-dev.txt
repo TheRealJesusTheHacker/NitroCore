@@ -17,6 +17,8 @@ setuptools>=68.0.0
 wheel>=0.41.0
 twine>=4.0.2
 
+# Dev-time asset generation (assets/create_icon.py; never shipped in the binary)
+pillow==12.3.0
+
 # Static Type Analysis Definitions
 types-setuptools>=68.0.0
-types-pyyaml>=6.0.12
