@@ -3,6 +3,23 @@
 All notable changes to NitroCore are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.2] - 2026-10-10
+
+### Security
+- Pillow bumped 11.0.0 → 12.3.0 (known CVEs in 11.0.0); moved to dev requirements (unused at runtime)
+- Removed the dead `wmic` fallback — zero `shell=True` calls remain repo-wide
+- Registry reads now close key handles in `finally` (no leak on failed reads)
+- Admin-denial and already-running exits now return code 1 instead of 0
+- Removed dead code: `tray.py` (undeclared pystray dependency), unused helpers
+- CI jobs pinned to least-privilege permissions; release actions pinned to commit SHAs
+- `python_requires` corrected to >=3.9 (codebase uses 3.9+ syntax)
+
+### Performance
+- `SHFILEOPSTRUCTW` ctypes struct hoisted to module level (was rebuilt per recycled file)
+- Disk usage cached 30 s instead of re-queried every 2 s tick
+- `FontEngine` skips font rebuild when the family is unchanged
+- Power-plan cache invalidation wired into pipeline completion
+
 ## [1.1.1] - 2026-09-25
 
 ### Fixed
