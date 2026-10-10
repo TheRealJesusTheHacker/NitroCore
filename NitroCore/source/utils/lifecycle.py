@@ -36,7 +36,7 @@ class LifecycleManager:
                     "NitroCore",
                     0x40,
                 )
-            sys.exit(0)
+            sys.exit(1)
 
     @staticmethod
     def register_emergency_cleanup(cleanup_callback: callable) -> None:
