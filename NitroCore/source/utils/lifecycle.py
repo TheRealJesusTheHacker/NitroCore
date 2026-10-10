@@ -4,7 +4,6 @@ and emergency OS handle cleanups.
 """
 
 import sys
-import atexit
 import ctypes
 from typing import Optional
 
@@ -37,11 +36,3 @@ class LifecycleManager:
                     0x40,
                 )
             sys.exit(1)
-
-    @staticmethod
-    def register_emergency_cleanup(cleanup_callback: callable) -> None:
-        """
-        Registers an emergency handler to safely release low-level 
-        system pointers if the app shuts down unexpectedly.
-        """
-        atexit.register(cleanup_callback)
