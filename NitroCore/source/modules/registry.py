@@ -53,9 +53,11 @@ class RegistryOptimizer:
             return None
         try:
             key = winreg.OpenKey(hive, sub_key, 0, winreg.KEY_READ)
-            value, _ = winreg.QueryValueEx(key, value_name)
-            winreg.CloseKey(key)
-            return value
+            try:
+                value, _ = winreg.QueryValueEx(key, value_name)
+                return value
+            finally:
+                winreg.CloseKey(key)
         except OSError:
             return None
     
@@ -65,9 +67,11 @@ class RegistryOptimizer:
             return None, None
         try:
             key = winreg.OpenKey(hive, sub_key, 0, winreg.KEY_READ)
-            value, value_type = winreg.QueryValueEx(key, value_name)
-            winreg.CloseKey(key)
-            return value, value_type
+            try:
+                value, value_type = winreg.QueryValueEx(key, value_name)
+                return value, value_type
+            finally:
+                winreg.CloseKey(key)
         except OSError:
             return None, None
 
