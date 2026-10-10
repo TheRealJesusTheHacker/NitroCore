@@ -9,8 +9,6 @@
 
 In plain terms: over time Windows collects junk files, runs background programs you don't need, and uses settings that favor battery life over speed. NitroCore cleans the junk, quiets the background noise, and flips the right switches — all from one simple dashboard. You don't need to know what the registry is. Just pick a profile, hit a button, and let it work.
 
-> ### Screenshots
-> _Screenshot placeholder — dashboard preview coming here._
 
 ---
 
