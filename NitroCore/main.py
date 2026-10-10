@@ -372,7 +372,7 @@ class NitroCoreApplication:
                 "Access Denied",
                 "NitroCore requires Administrative Privileges to modify system registries.",
             )
-            sys.exit(0)
+            sys.exit(1)
 
         LifecycleManager.enforce_single_instance()
 
