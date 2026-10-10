@@ -1,20 +1,22 @@
 """Hardware-accelerated typography profile manager for NitroCore graphics."""
 import tkinter.font as tkfont
-from typing import Dict
+from typing import Dict, Optional
 
 # UPDATED IMPORT: Pointing to 'source' instead of 'src'
 from source.utils.config import Config
 
 class FontEngine:
     _registry: Dict[str, tkfont.Font] = {}
+    _family: Optional[str] = None
 
     @classmethod
     def initialize(cls) -> None:
         """Compiles font strings directly into the active Tkinter rendering layer."""
-        if cls._registry:
-            cls._registry.clear()
-
         family = "Consolas" if Config.PI_BOY_MODE else "Segoe UI"
+        if cls._registry and cls._family == family:
+            return  # already built for this family — skip the rebuild
+        cls._registry.clear()
+        cls._family = family
 
         # Type scale — one family, clear hierarchy. Roles, not sizes, at call sites.
         cls._registry["display"] = tkfont.Font(family=family, size=18, weight="bold")
