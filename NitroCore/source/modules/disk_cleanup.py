@@ -8,6 +8,31 @@ from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
 from source.utils.preview import preview
 from source.utils.helpers import is_reparse_point
 
+import ctypes
+from ctypes import wintypes
+
+
+class _SHFILEOPSTRUCTW(ctypes.Structure):
+    """Built once at import; reused for every recycled file (perf)."""
+
+    _fields_ = [
+        ("hwnd", wintypes.HWND),
+        ("wFunc", wintypes.UINT),
+        ("pFrom", wintypes.LPCWSTR),
+        ("pTo", wintypes.LPCWSTR),
+        ("fFlags", wintypes.UINT),
+        ("fAnyOperationsAborted", wintypes.BOOL),
+        ("hNameMappings", wintypes.LPVOID),
+        ("lpszProgressTitle", wintypes.LPCWSTR),
+    ]
+
+
+_FO_DELETE = 3
+_FOF_ALLOWUNDO = 0x40
+_FOF_NOCONFIRMATION = 0x10
+_FOF_SILENT = 0x04
+_FOF_NOERRORUI = 0x400
+
 
 def _recycle_path_windows(path: str) -> bool:
     """
@@ -18,36 +43,17 @@ def _recycle_path_windows(path: str) -> bool:
     if not IS_WINDOWS:
         return False
     try:
-        import ctypes
-        from ctypes import wintypes
-
-        class SHFILEOPSTRUCTW(ctypes.Structure):
-            _fields_ = [
-                ("hwnd", wintypes.HWND),
-                ("wFunc", wintypes.UINT),
-                ("pFrom", wintypes.LPCWSTR),
-                ("pTo", wintypes.LPCWSTR),
-                ("fFlags", wintypes.UINT),
-                ("fAnyOperationsAborted", wintypes.BOOL),
-                ("hNameMappings", wintypes.LPVOID),
-                ("lpszProgressTitle", wintypes.LPCWSTR),
-            ]
-
-        FO_DELETE = 3
-        FOF_ALLOWUNDO = 0x40
-        FOF_NOCONFIRMATION = 0x10
-        FOF_SILENT = 0x04
-        FOF_NOERRORUI = 0x400
-
         # pFrom must be double-null-terminated; create_unicode_buffer adds
         # the final null on top of the explicit one.
         from_buf = ctypes.create_unicode_buffer(path + "\0")
-        op = SHFILEOPSTRUCTW()
+        op = _SHFILEOPSTRUCTW()
         op.hwnd = None
-        op.wFunc = FO_DELETE
+        op.wFunc = _FO_DELETE
         op.pFrom = ctypes.cast(from_buf, wintypes.LPCWSTR)
         op.pTo = None
-        op.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT | FOF_NOERRORUI
+        op.fFlags = (
+            _FOF_ALLOWUNDO | _FOF_NOCONFIRMATION | _FOF_SILENT | _FOF_NOERRORUI
+        )
 
         rc = ctypes.windll.shell32.SHFileOperationW(ctypes.byref(op))
         return rc == 0 and not op.fAnyOperationsAborted
