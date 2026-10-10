@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import time
+import weakref
 from typing import Dict, Optional
 
 import psutil
@@ -23,12 +24,18 @@ _POWER_PLAN_TTL_SECONDS = 120.0
 # Disk free space barely moves on a 2s poll cadence; cache the syscall result.
 _DISK_USAGE_TTL_SECONDS = 30.0
 
+# Live SystemStats instances. The optimization pipeline calls
+# invalidate_all_power_plan_caches() when it changes the power plan so the
+# header re-queries instead of showing the stale plan for up to 120s.
+_INSTANCES = weakref.WeakSet()
+
 
 class SystemStats:
     """Collects CPU, memory, disk, and power plan metrics."""
 
     def __init__(self):
         psutil.cpu_percent(interval=None)
+        _INSTANCES.add(self)
         self._power_plan_cache: Optional[str] = None
         self._power_plan_cached_at: float = 0.0
         self._disk_cache: Optional[str] = None
@@ -101,3 +108,9 @@ class SystemStats:
             return "Unknown"
         except Exception:
             return "Unknown"
+
+
+def invalidate_all_power_plan_caches() -> None:
+    """Force every live SystemStats instance to re-query the power plan on next poll."""
+    for instance in list(_INSTANCES):
+        instance.invalidate_power_plan_cache()
