@@ -65,7 +65,7 @@ setup(
     },
     include_package_data=True,
     install_requires=INSTALL_REQUIRES,
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     keywords=["windows", "optimizer", "performance", "cleanup", "registry", "services"],
     project_urls={
         "GitHub": "https://github.com/TheRealJesusTheHacker/NitroCore",
