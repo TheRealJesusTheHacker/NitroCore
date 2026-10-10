@@ -23,13 +23,15 @@ In plain terms: over time Windows collects junk files, runs background programs 
 - **📊 Live stats header** — CPU, RAM, disk, and power plan at a glance.
 - **🛟 Restore-point safety net** — offers to create a Windows restore point before anything risky.
 - **👁️ Preview mode** — see every change NitroCore *would* make before it makes any of them. Nothing happens in secret.
-- **🔐 Verified downloads** — every release ships SHA256 hashes so you can confirm your `.exe` is legit.
+- **🔐 Verified downloads** — every release ships SHA256 hashes plus a signed build-provenance attestation, so you can confirm your `.exe` is legit *and* was built from this repo's code.
 - **📝 Full operation logs** — every action is logged on screen and saved to `%APPDATA%\NitroCore\logs`.
 - **🥚 Hidden Fallout mode** — click the title 7 times. You'll see.
 
 ---
 
 ## 📥 Installation
+
+> **winget:** submitted to the Windows Package Manager — `winget install TheRealJesusTheHacker.NitroCore` goes live once Microsoft finishes review.
 
 ### Option A — Ready-to-run .exe (easiest)
 
@@ -122,7 +124,7 @@ Windows 10 and 11, 64-bit.
 Boot into System Restore and roll back to the restore point NitroCore offered to create. That's exactly what it's for.
 
 **My antivirus flagged it. Is it a virus?**
-No. Optimizers that edit the registry and manage services trip heuristic scanners all the time. NitroCore is open source — every line is right here for you (or anyone) to read. To be sure your download is genuine, check its SHA256 hash against the `SHA256SUMS.txt` published with each release. A code-signing certificate (which removes the "unknown publisher" warning) is on the roadmap.
+No. Optimizers that edit the registry and manage services trip heuristic scanners all the time. NitroCore is open source — every line is right here for you (or anyone) to read. To be sure your download is genuine, check its SHA256 hash against the `SHA256SUMS.txt` published with each release — and check the signed build-provenance attestation on the release page to confirm it was built from this repo. A code-signing certificate (which removes the "unknown publisher" warning) is on the roadmap.
 
 **Does it phone home or collect data?**
 No. Everything runs locally on your machine. Logs stay on your disk.
