@@ -20,6 +20,9 @@ _POWER_PLAN_NAMES = {
 # Power plan changes rarely; cache it instead of spawning powercfg on every poll.
 _POWER_PLAN_TTL_SECONDS = 120.0
 
+# Disk free space barely moves on a 2s poll cadence; cache the syscall result.
+_DISK_USAGE_TTL_SECONDS = 30.0
+
 
 class SystemStats:
     """Collects CPU, memory, disk, and power plan metrics."""
@@ -28,6 +31,8 @@ class SystemStats:
         psutil.cpu_percent(interval=None)
         self._power_plan_cache: Optional[str] = None
         self._power_plan_cached_at: float = 0.0
+        self._disk_cache: Optional[str] = None
+        self._disk_cached_at: float = 0.0
 
     def snapshot(self) -> Dict[str, str]:
         cpu = psutil.cpu_percent(interval=None)
@@ -44,11 +49,19 @@ class SystemStats:
         }
 
     def _primary_disk_free_gb(self) -> str:
+        now = time.monotonic()
+        if self._disk_cache is not None and now - self._disk_cached_at < _DISK_USAGE_TTL_SECONDS:
+            return self._disk_cache
         try:
             usage = psutil.disk_usage(os.environ.get("SystemDrive", "C:") + "\\")
-            return f"{usage.free // (1024 ** 3)} GB free on {os.environ.get('SystemDrive', 'C:')}"
+            self._disk_cache = (
+                f"{usage.free // (1024 ** 3)} GB free on "
+                f"{os.environ.get('SystemDrive', 'C:')}"
+            )
         except Exception:
-            return "N/A"
+            self._disk_cache = "N/A"
+        self._disk_cached_at = now
+        return self._disk_cache
 
     def _active_power_plan(self) -> str:
         now = time.monotonic()
