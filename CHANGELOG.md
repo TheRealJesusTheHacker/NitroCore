@@ -5,6 +5,18 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+### Security
+- Registry undo restore now refuses any snapshot entry outside HKCU — a
+  planted `%APPDATA%\NitroCore\registry_undo\undo-*.json` can never turn this
+  elevated process into a registry writer in another hive (every snapshot the
+  app writes is HKCU)
+- Helper executables (`powershell`, `powercfg`, `cleanmgr`, `dism`) are now
+  resolved via `%SystemRoot%\System32` instead of PATH (`system_tool_path()`),
+  so a PATH-hijacked binary can never be picked up with admin rights
+- Build and dev dependencies fully pinned (`setuptools==75.8.2` in
+  `pyproject.toml`; exact pins across `requirements.txt` /
+  `requirements-dev.txt`) for reproducible privileged builds
+
 ### Added
 - First pytest suite (`NitroCore/tests/`, 90+ tests): profiles/pipeline logic,
   preview recorder, CLI parsing, reparse-point fail-closed gate, registry
@@ -31,6 +43,10 @@ All notable changes to NitroCore are documented here. The format is based on
 - Run All pipeline now invalidates the cached power-plan reading on
   completion, so the header can't show a stale plan for up to 120 s (the
   Pip-Boy purge path already did this)
+- Service Manager: service handles are now released in `finally`, fixing a
+  handle leak when a query/control call raised after the handle was opened
+- Restore-point PowerShell call now runs with `-NonInteractive`, matching the
+  pagefile optimization call site
 
 ### Changed
 - Whole codebase formatted with black and ruff --fix (whitespace, import
