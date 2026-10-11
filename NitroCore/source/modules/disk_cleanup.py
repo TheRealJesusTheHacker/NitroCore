@@ -33,6 +33,27 @@ _FOF_SILENT = 0x04
 _FOF_NOERRORUI = 0x400
 
 
+def _decode_console_output(data: bytes) -> str:
+    """
+    Decode captured bytes from a Windows console tool (cleanmgr, DISM).
+
+    Console output uses the OEM code page (e.g. cp437/cp850), not UTF-8:
+    decoding with the default UTF-8 + errors="ignore" silently drops
+    non-ASCII bytes, which garbles error messages on non-English Windows
+    or when paths contain non-ASCII characters. Query the real OEM code
+    page on Windows; fall back to UTF-8 elsewhere.
+    """
+    if not data:
+        return ""
+    encoding = "utf-8"
+    if IS_WINDOWS:
+        try:
+            encoding = f"cp{ctypes.windll.kernel32.GetOEMCP()}"
+        except Exception:
+            pass
+    return data.decode(encoding, errors="replace")
+
+
 def _recycle_path_windows(path: str) -> bool:
     """
     Move a file or folder to the Recycle Bin via SHFileOperationW
@@ -116,7 +137,7 @@ class DiskCleanup:
             # L-7: record WHY cleanmgr failed before falling through to DISM.
             cleanmgr_note = (
                 f"cleanmgr exited with code {proc.returncode}: "
-                f"{proc.stderr.decode(errors='ignore').strip() or 'no error output'}"
+                f"{_decode_console_output(proc.stderr).strip() or 'no error output'}"
             )
         except subprocess.TimeoutExpired:
             return "Windows Native Cleanup timed out (System spent too long compressing old updates)"
@@ -140,7 +161,7 @@ class DiskCleanup:
                 return (
                     f"DISM component cleanup completed successfully ({cleanmgr_note})"
                 )
-            stderr = proc.stderr.decode(errors="ignore").strip()
+            stderr = _decode_console_output(proc.stderr).strip()
             return (
                 f"System cleanup failed: {stderr or 'Unknown error'} ({cleanmgr_note})"
             )
