@@ -129,9 +129,13 @@ class ServiceManager:
                 service_name,
                 win32service.SERVICE_QUERY_STATUS | win32service.SERVICE_STOP,
             )
+        except pywintypes.error as e:
+            if e.winerror == 1060:
+                return "Not Found on System"
+            return f"Stop Failed ({e.strerror})"
+        try:
             status = win32service.QueryServiceStatus(svc_handle)
             if status[1] == win32service.SERVICE_STOPPED:
-                win32service.CloseServiceHandle(svc_handle)
                 return "Already Stopped"
 
             win32service.ControlService(svc_handle, win32service.SERVICE_CONTROL_STOP)
@@ -139,17 +143,20 @@ class ServiceManager:
             # actually reaches STOPPED (or a stop-pending timeout) so the
             # reported result reflects reality.
             stopped = self._wait_for_stop(svc_handle, timeout_s=15.0)
-            win32service.CloseServiceHandle(svc_handle)
             return (
                 "Stopped Successfully"
                 if stopped
                 else "Stop Requested (timed out waiting for STOPPED)"
             )
-
         except pywintypes.error as e:
             if e.winerror == 1060:
                 return "Not Found on System"
             return f"Stop Failed ({e.strerror})"
+        finally:
+            # W-4 (audit 2026-10-11): every OpenService success path must
+            # release its handle — QueryServiceStatus/ControlService can
+            # raise after the handle is open, which previously leaked it.
+            win32service.CloseServiceHandle(svc_handle)
 
     @staticmethod
     def _wait_for_stop(svc_handle, timeout_s: float = 15.0) -> bool:
