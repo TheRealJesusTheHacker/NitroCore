@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest an idea for NitroCore
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Who hits this problem, and what do they do today without the feature?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What should NitroCore do?
+      description: Describe the behavior you want. Mockups or examples help.
+    validations:
+      required: true
+  - type: dropdown
+    id: profile
+    attributes:
+      label: Which profile does this belong to?
+      options:
+        - Both
+        - Gaming
+        - Cybersecurity
+        - Not profile-specific
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety considerations
+      description: >
+        NitroCore changes real system settings. Does this idea need a restore
+        point, a preview-mode entry, an undo path, or a confirmation dialog?
+        If you're not sure, say so — we'll figure it out.
