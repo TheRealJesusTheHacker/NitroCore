@@ -2,7 +2,7 @@ import subprocess
 
 import psutil
 from source.utils.config import Config
-from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
+from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs, system_tool_path
 from source.utils.preview import preview
 
 
@@ -59,7 +59,7 @@ class PerformanceTuner:
         """Best-effort read of the active power scheme name (safe; used for previews)."""
         try:
             result = subprocess.run(
-                ["powercfg", "/getactivescheme"],
+                [system_tool_path("powercfg"), "/getactivescheme"],
                 capture_output=True,
                 text=True,
                 timeout=15,
@@ -79,7 +79,7 @@ class PerformanceTuner:
         don't clone a duplicate scheme on every click."""
         try:
             result = subprocess.run(
-                ["powercfg", "/l"],
+                [system_tool_path("powercfg"), "/l"],
                 capture_output=True,
                 text=True,
                 timeout=15,
@@ -111,12 +111,16 @@ class PerformanceTuner:
             # duplicatescheme always creates a NEW entry (M-3).
             if not self._ultimate_scheme_present():
                 subprocess.run(
-                    ["powercfg", "-duplicatescheme", self.ultimate_perf_guid],
+                    [
+                        system_tool_path("powercfg"),
+                        "-duplicatescheme",
+                        self.ultimate_perf_guid,
+                    ],
                     **run_kwargs,
                 )
 
             subprocess.run(
-                ["powercfg", "/s", self.ultimate_perf_guid],
+                [system_tool_path("powercfg"), "/s", self.ultimate_perf_guid],
                 check=True,
                 **run_kwargs,
             )
@@ -125,7 +129,7 @@ class PerformanceTuner:
         except subprocess.CalledProcessError:
             try:
                 subprocess.run(
-                    ["powercfg", "/s", self.high_perf_guid],
+                    [system_tool_path("powercfg"), "/s", self.high_perf_guid],
                     check=True,
                     **run_kwargs,
                 )

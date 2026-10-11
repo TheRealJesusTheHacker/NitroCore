@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import psutil
 from source.utils.config import Config
 from source.utils.helpers import is_reparse_point
-from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
+from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs, system_tool_path
 from source.utils.preview import preview
 
 
@@ -107,7 +107,7 @@ class DiskCleanup:
         }
         try:
             proc = subprocess.run(
-                ["cleanmgr", "/verylowdisk"],
+                [system_tool_path("cleanmgr"), "/verylowdisk"],
                 timeout=300,
                 **run_kwargs,
             )
@@ -127,7 +127,12 @@ class DiskCleanup:
 
         try:
             proc = subprocess.run(
-                ["dism", "/Online", "/Cleanup-Image", "/StartComponentCleanup"],
+                [
+                    system_tool_path("dism"),
+                    "/Online",
+                    "/Cleanup-Image",
+                    "/StartComponentCleanup",
+                ],
                 timeout=600,
                 **run_kwargs,
             )

@@ -3,7 +3,7 @@
 import subprocess
 
 from source.utils.config import Config
-from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
+from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs, system_tool_path
 
 
 def create_restore_point(
@@ -27,7 +27,16 @@ def create_restore_point(
     )
     try:
         result = subprocess.run(
-            ["powershell", "-NoProfile", "-Command", script],
+            # S-2 (audit 2026-10-11): resolve via System32, not PATH — this
+            # process runs elevated. -NonInteractive added for parity with the
+            # other PowerShell call site (pagefile optimization).
+            [
+                system_tool_path("powershell"),
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                script,
+            ],
             capture_output=True,
             text=True,
             timeout=180,

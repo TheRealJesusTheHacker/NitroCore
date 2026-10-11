@@ -8,7 +8,7 @@ import weakref
 from typing import Dict, Optional
 
 import psutil
-from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
+from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs, system_tool_path
 
 _POWER_PLAN_NAMES = {
     "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c": "High Performance",
@@ -93,7 +93,7 @@ class SystemStats:
             return "N/A"
         try:
             result = subprocess.run(
-                ["powercfg", "/getactivescheme"],
+                [system_tool_path("powercfg"), "/getactivescheme"],
                 capture_output=True,
                 text=True,
                 timeout=5,
