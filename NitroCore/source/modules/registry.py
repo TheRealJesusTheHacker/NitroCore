@@ -4,7 +4,7 @@ import subprocess
 from datetime import datetime
 
 from source.utils.config import Config
-from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
+from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs, system_tool_path
 from source.utils.preview import preview
 
 try:
@@ -102,7 +102,7 @@ class RegistryOptimizer:
         """Persist this run's pre-change snapshots as a timestamped undo file."""
         if not self._undo_entries:
             return None
-        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
         undo_file = os.path.join(self._undo_dir(), f"undo-{stamp}.json")
         payload = {
             "created": stamp,
@@ -149,7 +149,15 @@ class RegistryOptimizer:
         restored, failed = 0, 0
         hive_by_name = {v: k for k, v in _HIVE_NAMES.items()}
         for entry in payload.get("entries", []):
-            hive = hive_by_name.get(entry.get("hive"))
+            # S-1 (audit 2026-10-11): undo files live under %APPDATA%, which is
+            # user-writable. A planted undo-*.json must never turn this
+            # elevated process into a registry writer outside HKCU. Every
+            # snapshot this app writes is HKCU, so entries naming any other
+            # hive are refused outright.
+            if entry.get("hive") != "HKCU":
+                failed += 1
+                continue
+            hive = hive_by_name["HKCU"]
             if hive is None:
                 failed += 1
                 continue
@@ -230,7 +238,7 @@ class RegistryOptimizer:
             return "Hibernation: would be disabled (preview)"
         try:
             subprocess.run(
-                ["powercfg", "/hibernate", "off"],
+                [system_tool_path("powercfg"), "/hibernate", "off"],
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -260,7 +268,9 @@ class RegistryOptimizer:
         try:
             subprocess.run(
                 [
-                    "powershell",
+                    # S-2 (audit 2026-10-11): resolve via System32, not PATH —
+                    # this process runs elevated.
+                    system_tool_path("powershell"),
                     "-NoProfile",
                     "-NonInteractive",
                     "-Command",
