@@ -37,3 +37,34 @@ jobs:
         run: pip install -r NitroCore/requirements.txt
       - name: Byte-compile every module
         run: python -m compileall -q NitroCore
+
+  tests:
+    name: Tests (pytest, ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        # requirements-dev.txt is Linux-safe: it does NOT pull in
+        # requirements.txt (pywin32 has no Linux wheels). The suite only
+        # exercises non-mutating logic and dry-run paths.
+        run: pip install -r NitroCore/requirements-dev.txt
+      - name: Run pytest
+        run: python -m pytest NitroCore/tests -v
+
+  lint:
+    name: Lint & format (ruff + black)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Install linters
+        run: pip install -r NitroCore/requirements-dev.txt
+      - name: Ruff check
+        run: ruff check NitroCore
+      - name: Black format check
+        run: black --check NitroCore

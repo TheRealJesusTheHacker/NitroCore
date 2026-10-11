@@ -1,7 +1,15 @@
 # ====================================================================
 # NitroCore - Developer & Testing Tooling Only
 # ====================================================================
--r requirements.txt
+# NOTE: this file intentionally does NOT `-r requirements.txt`. The
+# production requirements pin pywin32, which ships no Linux/macOS wheels,
+# and the pytest suite + linters run on ubuntu CI. The only runtime dep the
+# tests need is psutil (pinned to mirror requirements.txt). On a Windows
+# dev machine, install BOTH files:
+#   pip install -r requirements.txt -r requirements-dev.txt
+
+# Runtime dep needed by the test suite (mirrors requirements.txt pin)
+psutil==7.0.0
 
 # Testing & Metrics Frameworks
 pytest>=7.4.0
@@ -10,6 +18,7 @@ coverage>=7.3.0
 
 # Code Quality & Format Linter Engines
 black>=23.9.0
+ruff>=0.7.0
 flake8>=6.1.0
 
 # Packaging & Distribution Pipelines
