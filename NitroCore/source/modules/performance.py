@@ -45,7 +45,7 @@ class PerformanceTuner:
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 continue
 
-        return f"Process Tuning: Adjusted {adjusted_count} system components to High Responsiveness"
+        return f"Process Tuning: Adjusted {adjusted_count} system components to Above Normal priority"
 
     def _current_power_scheme(self):
         """Best-effort read of the active power scheme name (safe; used for previews)."""
