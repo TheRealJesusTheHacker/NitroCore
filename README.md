@@ -54,7 +54,7 @@ In dry-run mode every mutating module records a human-readable *"would do"* entr
 
 ### 🛟 Restore-point safety net
 
-Before high-impact steps, NitroCore offers to create a system restore point via PowerShell `Checkpoint-Computer` (`-RestorePointType MODIFY_SETTINGS`). If creation fails, the run **blocks** with a dialog: *Retry / Continue Without It / Abort* — it never silently proceeds without the safety net.
+Before high-impact steps, NitroCore offers to create a system restore point via PowerShell `Checkpoint-Computer` (`-RestorePointType MODIFY_SETTINGS`, run with `-NoProfile -NonInteractive`). If creation fails, the run **blocks** with a dialog: *Try Again / Continue Without It / Abort* — it never silently proceeds without the safety net.
 
 ### 🖥️ Command-line usage
 
