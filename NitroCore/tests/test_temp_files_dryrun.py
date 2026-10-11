@@ -47,6 +47,20 @@ def test_fast_dir_purge_never_follows_symlinks(tmp_path):
     assert files == 1  # the loop symlink is skipped, so no infinite recursion
 
 
+def test_fast_dir_purge_survives_pathological_depth(tmp_path):
+    # A tree nested deeper than the interpreter recursion limit must not
+    # kill the whole cleanup step: the deep subtree is skipped and the
+    # rest of the tree is still counted.
+    deep = tmp_path
+    for _ in range(1200):
+        deep = deep / "d"
+        deep.mkdir()
+    (tmp_path / "top.txt").write_bytes(b"z")
+    files, freed = TempFileCleaner()._fast_dir_purge(str(tmp_path), execute=False)
+    assert (files, freed) == (1, 1)
+    assert (tmp_path / "top.txt").exists()  # scan mode deleted nothing
+
+
 def test_clean_temp_directories_dry_run_reports_and_records(monkeypatch, tmp_path):
     _build_tree(tmp_path)
     monkeypatch.setattr(Config, "DRY_RUN", True, raising=False)

@@ -74,6 +74,30 @@ def test_clean_downloads_dry_run_counts_old_files_only(monkeypatch, tmp_path):
     assert "30 days" in entries[0]
 
 
+def test_clean_downloads_dry_run_survives_pathological_depth(monkeypatch, tmp_path):
+    # Same guarantee as _fast_dir_purge: a pathologically deep Downloads
+    # subtree is skipped instead of failing the whole cleanup run.
+    downloads = tmp_path / "Downloads"
+    downloads.mkdir()
+    deep = downloads
+    for _ in range(1200):
+        deep = deep / "d"
+        deep.mkdir()
+    old = downloads / "old-setup.exe"
+    old.write_bytes(b"0" * 64)
+    ancient = time.time() - 60 * 86400
+    os.utime(old, (ancient, ancient))
+
+    _point_downloads_at(monkeypatch, downloads)
+    monkeypatch.setattr(Config, "DRY_RUN", True, raising=False)
+    preview.start()
+
+    result = DiskCleanup().clean_downloads(retention_days=30)
+
+    assert "Would move 1 files" in result
+    assert old.exists()  # dry run: nothing recycled
+
+
 def test_clean_downloads_dry_run_keeps_everything_when_all_recent(
     monkeypatch, tmp_path
 ):
