@@ -8,7 +8,8 @@ from source.utils.preview import preview
 
 class TempFileCleaner:
     def __init__(self):
-        # De-duplicating folders (%TEMP% and %LOCALAPPDATA%\Temp are usually identical)
+        # De-duplicating the two canonical temp locations (%TEMP% and
+        # %SYSTEMROOT%\Temp).
         self.paths_to_clean = list(
             set(
                 [
