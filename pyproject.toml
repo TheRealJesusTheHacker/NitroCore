@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools>=68"]
+# S-3 (audit 2026-10-11): pinned — unpinned build deps drift the sdist/wheel.
+requires = ["setuptools==75.8.2"]
 build-backend = "setuptools.build_meta"
 
 [project]

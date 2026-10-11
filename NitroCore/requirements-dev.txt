@@ -12,22 +12,26 @@
 psutil==7.0.0
 
 # Testing & Metrics Frameworks
-pytest>=7.4.0
-pytest-cov>=4.1.0
-coverage>=7.3.0
+# S-3 (audit 2026-10-11): exact pins (no >= ranges), same as requirements.txt.
+# All pins support Python >=3.9 (the project's requires-python floor).
+# pytest-cov==6.2.1 verified against PyPI (2026-10-11); the rest are
+# long-standing stable releases with unchanged 3.9 compatibility.
+pytest==8.3.5
+pytest-cov==6.2.1
+coverage==7.10.6
 
 # Code Quality & Format Linter Engines
-black>=23.9.0
-ruff>=0.7.0
-flake8>=6.1.0
+black==25.1.0
+ruff==0.9.10
+flake8==7.1.2
 
 # Packaging & Distribution Pipelines
-setuptools>=68.0.0
-wheel>=0.41.0
-twine>=4.0.2
+setuptools==75.8.2
+wheel==0.45.1
+twine==6.1.0
 
 # Dev-time asset generation (assets/create_icon.py; never shipped in the binary)
 pillow==12.3.0
 
 # Static Type Analysis Definitions
-types-setuptools>=68.0.0
+types-setuptools==75.8.0.20250110
