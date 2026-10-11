@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "NitroCore"
+version = "1.1.2"
+description = "Windows system optimizer — one-click Gaming & Cybersecurity tuning profiles, cleanup, and restore-point safety."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+authors = [{ name = "JesusTheHacker" }]
+keywords = ["windows", "system-optimizer", "gaming", "cybersecurity", "python"]
+
+[tool.pytest.ini_options]
+testpaths = ["NitroCore/tests"]
+markers = [
+    "windows_only: requires a Windows runner (registry, services, powercfg paths)",
+]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+
+[tool.ruff.lint]
+# E501 (line length) is black's job — ruff leaves long strings/comments alone
+# so formatting stays a single tool's responsibility.
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
