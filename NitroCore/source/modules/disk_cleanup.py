@@ -206,7 +206,14 @@ class DiskCleanup:
                                             os.rmdir(entry.path)
                                     except OSError:
                                         pass
-                        except (PermissionError, FileNotFoundError, OSError):
+                        except (
+                            PermissionError,
+                            FileNotFoundError,
+                            OSError,
+                            RecursionError,
+                        ):
+                            # RecursionError: pathologically deep trees skip
+                            # that subtree instead of failing the whole run.
                             continue
             except PermissionError:
                 pass

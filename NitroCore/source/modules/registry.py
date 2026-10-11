@@ -121,9 +121,16 @@ class RegistryOptimizer:
         try:
             with open(undo_file, "w", encoding="utf-8") as fh:
                 json.dump(payload, fh, indent=2)
-            return undo_file
         except OSError:
+            # Write failed: keep the in-memory snapshots so a later run can
+            # still persist them. Entries are only dropped once safely on disk.
             return None
+        # The snapshots are durable now — drop the in-memory copies so the
+        # next run starts fresh. Without this, repeated runs accumulate stale
+        # snapshots and a later "undo" could revert to values from an earlier
+        # run instead of the run being undone.
+        self._undo_entries = []
+        return undo_file
 
     def restore_last_undo(self) -> str:
         """Restore registry values from the most recent undo file (one-click undo)."""

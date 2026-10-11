@@ -58,10 +58,13 @@ class TempFileCleaner:
                             if execute:
                                 # Attempt to clean up the directory shell if it's now empty
                                 os.rmdir(entry.path)
-                    except OSError:
+                    except (OSError, RecursionError):
                         # Skip locked files, in-use logs, and non-empty dirs
                         # (e.g. rmdir on a folder that still holds skipped files)
                         # without failing the whole cleanup run.
+                        # RecursionError: pathologically deep trees (deeper
+                        # than the interpreter limit) skip that subtree instead
+                        # of killing the entire cleanup step.
                         continue
         except OSError:
             pass

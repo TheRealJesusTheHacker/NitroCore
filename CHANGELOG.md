@@ -21,6 +21,17 @@ All notable changes to NitroCore are documented here. The format is based on
 - README rewritten with full per-tab feature rundown, architecture notes,
   Preview Mode docs, verification guide, roadmap, and a Donations section.
 
+### Fixed
+- Registry undo: snapshots are now cleared from memory once written to disk,
+  so repeated runs can't accumulate stale snapshots (a later "undo" could
+  previously revert values from an earlier run instead of the run being undone)
+- Temp/Downloads cleanup: pathologically deep directory trees (deeper than the
+  interpreter recursion limit) now skip that subtree instead of failing the
+  whole cleanup step with a `RecursionError`
+- Run All pipeline now invalidates the cached power-plan reading on
+  completion, so the header can't show a stale plan for up to 120 s (the
+  Pip-Boy purge path already did this)
+
 ### Changed
 - Whole codebase formatted with black and ruff --fix (whitespace, import
   order, two genuinely-unused imports removed). No behavior changes.

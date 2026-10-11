@@ -26,6 +26,7 @@ from source.modules.disk_cleanup import DiskCleanup
 from source.modules.performance import PerformanceTuner
 from source.modules.registry import RegistryOptimizer
 from source.modules.services import ServiceManager
+from source.modules.system_stats import invalidate_all_power_plan_caches
 from source.modules.temp_files import TempFileCleaner
 from source.utils.config import Config
 from source.utils.logger import Logger
@@ -825,6 +826,10 @@ class TabbedInterface:
                 def finish() -> None:
                     elapsed = time.time() - self._run_start_time
                     self._set_busy(False)
+                    # The pipeline may have switched the power plan; drop the
+                    # cached value so the header re-queries instead of showing
+                    # the stale plan for up to 120s (same as the Pip-Boy path).
+                    invalidate_all_power_plan_caches()
                     self._refresh_disk_usage()
                     summary = f"{self._steps_completed} modules · {elapsed:.1f}s" + (
                         f" · {self._mb_freed:.2f} MB freed" if self._mb_freed else ""
