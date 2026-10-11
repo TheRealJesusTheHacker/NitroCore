@@ -2,7 +2,8 @@
 
 import threading
 import traceback
-from typing import Callable, Any, Optional
+from typing import Any, Callable, Optional
+
 
 class AsyncWorker:
     """Dispatches background tasks safely without locking the primary GUI rendering thread."""

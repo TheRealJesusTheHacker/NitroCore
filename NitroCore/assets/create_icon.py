@@ -41,5 +41,7 @@ for size in SIZES:
 
     images.append(img)
 
-images[0].save(OUT, format="ICO", sizes=[(s, s) for s in SIZES], append_images=images[1:])
+images[0].save(
+    OUT, format="ICO", sizes=[(s, s) for s in SIZES], append_images=images[1:]
+)
 print(f"Created {OUT}")

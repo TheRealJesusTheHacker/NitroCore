@@ -1,5 +1,5 @@
-import os
 import json
+import os
 import subprocess
 from datetime import datetime
 
@@ -24,6 +24,7 @@ if winreg is not None:
         winreg.HKEY_CURRENT_CONFIG: "HKCC",
     }
 
+
 class RegistryOptimizer:
     # M-4: every registry write snapshots the previous value here first, so a
     # tweak can always be undone. Snapshots persist to a JSON undo file under
@@ -32,9 +33,9 @@ class RegistryOptimizer:
 
     def __init__(self):
         self.optimization_rules = {
-            'disable_hibernation': self._disable_hibernation,
-            'optimize_pagefile': self._optimize_pagefile,
-            'optimize_performance': self._optimize_performance
+            "disable_hibernation": self._disable_hibernation,
+            "optimize_pagefile": self._optimize_pagefile,
+            "optimize_performance": self._optimize_performance,
         }
         self._undo_entries = []
 
@@ -60,7 +61,7 @@ class RegistryOptimizer:
                 winreg.CloseKey(key)
         except OSError:
             return None
-    
+
     def _read_registry_value_full(self, hive, sub_key, value_name):
         """Best-effort read of (value, type); (None, None) when absent."""
         if winreg is None:
@@ -131,7 +132,8 @@ class RegistryOptimizer:
         undo_dir = self._undo_dir()
         try:
             files = sorted(
-                f for f in os.listdir(undo_dir)
+                f
+                for f in os.listdir(undo_dir)
                 if f.startswith("undo-") and f.endswith(".json")
             )
         except OSError:
@@ -152,10 +154,15 @@ class RegistryOptimizer:
                 failed += 1
                 continue
             try:
-                key = winreg.CreateKeyEx(hive, entry["sub_key"], 0, winreg.KEY_SET_VALUE)
+                key = winreg.CreateKeyEx(
+                    hive, entry["sub_key"], 0, winreg.KEY_SET_VALUE
+                )
                 if entry.get("existed"):
                     winreg.SetValueEx(
-                        key, entry["value_name"], 0, entry["old_type"],
+                        key,
+                        entry["value_name"],
+                        0,
+                        entry["old_type"],
                         self._deserialize_value(entry["old_value"]),
                     )
                 else:
@@ -194,14 +201,16 @@ class RegistryOptimizer:
             value_type = winreg.REG_DWORD
         # M-4: snapshot the pre-change value for the undo file.
         old_value, old_type = self._read_registry_value_full(hive, sub_key, value_name)
-        self._undo_entries.append({
-            "hive_name": _HIVE_NAMES.get(hive, str(hive)),
-            "sub_key": sub_key,
-            "value_name": value_name,
-            "old_value": old_value,
-            "old_type": old_type,
-            "existed": old_type is not None,
-        })
+        self._undo_entries.append(
+            {
+                "hive_name": _HIVE_NAMES.get(hive, str(hive)),
+                "sub_key": sub_key,
+                "value_name": value_name,
+                "old_value": old_value,
+                "old_type": old_type,
+                "existed": old_type is not None,
+            }
+        )
         try:
             # Open or create the key path with write permissions
             key = winreg.CreateKeyEx(hive, sub_key, 0, winreg.KEY_SET_VALUE)
@@ -251,7 +260,10 @@ class RegistryOptimizer:
         try:
             subprocess.run(
                 [
-                    "powershell", "-NoProfile", "-NonInteractive", "-Command",
+                    "powershell",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-Command",
                     "Get-CimInstance Win32_ComputerSystem | "
                     "Set-CimInstance -Property @{AutomaticManagedPagefile=$true}",
                 ],
@@ -264,48 +276,48 @@ class RegistryOptimizer:
             return "Pagefile configuration optimized to automatic management"
         except Exception as e:
             return f"Failed to optimize pagefile layout: {str(e)}"
-    
+
     def _optimize_performance(self):
         """Apply native Windows registry performance adjustments for low visual latency"""
         if winreg is None:
             return "Skipped: registry tweaks are Windows-only"
         success_count = 0
-        
+
         # Structure tweaks with explicit paths, names, values, and types
         tweaks = [
             # 1 = Adjust for best performance (disables heavy window animations, shadows, etc.)
             {
-                'hive': winreg.HKEY_CURRENT_USER,
-                'path': r"Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects",
-                'name': "VisualFXSetting",
-                'value': 1,
-                'type': winreg.REG_DWORD
+                "hive": winreg.HKEY_CURRENT_USER,
+                "path": r"Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects",
+                "name": "VisualFXSetting",
+                "value": 1,
+                "type": winreg.REG_DWORD,
             },
             # Disables menu fade animations to make window opening snappier
             {
-                'hive': winreg.HKEY_CURRENT_USER,
-                'path': r"Control Panel\Desktop",
-                'name': "UserPreferencesMask",
-                'value': b'\x90\x12\x03\x80\x10\x00\x00\x00', # Hex byte sequence for disabled effects
-                'type': winreg.REG_BINARY
+                "hive": winreg.HKEY_CURRENT_USER,
+                "path": r"Control Panel\Desktop",
+                "name": "UserPreferencesMask",
+                "value": b"\x90\x12\x03\x80\x10\x00\x00\x00",  # Hex byte sequence for disabled effects
+                "type": winreg.REG_BINARY,
             },
             # Lowering delay before menus hover/pop open (Default is 400ms, optimized to 10ms)
             {
-                'hive': winreg.HKEY_CURRENT_USER,
-                'path': r"Control Panel\Desktop",
-                'name': "MenuShowDelay",
-                'value': "10",
-                'type': winreg.REG_SZ
-            }
+                "hive": winreg.HKEY_CURRENT_USER,
+                "path": r"Control Panel\Desktop",
+                "name": "MenuShowDelay",
+                "value": "10",
+                "type": winreg.REG_SZ,
+            },
         ]
-        
+
         for tweak in tweaks:
             res = self._set_registry_value(
-                hive=tweak['hive'],
-                sub_key=tweak['path'],
-                value_name=tweak['name'],
-                value=tweak['value'],
-                value_type=tweak['type']
+                hive=tweak["hive"],
+                sub_key=tweak["path"],
+                value_name=tweak["name"],
+                value=tweak["value"],
+                value_type=tweak["type"],
             )
             if res:
                 success_count += 1
@@ -313,17 +325,21 @@ class RegistryOptimizer:
         if Config.DRY_RUN:
             return f"Would apply {success_count}/{len(tweaks)} performance registry tweaks (preview)"
         undo_file = self._write_undo_file()
-        undo_note = f" (previous values saved to {os.path.basename(undo_file)})" if undo_file else ""
+        undo_note = (
+            f" (previous values saved to {os.path.basename(undo_file)})"
+            if undo_file
+            else ""
+        )
         return f"Applied {success_count}/{len(tweaks)} performance registry tweaks{undo_note}"
-    
+
     def apply_all(self):
         """Apply all system optimizations and aggregate responses cleanly for the UI status log"""
         summary_reports = []
         for name, func in self.optimization_rules.items():
-            formatted_name = name.replace('_', ' ').title()
+            formatted_name = name.replace("_", " ").title()
             execution_result = func()
             summary_reports.append(f"{formatted_name}: {execution_result}")
-            
+
         # Join into a single multi-line string text payload for our safe UI display
         return "\n".join(summary_reports)
 

@@ -1,19 +1,23 @@
-import os
-import shutil
 import glob
+import os
 
 from source.utils.config import Config
-from source.utils.preview import preview
 from source.utils.helpers import is_reparse_point
+from source.utils.preview import preview
+
 
 class TempFileCleaner:
     def __init__(self):
         # De-duplicating folders (%TEMP% and %LOCALAPPDATA%\Temp are usually identical)
-        self.paths_to_clean = list(set([
-            os.path.realpath(os.path.expandvars('%TEMP%')),
-            os.path.realpath(os.path.expandvars('%SYSTEMROOT%\\Temp'))
-        ]))
-        
+        self.paths_to_clean = list(
+            set(
+                [
+                    os.path.realpath(os.path.expandvars("%TEMP%")),
+                    os.path.realpath(os.path.expandvars("%SYSTEMROOT%\\Temp")),
+                ]
+            )
+        )
+
     def _fast_dir_purge(self, target_dir, execute=True):
         """
         High-performance recursive file and directory purger using os.scandir.
@@ -24,7 +28,7 @@ class TempFileCleaner:
         """
         files_deleted = 0
         bytes_saved = 0
-        
+
         if not os.path.exists(target_dir):
             return files_deleted, bytes_saved
 
@@ -45,10 +49,12 @@ class TempFileCleaner:
                             continue
                         elif entry.is_dir(follow_symlinks=False):
                             # Recursively purge subdirectories
-                            sub_files, sub_bytes = self._fast_dir_purge(entry.path, execute=execute)
+                            sub_files, sub_bytes = self._fast_dir_purge(
+                                entry.path, execute=execute
+                            )
                             files_deleted += sub_files
                             bytes_saved += sub_bytes
-                            
+
                             if execute:
                                 # Attempt to clean up the directory shell if it's now empty
                                 os.rmdir(entry.path)
@@ -59,7 +65,7 @@ class TempFileCleaner:
                         continue
         except OSError:
             pass
-            
+
         return files_deleted, bytes_saved
 
     def clean_temp_directories(self):
@@ -85,24 +91,27 @@ class TempFileCleaner:
                 f"({mb_saved:.2f} MB would be freed) (preview)"
             )
         return f"System Temp: Removed {total_files} files ({mb_saved:.2f} MB freed)"
-    
+
     def clean_browser_cache(self):
         """Clean browser cache files accurately resolving profile wildcards"""
         browser_paths = [
-            ('%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\Cache\\Cache_Data', 'Chrome'),
-            ('%APPDATA%\\Mozilla\\Firefox\\Profiles\\*\\cache2', 'Firefox')
+            (
+                "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Default\\Cache\\Cache_Data",
+                "Chrome",
+            ),
+            ("%APPDATA%\\Mozilla\\Firefox\\Profiles\\*\\cache2", "Firefox"),
         ]
-        
+
         total_files = 0
         total_bytes = 0
         dry_run = Config.DRY_RUN
 
         for path_template, browser_name in browser_paths:
             expanded_template = os.path.expandvars(path_template)
-            
+
             # Use glob to properly resolve wildcards like '*' in Firefox profiles
             target_paths = glob.glob(expanded_template)
-            
+
             for path in target_paths:
                 files, bytes_freed = self._fast_dir_purge(path, execute=not dry_run)
                 if dry_run:

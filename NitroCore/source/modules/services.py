@@ -1,6 +1,6 @@
 try:
-    import win32service
     import pywintypes
+    import win32service
 except ImportError:  # Non-Windows platform: service methods degrade gracefully
     win32service = None
     pywintypes = None
@@ -19,6 +19,7 @@ _SECURITY_WARNING = (
     "security patches will NOT install automatically until you re-enable them "
     "(Services app -> Windows Update -> Automatic)."
 )
+
 
 class ServiceManager:
     def __init__(self):
@@ -43,7 +44,9 @@ class ServiceManager:
         if win32service is None:
             return ""
         try:
-            scm_handle = win32service.OpenSCManager(None, None, win32service.SC_MANAGER_CONNECT)
+            scm_handle = win32service.OpenSCManager(
+                None, None, win32service.SC_MANAGER_CONNECT
+            )
         except Exception:
             return ""
         try:
@@ -51,7 +54,8 @@ class ServiceManager:
                 svc_handle = win32service.OpenService(
                     scm_handle,
                     service_name,
-                    win32service.SERVICE_QUERY_STATUS | win32service.SERVICE_QUERY_CONFIG,
+                    win32service.SERVICE_QUERY_STATUS
+                    | win32service.SERVICE_QUERY_CONFIG,
                 )
             except Exception:
                 return " (not found on this system)"
@@ -99,7 +103,9 @@ class ServiceManager:
             )
 
         try:
-            scm_handle = win32service.OpenSCManager(None, None, win32service.SC_MANAGER_ALL_ACCESS)
+            scm_handle = win32service.OpenSCManager(
+                None, None, win32service.SC_MANAGER_ALL_ACCESS
+            )
         except Exception:
             return "Services Optimization Error: Access Denied (Requires Administrator privileges)"
 
@@ -119,7 +125,8 @@ class ServiceManager:
     def _stop_service_safely(self, scm_handle, service_name):
         try:
             svc_handle = win32service.OpenService(
-                scm_handle, service_name,
+                scm_handle,
+                service_name,
                 win32service.SERVICE_QUERY_STATUS | win32service.SERVICE_STOP,
             )
             status = win32service.QueryServiceStatus(svc_handle)
@@ -133,7 +140,11 @@ class ServiceManager:
             # reported result reflects reality.
             stopped = self._wait_for_stop(svc_handle, timeout_s=15.0)
             win32service.CloseServiceHandle(svc_handle)
-            return "Stopped Successfully" if stopped else "Stop Requested (timed out waiting for STOPPED)"
+            return (
+                "Stopped Successfully"
+                if stopped
+                else "Stop Requested (timed out waiting for STOPPED)"
+            )
 
         except pywintypes.error as e:
             if e.winerror == 1060:
@@ -167,7 +178,13 @@ class ServiceManager:
                 win32service.SERVICE_NO_CHANGE,
                 startup_type,
                 win32service.SERVICE_NO_CHANGE,
-                None, None, 0, None, None, None, None,
+                None,
+                None,
+                0,
+                None,
+                None,
+                None,
+                None,
             )
             win32service.CloseServiceHandle(svc_handle)
             return "Startup Set to Manual"

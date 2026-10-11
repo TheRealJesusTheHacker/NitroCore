@@ -1,18 +1,19 @@
 """
-Application lifecycle guardrails, handling single-instance enforcement 
+Application lifecycle guardrails, handling single-instance enforcement
 and emergency OS handle cleanups.
 """
 
-import sys
 import ctypes
+import sys
 from typing import Optional
 
 IS_WINDOWS = sys.platform == "win32"
 
 if IS_WINDOWS:
-    import win32event
     import win32api
+    import win32event
     import winerror
+
 
 class LifecycleManager:
     """Manages system-level single instance constraints and process teardowns."""
@@ -24,7 +25,9 @@ class LifecycleManager:
         if not IS_WINDOWS:
             return
 
-        cls._mutex = win32event.CreateMutex(None, False, "Global\\NitroCore_SingleInstance_Mutex")
+        cls._mutex = win32event.CreateMutex(
+            None, False, "Global\\NitroCore_SingleInstance_Mutex"
+        )
 
         if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
             cls._mutex = None

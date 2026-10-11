@@ -14,11 +14,11 @@ RestoreFailedResult = Literal["retry", "continue", "abort"]
 
 def _icon_badge(parent: tk.Widget, bg: str, glyph: str, color: str) -> tk.Canvas:
     """A small circular badge with a glyph — friendlier than a bare title."""
-    canvas = tk.Canvas(parent, width=40, height=40, bg=bg,
-                       highlightthickness=0, bd=0)
+    canvas = tk.Canvas(parent, width=40, height=40, bg=bg, highlightthickness=0, bd=0)
     canvas.create_oval(2, 2, 38, 38, fill=color, outline="")
-    canvas.create_text(20, 21, text=glyph, font=FontEngine.get("header"),
-                       fill="#FFFFFF")
+    canvas.create_text(
+        20, 21, text=glyph, font=FontEngine.get("header"), fill="#FFFFFF"
+    )
     return canvas
 
 
@@ -30,7 +30,7 @@ class RestorePointDialog:
         parent: tk.Tk,
         title: str = "Safety Check",
         message: str = "This will change some Windows settings. "
-                       "Want me to create a restore point first, just in case?",
+        "Want me to create a restore point first, just in case?",
         bg: str = theme.CARD,
         fg: str = theme.TEXT,
         muted: str = theme.MUTED,
@@ -109,7 +109,7 @@ class RestorePointDialog:
         cls,
         parent: tk.Tk,
         message: str = "This will change some Windows settings. "
-                       "Want me to create a restore point first, just in case?",
+        "Want me to create a restore point first, just in case?",
     ) -> DialogResult:
         dialog = cls(parent, message=message)
         return dialog.result or "cancel"

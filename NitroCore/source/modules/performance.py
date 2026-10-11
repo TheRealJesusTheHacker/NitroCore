@@ -1,7 +1,6 @@
-import os
 import subprocess
-import psutil
 
+import psutil
 from source.utils.config import Config
 from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
 from source.utils.preview import preview
@@ -20,12 +19,21 @@ class PerformanceTuner:
             matched = []
             for proc in psutil.process_iter(["name", "pid"]):
                 try:
-                    if proc.info["name"] and proc.info["name"].lower() in target_processes:
+                    if (
+                        proc.info["name"]
+                        and proc.info["name"].lower() in target_processes
+                    ):
                         matched.append(f"{proc.info['name']} (PID {proc.info['pid']})")
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                except (
+                    psutil.NoSuchProcess,
+                    psutil.AccessDenied,
+                    psutil.ZombieProcess,
+                ):
                     continue
             for label in matched:
-                preview.record(f"Would raise process priority of {label} to Above Normal")
+                preview.record(
+                    f"Would raise process priority of {label} to Above Normal"
+                )
             if not matched:
                 preview.record(
                     "Would raise process priority of explorer.exe / dwm.exe to Above Normal "

@@ -1,15 +1,14 @@
+import ctypes
 import os
 import subprocess
-import psutil
+from ctypes import wintypes
 from datetime import datetime, timedelta
 
+import psutil
 from source.utils.config import Config
+from source.utils.helpers import is_reparse_point
 from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
 from source.utils.preview import preview
-from source.utils.helpers import is_reparse_point
-
-import ctypes
-from ctypes import wintypes
 
 
 class _SHFILEOPSTRUCTW(ctypes.Structure):
@@ -51,9 +50,7 @@ def _recycle_path_windows(path: str) -> bool:
         op.wFunc = _FO_DELETE
         op.pFrom = ctypes.cast(from_buf, wintypes.LPCWSTR)
         op.pTo = None
-        op.fFlags = (
-            _FOF_ALLOWUNDO | _FOF_NOCONFIRMATION | _FOF_SILENT | _FOF_NOERRORUI
-        )
+        op.fFlags = _FOF_ALLOWUNDO | _FOF_NOCONFIRMATION | _FOF_SILENT | _FOF_NOERRORUI
 
         rc = ctypes.windll.shell32.SHFileOperationW(ctypes.byref(op))
         return rc == 0 and not op.fAnyOperationsAborted
@@ -76,9 +73,9 @@ class DiskCleanup:
             try:
                 usage_stats = psutil.disk_usage(partition.mountpoint)
                 usage[partition.device] = {
-                    "total_gb": round(usage_stats.total / (1024 ** 3), 2),
-                    "used_gb": round(usage_stats.used / (1024 ** 3), 2),
-                    "free_gb": round(usage_stats.free / (1024 ** 3), 2),
+                    "total_gb": round(usage_stats.total / (1024**3), 2),
+                    "used_gb": round(usage_stats.used / (1024**3), 2),
+                    "free_gb": round(usage_stats.free / (1024**3), 2),
                     "percent": usage_stats.percent,
                 }
             except (PermissionError, FileNotFoundError, OSError):
@@ -135,9 +132,13 @@ class DiskCleanup:
                 **run_kwargs,
             )
             if proc.returncode == 0:
-                return f"DISM component cleanup completed successfully ({cleanmgr_note})"
+                return (
+                    f"DISM component cleanup completed successfully ({cleanmgr_note})"
+                )
             stderr = proc.stderr.decode(errors="ignore").strip()
-            return f"System cleanup failed: {stderr or 'Unknown error'} ({cleanmgr_note})"
+            return (
+                f"System cleanup failed: {stderr or 'Unknown error'} ({cleanmgr_note})"
+            )
         except subprocess.TimeoutExpired:
             return f"DISM cleanup timed out ({cleanmgr_note})"
         except Exception as e:
@@ -152,7 +153,9 @@ class DiskCleanup:
         and reported — never silently destroyed. Callers must still confirm with
         the user before invoking this (see tabs._run_disk_downloads).
         """
-        downloads_path = os.path.realpath(os.path.expandvars("%USERPROFILE%\\Downloads"))
+        downloads_path = os.path.realpath(
+            os.path.expandvars("%USERPROFILE%\\Downloads")
+        )
 
         if not os.path.exists(downloads_path):
             return "Downloads folder not found"
@@ -170,7 +173,9 @@ class DiskCleanup:
                     for entry in entries:
                         try:
                             if entry.is_file(follow_symlinks=False):
-                                file_mtime = datetime.fromtimestamp(entry.stat().st_mtime)
+                                file_mtime = datetime.fromtimestamp(
+                                    entry.stat().st_mtime
+                                )
                                 if file_mtime < cutoff_date:
                                     file_size = entry.stat().st_size
                                     if execute:
@@ -206,7 +211,8 @@ class DiskCleanup:
         skipped_note = (
             f" ({files_skipped} file(s) could not be moved to the Recycle Bin "
             f"and were left untouched)"
-            if files_skipped else ""
+            if files_skipped
+            else ""
         )
         if dry_run:
             preview.record(

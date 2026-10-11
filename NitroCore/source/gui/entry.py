@@ -1,10 +1,10 @@
 """
-Custom Input Entry component featuring thread-safe text monitoring and 
+Custom Input Entry component featuring thread-safe text monitoring and
 isolated placeholder schema control built for NitroCore.
 """
 
 import tkinter as tk
-from typing import Callable, Optional, Tuple, List
+from typing import Callable, List, Optional, Tuple
 
 
 class CustomEntry:
@@ -12,7 +12,7 @@ class CustomEntry:
     High-performance flat-styled text input field component.
     Guarantees placeholder text isolation and instant text change callback processing.
     """
-    
+
     def __init__(
         self,
         parent: tk.Widget,
@@ -20,10 +20,10 @@ class CustomEntry:
         width: Optional[int] = None,
         font: Tuple[str, int, str] = ("Segoe UI", 10, "normal"),
         show: Optional[str] = None,
-        bg_color: str = "#1E1F22",       # Deep background dark theme matching
-        fg_color: str = "#F2F3F5",       # Bright slate text output
-        placeholder_color: str = "#4E5058", # Muted grey placeholder shade
-        accent_color: str = "#FF6B35",   # Focus ring color
+        bg_color: str = "#1E1F22",  # Deep background dark theme matching
+        fg_color: str = "#F2F3F5",  # Bright slate text output
+        placeholder_color: str = "#4E5058",  # Muted grey placeholder shade
+        accent_color: str = "#FF6B35",  # Focus ring color
     ):
         """Initialize core variable registers and bind hardware window event handlers."""
         self.parent = parent
@@ -32,7 +32,7 @@ class CustomEntry:
         self.fg_color = fg_color
         self.show_char = show
         self.accent_color = accent_color
-        
+
         # Track placeholder state separately to keep data manipulation clean
         self.is_showing_placeholder = False
         self.on_change_callbacks: List[Callable[[str], None]] = []
@@ -50,15 +50,15 @@ class CustomEntry:
             show=show,
             bg=bg_color,
             fg=fg_color,
-            insertbackground=fg_color,   # Colors the flashing input caret cursor white
+            insertbackground=fg_color,  # Colors the flashing input caret cursor white
             relief="flat",
-            bd=4                         # Tiny internal boundary padding mask
+            bd=4,  # Tiny internal boundary padding mask
         )
-        
+
         # Initialize placeholder structure securely
         if self.placeholder:
             self._apply_placeholder_state()
-            
+
         # Physical device interaction hook loops
         self.widget.bind("<FocusIn>", self._on_focus_in)
         self.widget.bind("<FocusOut>", self._on_focus_out)
@@ -86,7 +86,7 @@ class CustomEntry:
 
     def get_value(self) -> str:
         """
-        Safely captures text data. 
+        Safely captures text data.
         Guaranteed to return an empty string if the placeholder mask is active.
         """
         if self.is_showing_placeholder:
@@ -138,4 +138,3 @@ class CustomEntry:
         self.widget.config(fg=self.fg_color)
         if self.show_char:
             self.widget.config(show=self.show_char)
-

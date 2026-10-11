@@ -1,9 +1,11 @@
 """Hardware-accelerated typography profile manager for NitroCore graphics."""
+
 import tkinter.font as tkfont
 from typing import Dict, Optional
 
 # UPDATED IMPORT: Pointing to 'source' instead of 'src'
 from source.utils.config import Config
+
 
 class FontEngine:
     _registry: Dict[str, tkfont.Font] = {}

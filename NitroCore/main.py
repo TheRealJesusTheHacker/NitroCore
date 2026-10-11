@@ -2,25 +2,25 @@
 NitroCore Windows System Optimizer - Primary Application Entry Point.
 """
 
+import ctypes
 import os
 import sys
-import ctypes
 import tkinter as tk
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from source import __version__
-from source.utils.platform import IS_WINDOWS
-from source.utils.config import Config
-from source.utils.lifecycle import LifecycleManager
-from source.gui.window import Window
+from source.gui import theme
+from source.gui.button import CustomButton
+from source.gui.dialogs import ConfirmDialog, RestoreFailedDialog, RestorePointDialog
 from source.gui.fonts import FontEngine
 from source.gui.frame import CustomFrame
-from source.gui.button import CustomButton
 from source.gui.label import CustomLabel
 from source.gui.tabs import TabbedInterface
-from source.gui import theme
-from source.gui.dialogs import ConfirmDialog, RestorePointDialog, RestoreFailedDialog
+from source.gui.window import Window
+from source.utils.config import Config
+from source.utils.lifecycle import LifecycleManager
+from source.utils.platform import IS_WINDOWS
 from source.utils.restore_point import create_restore_point
 
 
@@ -104,7 +104,9 @@ class NitroCoreApplication:
             "|_____________________________________________________|_____________________|"
         )
 
-        header_lbl = CustomLabel(self.main_panel.canvas, text=header_text, font=FontEngine.get("log"))
+        header_lbl = CustomLabel(
+            self.main_panel.canvas, text=header_text, font=FontEngine.get("log")
+        )
         header_lbl.configure(fg=fg_color, bg=bg_color, justify="left")
         header_lbl.pack(fill="x", pady=(0, 20))
         # L-9: a way back out — click the header to leave Pip-Boy mode.
@@ -124,18 +126,48 @@ class NitroCoreApplication:
         stats_box.pack(fill="both", expand=True, pady=10)
 
         special_data = [
-            ("S - STRENGTH", "10 [MAX]", ">> Carrying capacity optimized. Registry weight lifted."),
-            ("P - PERCEPTION", "10 [MAX]", ">> File path scanning visibility at absolute maximum."),
-            ("E - ENDURANCE", "10 [MAX]", ">> Process stamina verified. Handle exceptions absorbed."),
-            ("C - CHARISMA", "10 [MAX]", ">> Network communication protocols fully persuasive."),
-            ("I - INTELLIGENCE", "10 [MAX]", ">> Async worker thread memory allocation hyper-efficient."),
-            ("A - AGILITY", "10 [MAX]", ">> UI update refresh latency dropped to zero ms."),
-            ("L - LUCK", "10 [MAX]", ">> NullPointerErrors automatically avoided by fortune."),
+            (
+                "S - STRENGTH",
+                "10 [MAX]",
+                ">> Carrying capacity optimized. Registry weight lifted.",
+            ),
+            (
+                "P - PERCEPTION",
+                "10 [MAX]",
+                ">> File path scanning visibility at absolute maximum.",
+            ),
+            (
+                "E - ENDURANCE",
+                "10 [MAX]",
+                ">> Process stamina verified. Handle exceptions absorbed.",
+            ),
+            (
+                "C - CHARISMA",
+                "10 [MAX]",
+                ">> Network communication protocols fully persuasive.",
+            ),
+            (
+                "I - INTELLIGENCE",
+                "10 [MAX]",
+                ">> Async worker thread memory allocation hyper-efficient.",
+            ),
+            (
+                "A - AGILITY",
+                "10 [MAX]",
+                ">> UI update refresh latency dropped to zero ms.",
+            ),
+            (
+                "L - LUCK",
+                "10 [MAX]",
+                ">> NullPointerErrors automatically avoided by fortune.",
+            ),
         ]
 
         for stat, val, desc in special_data:
             row_text = f"{stat.ljust(16)} - {val}   {desc}"
-            lbl = CustomLabel(stats_box.canvas, text=row_text, font=FontEngine.get("body"))
+            lbl = CustomLabel(
+                stats_box.canvas, text=row_text, font=FontEngine.get("body")
+            )
             lbl.configure(fg=fg_color, bg=bg_color, anchor="w")
             lbl.pack(fill="x", pady=4)
 
@@ -167,12 +199,12 @@ class NitroCoreApplication:
         """Run the optimization pipeline in dry-run mode and print the report."""
         from types import SimpleNamespace
 
-        from source.modules.registry import RegistryOptimizer
-        from source.modules.temp_files import TempFileCleaner
         from source.modules.disk_cleanup import DiskCleanup
-        from source.modules.services import ServiceManager
         from source.modules.performance import PerformanceTuner
-        from source.utils.preview import preview, PREVIEW_FOOTER
+        from source.modules.registry import RegistryOptimizer
+        from source.modules.services import ServiceManager
+        from source.modules.temp_files import TempFileCleaner
+        from source.utils.preview import PREVIEW_FOOTER, preview
         from source.utils.profiles import PROFILE_META, execute_step, get_pipeline
 
         modules = SimpleNamespace(
@@ -206,15 +238,11 @@ class NitroCoreApplication:
         """H-1: the Pip-Boy purge button is no longer a fire-and-forget
         destructive pipeline. It now requires explicit confirmation, offers a
         restore point, honors preview mode, and refuses to double-fire."""
-        from source.modules.registry import RegistryOptimizer
-        from source.modules.temp_files import TempFileCleaner
-        from source.modules.disk_cleanup import DiskCleanup
-        from source.modules.services import ServiceManager
-        from source.modules.performance import PerformanceTuner
-        from source.modules.async_worker import AsyncWorker
 
         if self._pipboy_busy:
-            print(">> [VATS] Purge already in progress — hold your horses, vault dweller.")
+            print(
+                ">> [VATS] Purge already in progress — hold your horses, vault dweller."
+            )
             return
 
         proceed = ConfirmDialog.ask(
@@ -286,15 +314,16 @@ class NitroCoreApplication:
                 pass
 
         from source.modules.async_worker import AsyncWorker
+
         AsyncWorker.run_task(task, on_complete)
 
     def _pipboy_run(self, preview_only: bool = False):
-        from source.modules.registry import RegistryOptimizer
-        from source.modules.temp_files import TempFileCleaner
-        from source.modules.disk_cleanup import DiskCleanup
-        from source.modules.services import ServiceManager
-        from source.modules.performance import PerformanceTuner
         from source.modules.async_worker import AsyncWorker
+        from source.modules.disk_cleanup import DiskCleanup
+        from source.modules.performance import PerformanceTuner
+        from source.modules.registry import RegistryOptimizer
+        from source.modules.services import ServiceManager
+        from source.modules.temp_files import TempFileCleaner
 
         self._pipboy_busy = True
         if self._purge_btn is not None:
@@ -302,6 +331,7 @@ class NitroCoreApplication:
 
         if preview_only:
             from source.utils.preview import preview as _preview
+
             _preview.start()
 
         print(">> [VATS] STARTING SYSTEM RAD PURGE MULTIPLIER...")
@@ -314,16 +344,23 @@ class NitroCoreApplication:
             perf = PerformanceTuner()
             results = [
                 ("Registry", registry.apply_all()),
-                ("Temp", f"{temp.clean_temp_directories()}\n{temp.clean_browser_cache()}"),
+                (
+                    "Temp",
+                    f"{temp.clean_temp_directories()}\n{temp.clean_browser_cache()}",
+                ),
                 ("Disk", disk.clean_system_files()),
                 ("Services", services.optimize_all_services()),
-                ("Performance", f"{perf.optimize_power_plan()}\n{perf.set_process_priority()}"),
+                (
+                    "Performance",
+                    f"{perf.optimize_power_plan()}\n{perf.set_process_priority()}",
+                ),
             ]
             for label, result in results:
                 print(f">> [{label}]")
                 print(result)
             if preview_only:
                 from source.utils.preview import preview
+
                 entries = preview.report()
                 print(f">> [VATS] {len(entries)} change(s) previewed, 0 applied.")
                 for index, entry in enumerate(entries, start=1):
@@ -337,7 +374,9 @@ class NitroCoreApplication:
                 # cached value so the header re-queries instead of showing
                 # the stale plan for up to 120s.
                 try:
-                    from source.modules.system_stats import invalidate_all_power_plan_caches
+                    from source.modules.system_stats import (
+                        invalidate_all_power_plan_caches,
+                    )
                 except ImportError:
                     pass
                 else:

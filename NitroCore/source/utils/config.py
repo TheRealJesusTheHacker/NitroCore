@@ -1,4 +1,5 @@
 """Configuration manager and command-line argument parser for NitroCore."""
+
 import argparse
 
 from source.utils.profiles import GAMING
@@ -6,6 +7,7 @@ from source.utils.profiles import GAMING
 
 class Config:
     """Stores global application state parameters and Easter Egg switches."""
+
     PI_BOY_MODE = False
     CLICK_COUNTER = 0
     ACTIVE_PROFILE = GAMING
@@ -16,14 +18,14 @@ class Config:
         """Parses hidden runtime command-line flag profiles."""
         parser = argparse.ArgumentParser(description="NitroCore System Optimizer")
         parser.add_argument(
-            '--fallout',
-            action='store_true',
-            help=argparse.SUPPRESS  # Hides it from standard --help lists
+            "--fallout",
+            action="store_true",
+            help=argparse.SUPPRESS,  # Hides it from standard --help lists
         )
         parser.add_argument(
-            '--dry-run',
-            action='store_true',
-            help='Preview mode: print what would change without modifying the system'
+            "--dry-run",
+            action="store_true",
+            help="Preview mode: print what would change without modifying the system",
         )
         args, _ = parser.parse_known_args()
         if args.fallout:

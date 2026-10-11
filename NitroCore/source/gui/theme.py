@@ -12,16 +12,16 @@ import tkinter.font as tkfont
 from typing import Optional
 
 # ---------------------------------------------------------------- palette ---
-BG = "#1B1D21"            # app backdrop
-BG_SUNKEN = "#141619"     # sunken areas: log view, progress trough
-CARD = "#26282E"          # card surfaces
-CARD_HOVER = "#2E3138"    # card/button hover surface
+BG = "#1B1D21"  # app backdrop
+BG_SUNKEN = "#141619"  # sunken areas: log view, progress trough
+CARD = "#26282E"  # card surfaces
+CARD_HOVER = "#2E3138"  # card/button hover surface
 BTN_SECONDARY_BG = "#2E3138"
-BORDER = "#3B3E46"        # subtle card borders
-BORDER_SOFT = "#32353C"   # barely-there borders
-TEXT = "#F2F3F5"          # primary text
-MUTED = "#A9ADB3"         # secondary text
-FAINT = "#6E7279"         # captions, placeholders
+BORDER = "#3B3E46"  # subtle card borders
+BORDER_SOFT = "#32353C"  # barely-there borders
+TEXT = "#F2F3F5"  # primary text
+MUTED = "#A9ADB3"  # secondary text
+FAINT = "#6E7279"  # captions, placeholders
 DISABLED_BG = "#2A2D33"
 DISABLED_FG = "#6E7279"
 
@@ -57,7 +57,7 @@ def _clamp(v: float) -> int:
 
 def hex_to_rgb(color: str) -> tuple:
     color = color.lstrip("#")
-    return tuple(int(color[i:i + 2], 16) for i in (0, 2, 4))
+    return tuple(int(color[i : i + 2], 16) for i in (0, 2, 4))
 
 
 def rgb_to_hex(rgb: tuple) -> str:
@@ -68,7 +68,9 @@ def mix(color_a: str, color_b: str, t: float) -> str:
     """Blend two hex colors. t=1 -> color_a, t=0 -> color_b."""
     ra, ga, ba = hex_to_rgb(color_a)
     rb, gb, bb = hex_to_rgb(color_b)
-    return rgb_to_hex((ra * t + rb * (1 - t), ga * t + gb * (1 - t), ba * t + bb * (1 - t)))
+    return rgb_to_hex(
+        (ra * t + rb * (1 - t), ga * t + gb * (1 - t), ba * t + bb * (1 - t))
+    )
 
 
 def darken(color: str, factor: float = 0.8) -> str:
@@ -90,18 +92,30 @@ def rounded_rect(canvas: tk.Canvas, x1, y1, x2, y2, radius, **kwargs):
     """
     radius = max(0, min(radius, (x2 - x1) / 2, (y2 - y1) / 2))
     points = [
-        x1 + radius, y1,
-        x2 - radius, y1,
-        x2, y1,
-        x2, y1 + radius,
-        x2, y2 - radius,
-        x2, y2,
-        x2 - radius, y2,
-        x1 + radius, y2,
-        x1, y2,
-        x1, y2 - radius,
-        x1, y1 + radius,
-        x1, y1,
+        x1 + radius,
+        y1,
+        x2 - radius,
+        y1,
+        x2,
+        y1,
+        x2,
+        y1 + radius,
+        x2,
+        y2 - radius,
+        x2,
+        y2,
+        x2 - radius,
+        y2,
+        x1 + radius,
+        y2,
+        x1,
+        y2,
+        x1,
+        y2 - radius,
+        x1,
+        y1 + radius,
+        x1,
+        y1,
     ]
     return canvas.create_polygon(points, smooth=True, **kwargs)
 
@@ -180,11 +194,29 @@ class Card(tk.Canvas):
         if w < 4 or h < 4:
             return
         self.delete("card")
-        rounded_rect(self, 1, 1, w - 1, h - 1, self._radius,
-                     fill=self._border_color, outline="", tags="card")
+        rounded_rect(
+            self,
+            1,
+            1,
+            w - 1,
+            h - 1,
+            self._radius,
+            fill=self._border_color,
+            outline="",
+            tags="card",
+        )
         inner_r = max(1, self._radius - 1)
-        rounded_rect(self, 2, 2, w - 2, h - 2, inner_r,
-                     fill=self._card_bg, outline="", tags="card")
+        rounded_rect(
+            self,
+            2,
+            2,
+            w - 2,
+            h - 2,
+            inner_r,
+            fill=self._card_bg,
+            outline="",
+            tags="card",
+        )
         self.itemconfigure(self._win, width=max(1, w - 2 * self._padx))
         self.coords(self._win, self._padx, self._pady)
         self.tag_lower("card", self._win)
@@ -215,8 +247,12 @@ class Badge(tk.Canvas):
         height = self._font.metrics("linespace") + pady * 2
         width = self._font.measure(text) + padx * 2
         super().__init__(
-            parent, width=width, height=height, bg=bg,
-            highlightthickness=0, bd=0,
+            parent,
+            width=width,
+            height=height,
+            bg=bg,
+            highlightthickness=0,
+            bd=0,
         )
         self._text = text
         self._draw()
@@ -225,10 +261,10 @@ class Badge(tk.Canvas):
         self.delete("all")
         w = int(self.cget("width"))
         h = int(self.cget("height"))
-        rounded_rect(self, 1, 1, w - 1, h - 1, self._radius,
-                     fill=self._pill_bg, outline="")
-        self.create_text(w / 2, h / 2, text=self._text,
-                         font=self._font, fill=self._fg)
+        rounded_rect(
+            self, 1, 1, w - 1, h - 1, self._radius, fill=self._pill_bg, outline=""
+        )
+        self.create_text(w / 2, h / 2, text=self._text, font=self._font, fill=self._fg)
 
     def set_text(self, text: str) -> None:
         self._text = text
@@ -251,8 +287,13 @@ class ToggleSwitch(tk.Canvas):
         height: int = 26,
     ):
         super().__init__(
-            parent, width=width, height=height, bg=bg,
-            highlightthickness=0, bd=0, cursor="hand2",
+            parent,
+            width=width,
+            height=height,
+            bg=bg,
+            highlightthickness=0,
+            bd=0,
+            cursor="hand2",
         )
         self.variable = variable
         self.command = command
@@ -281,13 +322,20 @@ class ToggleSwitch(tk.Canvas):
         else:
             track = self.accent if is_on else BORDER
             knob_fill = "#FFFFFF"
-        rounded_rect(self, 1, 1, self._tw - 1, self._th - 1, radius - 1,
-                     fill=track, outline="")
+        rounded_rect(
+            self, 1, 1, self._tw - 1, self._th - 1, radius - 1, fill=track, outline=""
+        )
         knob_r = radius - 5
         cy = self._th / 2
         cx = (self._tw - radius - 1) if is_on else (radius + 1)
-        self.create_oval(cx - knob_r, cy - knob_r, cx + knob_r, cy + knob_r,
-                         fill=knob_fill, outline="")
+        self.create_oval(
+            cx - knob_r,
+            cy - knob_r,
+            cx + knob_r,
+            cy + knob_r,
+            fill=knob_fill,
+            outline="",
+        )
 
     def set_accent(self, accent: str) -> None:
         self.accent = accent

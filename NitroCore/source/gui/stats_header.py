@@ -4,9 +4,9 @@ import tkinter as tk
 from typing import Optional
 
 from source.gui import theme
+from source.gui.fonts import FontEngine
 from source.gui.frame import CustomFrame
 from source.gui.label import CustomLabel
-from source.gui.fonts import FontEngine
 from source.modules.system_stats import SystemStats
 
 
@@ -54,7 +54,9 @@ class StatsHeader:
 
         self.refresh()
 
-    def _add_stat_card(self, parent: tk.Widget, key: str, title: str, hint: str) -> None:
+    def _add_stat_card(
+        self, parent: tk.Widget, key: str, title: str, hint: str
+    ) -> None:
         card = theme.Card(
             parent,
             bg=self.bg_color,

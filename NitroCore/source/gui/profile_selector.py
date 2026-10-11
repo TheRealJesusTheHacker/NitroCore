@@ -4,10 +4,10 @@ import tkinter as tk
 from typing import Callable
 
 from source.gui import theme
-from source.gui.label import CustomLabel
 from source.gui.fonts import FontEngine
+from source.gui.label import CustomLabel
 from source.utils.config import Config
-from source.utils.profiles import PROFILE_META, GAMING, CYBERSECURITY
+from source.utils.profiles import CYBERSECURITY, GAMING, PROFILE_META
 
 
 class ProfileSelector:
@@ -65,8 +65,12 @@ class ProfileSelector:
             pady=theme.PAD_MD,
             cursor="hand2",
         )
-        card.pack(side="left", fill="x", expand=True,
-                  padx=(0, theme.PAD_SM if profile_id == GAMING else 0))
+        card.pack(
+            side="left",
+            fill="x",
+            expand=True,
+            padx=(0, theme.PAD_SM if profile_id == GAMING else 0),
+        )
         self._cards[profile_id] = card
 
         top_row = tk.Frame(card.canvas, bg=self.card_color)
@@ -83,8 +87,9 @@ class ProfileSelector:
         title.pack(side="left")
 
         self._dot = getattr(self, "_dot", {})
-        dot = tk.Canvas(top_row, width=18, height=18, bg=self.card_color,
-                        highlightthickness=0, bd=0)
+        dot = tk.Canvas(
+            top_row, width=18, height=18, bg=self.card_color, highlightthickness=0, bd=0
+        )
         dot.pack(side="right")
         self._dot[profile_id] = (dot, accent)
 
@@ -111,12 +116,21 @@ class ProfileSelector:
         def select(_event=None, pid=profile_id):
             self._select(pid)
 
-        hover_targets = [card, card.inner, top_row, dot,
-                         title.label, tagline.label, desc.label]
+        hover_targets = [
+            card,
+            card.inner,
+            top_row,
+            dot,
+            title.label,
+            tagline.label,
+            desc.label,
+        ]
         for widget in hover_targets:
             widget.bind("<Button-1>", select)
             widget.bind("<Enter>", lambda _e, pid=profile_id: self._on_hover(pid, True))
-            widget.bind("<Leave>", lambda _e, pid=profile_id: self._on_hover(pid, False))
+            widget.bind(
+                "<Leave>", lambda _e, pid=profile_id: self._on_hover(pid, False)
+            )
 
     def _select(self, profile_id: str) -> None:
         if Config.ACTIVE_PROFILE == profile_id:
@@ -150,8 +164,11 @@ class ProfileSelector:
         for pid, card in self._cards.items():
             selected = pid == profile_id
             accent = self._accents[pid]
-            fill = (theme.tint(accent, self.card_color, 0.10) if selected
-                    else self.card_color)
+            fill = (
+                theme.tint(accent, self.card_color, 0.10)
+                if selected
+                else self.card_color
+            )
             card.set_border(accent if selected else self.card_color)
             card.set_fill(fill)
             self._top_rows[pid].configure(bg=fill)

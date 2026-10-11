@@ -4,22 +4,22 @@ Optimized to provide strict layout nesting boundaries without UI manager locking
 """
 
 import tkinter as tk
-from typing import Optional, Tuple, Union
+from typing import Optional
 
 
 class CustomFrame:
     """
     High-performance flat layout container panel built for NitroCore.
-    Exposes explicit parent mapping properties to allow child widgets 
+    Exposes explicit parent mapping properties to allow child widgets
     to choose their layout manager freely.
     """
-    
+
     def __init__(
         self,
         parent: tk.Widget,
-        bg_color: str = "#2F3136",      # Discord-style deep panel background
-        borderwidth: int = 0,            # Zeroed out border by default for smooth panels
-        relief: str = "flat",            # Flat uniform visual layer design
+        bg_color: str = "#2F3136",  # Discord-style deep panel background
+        borderwidth: int = 0,  # Zeroed out border by default for smooth panels
+        relief: str = "flat",  # Flat uniform visual layer design
         border_color: Optional[str] = None,  # Subtle 1px border when set
     ):
         """Initialize backend canvas layout panel containers."""

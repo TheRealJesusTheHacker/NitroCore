@@ -124,20 +124,53 @@ class CustomButton:
             return
         c.delete("btn")
         if self._border_color:
-            theme.rounded_rect(c, 0.5, 0.5, w - 0.5, h - 0.5, self._radius,
-                               fill=self._border_color, outline="", tags="btn")
-            theme.rounded_rect(c, 1.5, 1.5, w - 1.5, h - 1.5,
-                               max(1, self._radius - 1),
-                               fill=self._current_fill(), outline="", tags="btn")
+            theme.rounded_rect(
+                c,
+                0.5,
+                0.5,
+                w - 0.5,
+                h - 0.5,
+                self._radius,
+                fill=self._border_color,
+                outline="",
+                tags="btn",
+            )
+            theme.rounded_rect(
+                c,
+                1.5,
+                1.5,
+                w - 1.5,
+                h - 1.5,
+                max(1, self._radius - 1),
+                fill=self._current_fill(),
+                outline="",
+                tags="btn",
+            )
         else:
-            theme.rounded_rect(c, 1, 1, w - 1, h - 1, self._radius,
-                               fill=self._current_fill(), outline="", tags="btn")
+            theme.rounded_rect(
+                c,
+                1,
+                1,
+                w - 1,
+                h - 1,
+                self._radius,
+                fill=self._current_fill(),
+                outline="",
+                tags="btn",
+            )
         if self._anchor == "w":
             x, anchor = self._padx, "w"
         else:
             x, anchor = w / 2, "center"
-        c.create_text(x, h / 2, text=self._text, font=self._font,
-                      fill=self._current_text_fg(), anchor=anchor, tags="btn")
+        c.create_text(
+            x,
+            h / 2,
+            text=self._text,
+            font=self._font,
+            fill=self._current_text_fg(),
+            anchor=anchor,
+            tags="btn",
+        )
 
     # ------------------------------------------------------------------ API
     def pack(self, **kwargs) -> None:

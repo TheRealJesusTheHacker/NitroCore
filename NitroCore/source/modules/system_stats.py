@@ -8,7 +8,6 @@ import weakref
 from typing import Dict, Optional
 
 import psutil
-
 from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs
 
 _POWER_PLAN_NAMES = {
@@ -57,7 +56,10 @@ class SystemStats:
 
     def _primary_disk_free_gb(self) -> str:
         now = time.monotonic()
-        if self._disk_cache is not None and now - self._disk_cached_at < _DISK_USAGE_TTL_SECONDS:
+        if (
+            self._disk_cache is not None
+            and now - self._disk_cached_at < _DISK_USAGE_TTL_SECONDS
+        ):
             return self._disk_cache
         try:
             usage = psutil.disk_usage(os.environ.get("SystemDrive", "C:") + "\\")

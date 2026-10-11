@@ -3,30 +3,30 @@
 import re
 import time
 import tkinter as tk
-from tkinter import scrolledtext
 from datetime import datetime
+from tkinter import scrolledtext
 from typing import Callable, Dict, List, Optional, Tuple
 
-from source.gui.frame import CustomFrame
-from source.gui.button import CustomButton
-from source.gui.label import CustomLabel
-from source.gui.fonts import FontEngine
 from source.gui import theme
-from source.gui.stats_header import StatsHeader
-from source.gui.profile_selector import ProfileSelector
-from source.gui.progress_panel import ProgressPanel
+from source.gui.button import CustomButton
 from source.gui.dialogs import (
     ConfirmDialog,
     PreviewReportDialog,
     RestoreFailedDialog,
     RestorePointDialog,
 )
+from source.gui.fonts import FontEngine
+from source.gui.frame import CustomFrame
+from source.gui.label import CustomLabel
+from source.gui.profile_selector import ProfileSelector
+from source.gui.progress_panel import ProgressPanel
+from source.gui.stats_header import StatsHeader
 from source.modules.async_worker import AsyncWorker
-from source.modules.registry import RegistryOptimizer
-from source.modules.temp_files import TempFileCleaner
 from source.modules.disk_cleanup import DiskCleanup
-from source.modules.services import ServiceManager
 from source.modules.performance import PerformanceTuner
+from source.modules.registry import RegistryOptimizer
+from source.modules.services import ServiceManager
+from source.modules.temp_files import TempFileCleaner
 from source.utils.config import Config
 from source.utils.logger import Logger
 from source.utils.preview import preview
@@ -108,7 +108,9 @@ class TabbedInterface:
         if hasattr(self, "preview_check"):
             self.preview_check.set_accent(self.accent_color)
         if self.run_all_btn:
-            self.run_all_btn.configure(bg=self.accent_color, activebackground=self._darken_accent())
+            self.run_all_btn.configure(
+                bg=self.accent_color, activebackground=self._darken_accent()
+            )
             self.run_all_btn.label.configure(
                 text=f"Run All ({PROFILE_META[profile]['label']})"
             )
@@ -123,7 +125,9 @@ class TabbedInterface:
             for lbl in self.stats_header._value_labels.values():
                 lbl.configure(fg=self.accent_color)
         self._show_tab(self._active_tab)
-        self._append_log(f"Profile switched to {PROFILE_META[profile]['label']}.", "info")
+        self._append_log(
+            f"Profile switched to {PROFILE_META[profile]['label']}.", "info"
+        )
 
     def _darken_accent(self) -> str:
         return theme.darken(self.accent_color, 0.8)
@@ -133,8 +137,9 @@ class TabbedInterface:
         logo = self._logo
         logo.delete("all")
         theme.rounded_rect(logo, 2, 2, 38, 38, 10, fill=self.accent_color, outline="")
-        logo.create_text(20, 21, text="N", font=FontEngine.get("display"),
-                         fill="#FFFFFF")
+        logo.create_text(
+            20, 21, text="N", font=FontEngine.get("display"), fill="#FFFFFF"
+        )
 
     def _build_brand_header(self) -> None:
         header = tk.Frame(self.parent, bg=self.bg_color)
@@ -143,8 +148,9 @@ class TabbedInterface:
         brand = tk.Frame(header, bg=self.bg_color)
         brand.pack(side="left")
 
-        self._logo = tk.Canvas(brand, width=40, height=40, bg=self.bg_color,
-                               highlightthickness=0, bd=0)
+        self._logo = tk.Canvas(
+            brand, width=40, height=40, bg=self.bg_color, highlightthickness=0, bd=0
+        )
         self._logo.pack(side="left")
         self._draw_logo()
 
@@ -297,9 +303,13 @@ class TabbedInterface:
         self._tab_panels[tab_id] = panel
         return panel
 
-    def _add_tab_header(self, panel: CustomFrame, title: str, description: str, risk: str = "Medium") -> None:
+    def _add_tab_header(
+        self, panel: CustomFrame, title: str, description: str, risk: str = "Medium"
+    ) -> None:
         title_row = tk.Frame(panel.canvas, bg=self.panel_color)
-        title_row.pack(anchor="w", fill="x", padx=theme.PAD_LG, pady=(theme.PAD_LG, theme.PAD_SM))
+        title_row.pack(
+            anchor="w", fill="x", padx=theme.PAD_LG, pady=(theme.PAD_LG, theme.PAD_SM)
+        )
 
         title_lbl = CustomLabel(
             parent=title_row,
@@ -364,8 +374,12 @@ class TabbedInterface:
             "Gaming profile applies all; Cybersecurity profile applies visual tweaks only.",
             risk="High",
         )
-        self._add_action_button(panel, "Apply Registry Optimizations", self._run_registry)
-        self._add_action_button(panel, "Restore Previous Registry Values", self._run_registry_undo)
+        self._add_action_button(
+            panel, "Apply Registry Optimizations", self._run_registry
+        )
+        self._add_action_button(
+            panel, "Restore Previous Registry Values", self._run_registry_undo
+        )
 
     def _build_temp_files_tab(self) -> None:
         panel = self._make_tab_panel("temp_files")
@@ -399,8 +413,12 @@ class TabbedInterface:
         self.disk_usage_lbl.pack(anchor="w", padx=16, pady=(0, 16))
 
         self._add_action_button(panel, "Refresh Disk Usage", self._refresh_disk_usage)
-        self._add_action_button(panel, "Run Windows Disk Cleanup", self._run_disk_system)
-        self._add_action_button(panel, "Clean Old Downloads (30+ days)", self._run_disk_downloads)
+        self._add_action_button(
+            panel, "Run Windows Disk Cleanup", self._run_disk_system
+        )
+        self._add_action_button(
+            panel, "Clean Old Downloads (30+ days)", self._run_disk_downloads
+        )
 
     def _build_services_tab(self) -> None:
         panel = self._make_tab_panel("services")
@@ -411,7 +429,9 @@ class TabbedInterface:
             "to keep patching active.",
             risk="High",
         )
-        self._add_action_button(panel, "Optimize Background Services", self._run_services)
+        self._add_action_button(
+            panel, "Optimize Background Services", self._run_services
+        )
 
     def _build_performance_tab(self) -> None:
         panel = self._make_tab_panel("performance")
@@ -422,8 +442,12 @@ class TabbedInterface:
             risk="Low",
         )
         self._add_action_button(panel, "Apply Power Plan", self._run_power_plan)
-        self._add_action_button(panel, "Tune Process Priority", self._run_process_priority)
-        self._add_action_button(panel, "Apply All Performance Tweaks", self._run_performance_all)
+        self._add_action_button(
+            panel, "Tune Process Priority", self._run_process_priority
+        )
+        self._add_action_button(
+            panel, "Apply All Performance Tweaks", self._run_performance_all
+        )
 
     def _build_status_tab(self) -> None:
         panel = self._make_tab_panel("status")
@@ -443,7 +467,9 @@ class TabbedInterface:
             padx=2,
             pady=2,
         )
-        log_frame.pack(fill="both", expand=True, padx=theme.PAD_LG, pady=(0, theme.PAD_SM))
+        log_frame.pack(
+            fill="both", expand=True, padx=theme.PAD_LG, pady=(0, theme.PAD_SM)
+        )
 
         self.log_text = scrolledtext.ScrolledText(
             log_frame,
@@ -507,7 +533,10 @@ class TabbedInterface:
             return "error"
         if any(w in lower for w in ("warning", "skipped", "timeout", "timed out")):
             return "warning"
-        if any(w in lower for w in ("success", "complete", "freed", "applied", "switched", "stopped")):
+        if any(
+            w in lower
+            for w in ("success", "complete", "freed", "applied", "switched", "stopped")
+        ):
             return "success"
         return "info"
 
@@ -546,7 +575,9 @@ class TabbedInterface:
         except tk.TclError:
             pass
 
-    def _create_restore_then(self, action_label: str, continuation: Callable[[], None]) -> None:
+    def _create_restore_then(
+        self, action_label: str, continuation: Callable[[], None]
+    ) -> None:
         """Create a restore point asynchronously, then run continuation."""
         self._append_log("Creating system restore point...", "info")
         self._set_busy(True)
@@ -589,7 +620,10 @@ class TabbedInterface:
     def _on_preview_toggled(self) -> None:
         Config.DRY_RUN = bool(self.preview_var.get())
         if Config.DRY_RUN:
-            self._append_log("Preview mode on \u2014 runs will show what would change, nothing else.", "info")
+            self._append_log(
+                "Preview mode on \u2014 runs will show what would change, nothing else.",
+                "info",
+            )
         else:
             self._append_log("Preview mode off \u2014 runs will apply changes.", "info")
 
@@ -601,7 +635,9 @@ class TabbedInterface:
         )
         PreviewReportDialog.show(self.root, entries)
 
-    def _prompt_restore(self, action_label: str, continuation: Callable[[], None]) -> None:
+    def _prompt_restore(
+        self, action_label: str, continuation: Callable[[], None]
+    ) -> None:
         if Config.DRY_RUN:
             self._append_log("Preview mode: skipping restore point prompt.", "info")
             continuation()
@@ -652,7 +688,9 @@ class TabbedInterface:
 
         AsyncWorker.run_task(task, on_complete)
 
-    def _run_async(self, label: str, task: Callable[[], str], require_restore: bool = False) -> None:
+    def _run_async(
+        self, label: str, task: Callable[[], str], require_restore: bool = False
+    ) -> None:
         if self._busy:
             return
         if require_restore:
@@ -689,7 +727,9 @@ class TabbedInterface:
     def _refresh_disk_usage(self) -> None:
         usage = self.disk_cleanup.get_disk_usage()
         if not usage:
-            self.disk_usage_lbl.configure(text="No fixed drives found \u2014 nothing to show here yet.")
+            self.disk_usage_lbl.configure(
+                text="No fixed drives found \u2014 nothing to show here yet."
+            )
             return
 
         lines = ["Drive Usage:"]
@@ -767,26 +807,32 @@ class TabbedInterface:
         profile_label = PROFILE_META[profile]["label"]
         pipeline = get_pipeline(profile)
         self._show_tab("status")
-        self._append_log(f"=== Running {profile_label} optimization pipeline ===", "info")
+        self._append_log(
+            f"=== Running {profile_label} optimization pipeline ===", "info"
+        )
         self._set_busy(True)
         self._run_start_time = time.time()
         self._mb_freed = 0.0
         self._steps_completed = 0
         preview.start()
-        self.progress_panel.start(f"{profile_label} pipeline", total_steps=len(pipeline))
+        self.progress_panel.start(
+            f"{profile_label} pipeline", total_steps=len(pipeline)
+        )
 
         def run_steps(index: int = 0) -> None:
             if index >= len(pipeline):
+
                 def finish() -> None:
                     elapsed = time.time() - self._run_start_time
                     self._set_busy(False)
                     self._refresh_disk_usage()
-                    summary = (
-                        f"{self._steps_completed} modules · {elapsed:.1f}s"
-                        + (f" · {self._mb_freed:.2f} MB freed" if self._mb_freed else "")
+                    summary = f"{self._steps_completed} modules · {elapsed:.1f}s" + (
+                        f" · {self._mb_freed:.2f} MB freed" if self._mb_freed else ""
                     )
                     self.progress_panel.finish(summary)
-                    self._append_log(f"=== {profile_label} optimization complete ===", "success")
+                    self._append_log(
+                        f"=== {profile_label} optimization complete ===", "success"
+                    )
                     self._mb_freed = 0.0
                     if Config.DRY_RUN:
                         self._show_preview_report()
@@ -795,7 +841,10 @@ class TabbedInterface:
                 return
 
             step_id, step_label = pipeline[index]
-            self._safe_after(0, lambda i=index, sl=step_label: self.progress_panel.set_step(i + 1, sl))
+            self._safe_after(
+                0,
+                lambda i=index, sl=step_label: self.progress_panel.set_step(i + 1, sl),
+            )
 
             def task() -> str:
                 return execute_step(step_id, profile, self._modules)

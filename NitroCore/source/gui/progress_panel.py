@@ -4,8 +4,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 from source.gui import theme
-from source.gui.label import CustomLabel
 from source.gui.fonts import FontEngine
+from source.gui.label import CustomLabel
 
 
 class ProgressPanel:
@@ -128,7 +128,9 @@ class ProgressPanel:
     def set_step(self, step_index: int, step_label: str) -> None:
         pct = (step_index / self._total_steps) * 100
         self.bar["value"] = pct
-        self.status_lbl.configure(text=f"Step {step_index}/{self._total_steps}: {step_label}")
+        self.status_lbl.configure(
+            text=f"Step {step_index}/{self._total_steps}: {step_label}"
+        )
 
     def finish(self, summary: str) -> None:
         self.bar.stop()

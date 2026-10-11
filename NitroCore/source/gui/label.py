@@ -8,6 +8,7 @@ import tkinter as tk
 import tkinter.font as tkfont
 from typing import Optional
 
+
 class CustomLabel:
     """A clean, custom-styled flat GUI text wrapper component."""
 
@@ -17,7 +18,7 @@ class CustomLabel:
         text: str,
         font: tkfont.Font,
         bg: str = "#202225",
-        fg: str = "#F2F3F5"
+        fg: str = "#F2F3F5",
     ):
         self.normal_background = bg
         self.normal_foreground = fg
@@ -30,7 +31,7 @@ class CustomLabel:
             bg=self.normal_background,
             fg=self.normal_foreground,
             highlightthickness=0,
-            bd=0
+            bd=0,
         )
 
     def pack(self, **kwargs) -> None:

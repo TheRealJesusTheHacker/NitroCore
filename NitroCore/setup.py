@@ -3,16 +3,20 @@ Setup script for compiling and distributing the NitroCore Windows System Optimiz
 Features optimized file-stream configuration parsers and proper folder alignment mapping.
 """
 
-import sys
 from pathlib import Path
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 # Base folder location mapping
 BASE_DIR = Path(__file__).resolve().parent
 
 # 1. Read version from file smoothly with a safe string fallback
 VERSION_FILE = BASE_DIR / "VERSION"
-VERSION = VERSION_FILE.read_text(encoding="utf-8").strip() if VERSION_FILE.exists() else "1.0.0"
+VERSION = (
+    VERSION_FILE.read_text(encoding="utf-8").strip()
+    if VERSION_FILE.exists()
+    else "1.0.0"
+)
 
 # 2. Robust parsing pipeline for requirements.txt (cleans comments and white space)
 INSTALL_REQUIRES = []
@@ -26,7 +30,9 @@ if REQUIREMENTS_FILE.exists():
 
 # 3. Fetch distribution payload description details safely
 README_FILE = BASE_DIR / "README.md"
-LONG_DESCRIPTION = README_FILE.read_text(encoding="utf-8") if README_FILE.exists() else ""
+LONG_DESCRIPTION = (
+    README_FILE.read_text(encoding="utf-8") if README_FILE.exists() else ""
+)
 
 setup(
     name="nitrocore-optimizer",
@@ -58,7 +64,6 @@ setup(
     # built empty packages)
     packages=find_packages(where="source"),
     package_dir={"": "source"},
-    
     # Bundle core manifest text parameters alongside binary wheels
     package_data={
         "": ["LICENSE", "README.md", "VERSION"],
