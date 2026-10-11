@@ -3,6 +3,28 @@
 All notable changes to NitroCore are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+- First pytest suite (`NitroCore/tests/`, 90+ tests): profiles/pipeline logic,
+  preview recorder, CLI parsing, reparse-point fail-closed gate, registry
+  undo serialization, dry-run paths for temp/disk/performance/services, and
+  restore-point guards. Windows-only paths are marked `windows_only` and
+  skipped off Windows; no test mutates the registry, services, or filesystem.
+- `pyproject.toml`: pytest config, ruff (E/F/I/W) and black (88 cols) settings.
+- CI now runs the pytest suite and ruff + black checks on every push/PR
+  (ubuntu runner, SHA-pinned actions).
+- `requirements-dev.txt` is now Linux-safe (no longer pulls in pywin32 via
+  `requirements.txt`); adds `ruff`.
+- Issue templates (bug report, feature request) and a PR template with a
+  safety checklist for system-mutating changes.
+- README rewritten with full per-tab feature rundown, architecture notes,
+  Preview Mode docs, verification guide, roadmap, and a Donations section.
+
+### Changed
+- Whole codebase formatted with black and ruff --fix (whitespace, import
+  order, two genuinely-unused imports removed). No behavior changes.
+
 ## [1.1.2] - 2026-10-10
 
 ### Security
