@@ -9,7 +9,7 @@
 # and enforce with `pip install --require-hashes`.
 
 # Low-level Windows API interaction extensions
-pywin32==310
+pywin32==312
 
 # Process metrics, memory telemetry, and CPU prioritization tracking
 psutil==7.0.0
