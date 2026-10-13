@@ -3,6 +3,22 @@
 All notable changes to NitroCore are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Fixed
+- Service startup changes no longer leak the service handle when
+  `ChangeServiceConfig` fails, and a failure is reported per-service instead
+  of aborting the remaining services in the step (audit 2026-10-13, W-5)
+- Power-plan switching (`powercfg`) is now time-bounded like every other
+  subprocess call in the app — a hung `powercfg` reports a Power Plan Error
+  instead of wedging the worker thread (audit 2026-10-13, W-6)
+- Import ordering in three modules restored to the project's ruff style,
+  returning the CI lint job to green
+
+### Documentation
+- winget README now documents the published 1.1.3 manifests (hash verified
+  against the v1.1.3 release) instead of only the original 1.1.2 submission
+
 ## [1.1.3] - 2026-10-11
 
 ### Security
