@@ -8,6 +8,7 @@ import weakref
 from typing import Dict, Optional
 
 import psutil
+
 from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs, system_tool_path
 
 _POWER_PLAN_NAMES = {

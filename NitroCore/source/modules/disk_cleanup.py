@@ -5,6 +5,7 @@ from ctypes import wintypes
 from datetime import datetime, timedelta
 
 import psutil
+
 from source.utils.config import Config
 from source.utils.helpers import is_reparse_point
 from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs, system_tool_path
