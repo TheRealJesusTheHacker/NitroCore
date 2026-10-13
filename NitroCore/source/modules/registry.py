@@ -144,9 +144,24 @@ class RegistryOptimizer:
                 payload = json.load(fh)
         except (OSError, ValueError) as e:
             return f"Could not read undo file: {e}"
+        # BH2-3 (bug hunt 2026-10-13): valid JSON with the wrong shape
+        # (a list, a bare string, "entries" that isn't a list, non-object
+        # entries) used to raise AttributeError/TypeError out of this
+        # method — the undo file is user-writable, so a corrupt or
+        # hand-edited file crashed the restore instead of reporting.
+        if not isinstance(payload, dict) or not isinstance(
+            payload.get("entries"), list
+        ):
+            return (
+                "Could not read undo file: unexpected format "
+                "(expected a JSON object with an 'entries' list)"
+            )
         restored, failed = 0, 0
         hive_by_name = {v: k for k, v in _HIVE_NAMES.items()}
-        for entry in payload.get("entries", []):
+        for entry in payload["entries"]:
+            if not isinstance(entry, dict):
+                failed += 1
+                continue
             # S-1 (audit 2026-10-11): undo files live under %APPDATA%, which is
             # user-writable. A planted undo-*.json must never turn this
             # elevated process into a registry writer outside HKCU. Every
@@ -240,6 +255,13 @@ class RegistryOptimizer:
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                # BH2-4 (bug hunt 2026-10-13): this and the pagefile call
+                # below were the last subprocess sites in the app without
+                # a timeout (W-6 bounded the rest) — a hung powercfg or
+                # PowerShell would wedge the worker thread and the GUI
+                # busy state forever. A timeout now lands in the existing
+                # error handlers and returns a readable failure string.
+                timeout=30,
                 **hidden_subprocess_kwargs(),
             )
             return "Hibernation Disabled Successfully"
@@ -279,6 +301,10 @@ class RegistryOptimizer:
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                # BH2-4: see _disable_hibernation — PowerShell/CIM gets a
+                # longer bound than powercfg (cold start + CIM on a loaded
+                # machine), but it must be bounded.
+                timeout=120,
                 **hidden_subprocess_kwargs(),
             )
             return "Pagefile configuration optimized to automatic management"
