@@ -187,7 +187,9 @@ class DiskCleanup:
         if not os.path.exists(downloads_path):
             return "Downloads folder not found"
 
-        cutoff_date = datetime.now() - timedelta(days=retention_days)
+        # Compare raw epoch timestamps: building a datetime per file (via
+        # datetime.fromtimestamp) dominated this scan on large trees.
+        cutoff_ts = (datetime.now() - timedelta(days=retention_days)).timestamp()
         files_removed = 0
         files_skipped = 0
         bytes_saved = 0
@@ -200,11 +202,9 @@ class DiskCleanup:
                     for entry in entries:
                         try:
                             if entry.is_file(follow_symlinks=False):
-                                file_mtime = datetime.fromtimestamp(
-                                    entry.stat().st_mtime
-                                )
-                                if file_mtime < cutoff_date:
-                                    file_size = entry.stat().st_size
+                                entry_stat = entry.stat()
+                                if entry_stat.st_mtime < cutoff_ts:
+                                    file_size = entry_stat.st_size
                                     if execute:
                                         # Recycle, don't destroy. Fail closed:
                                         # if the shell won't take it, leave it.

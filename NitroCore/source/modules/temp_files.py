@@ -30,11 +30,11 @@ class TempFileCleaner:
         files_deleted = 0
         bytes_saved = 0
 
-        if not os.path.exists(target_dir):
-            return files_deleted, bytes_saved
-
         try:
-            # os.scandir() is heavily optimized at the OS file-system level on Windows
+            # os.scandir() is heavily optimized at the OS file-system level on
+            # Windows. A missing target raises OSError here, which the handler
+            # below already turns into (0, 0) — no separate exists() probe
+            # (that was one extra stat syscall per directory in the tree).
             with os.scandir(target_dir) as entries:
                 for entry in entries:
                     try:
