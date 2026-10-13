@@ -23,6 +23,19 @@ All notable changes to NitroCore are documented here. The format is based on
   (imported nowhere) and a write-only attribute in the progress panel
 
 ### Fixed
+- Service stops now report unexpected (non-Windows-API) failures
+  per-service instead of aborting the whole services step and discarding
+  every result — the same guard startup changes received in W-5, applied
+  to the stop path (bug hunt 2026-10-13, BH2-1)
+- Stop polling no longer mistakes a just-issued stop for a timeout: a
+  service still reporting "running" right after the stop request keeps
+  being polled until it stops or the deadline passes (BH2-2)
+- Registry undo restore no longer crashes on a corrupt or hand-edited
+  undo file whose JSON parses but has the wrong shape — it reports the
+  file as unreadable instead (BH2-3)
+- The registry module's `powercfg` (hibernation) and PowerShell
+  (pagefile) calls are now time-bounded like every other subprocess
+  call in the app (BH2-4)
 - Service startup changes no longer leak the service handle when
   `ChangeServiceConfig` fails, and a failure is reported per-service instead
   of aborting the remaining services in the step (audit 2026-10-13, W-5)
