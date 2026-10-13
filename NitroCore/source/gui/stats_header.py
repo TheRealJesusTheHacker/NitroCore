@@ -7,6 +7,7 @@ from source.gui import theme
 from source.gui.fonts import FontEngine
 from source.gui.frame import CustomFrame
 from source.gui.label import CustomLabel
+from source.modules.async_worker import AsyncWorker
 from source.modules.system_stats import SystemStats
 
 
@@ -41,6 +42,8 @@ class StatsHeader:
         self._stats = SystemStats()
         self._value_labels: dict[str, CustomLabel] = {}
         self._poll_id: Optional[str] = None
+        self._fetch_in_flight = False
+        self._stopped = False
 
         container = CustomFrame(parent, bg_color=bg_color)
         container.pack(fill="x", pady=(0, theme.PAD_MD))
@@ -96,16 +99,54 @@ class StatsHeader:
         )
         hint_lbl.pack(anchor="w")
 
+    def _render(self, data: dict) -> None:
+        for key, lbl in self._value_labels.items():
+            lbl.configure(text=data.get(key, "—"))
+
     def refresh(self) -> None:
+        """Priming refresh: synchronous snapshot + render, then start polling.
+
+        Runs once during construction (window not yet shown), so blocking
+        briefly here is harmless and the header never paints placeholders.
+        """
         try:
-            data = self._stats.snapshot()
-            for key, lbl in self._value_labels.items():
-                lbl.configure(text=data.get(key, "—"))
+            self._render(self._stats.snapshot())
         except Exception:
             pass
-        self._poll_id = self.root.after(self.POLL_MS, self.refresh)
+        self._poll_id = self.root.after(self.POLL_MS, self._poll)
+
+    def _poll(self) -> None:
+        """Periodic refresh — fetch off the UI thread, render back on it.
+
+        snapshot() can spawn powercfg (up to its 5s timeout) when the
+        power-plan TTL expires; doing that on the UI thread froze the
+        window on every expiry. The next poll is scheduled up front so the
+        cadence holds even if a fetch runs long; an in-flight guard keeps
+        fetches from piling up.
+        """
+        self._poll_id = self.root.after(self.POLL_MS, self._poll)
+        if self._fetch_in_flight:
+            return
+        self._fetch_in_flight = True
+
+        def on_complete(result) -> None:
+            self._fetch_in_flight = False
+            if self._stopped or result is None:
+                return
+
+            def render() -> None:
+                if not self._stopped:
+                    self._render(result)
+
+            try:
+                self.root.after(0, render)
+            except tk.TclError:
+                pass
+
+        AsyncWorker.run_task(self._stats.snapshot, on_complete)
 
     def stop(self) -> None:
+        self._stopped = True
         if self._poll_id:
             self.root.after_cancel(self._poll_id)
             self._poll_id = None
