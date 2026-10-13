@@ -180,6 +180,13 @@ class ServiceManager:
             svc_handle = win32service.OpenService(
                 scm_handle, service_name, win32service.SERVICE_CHANGE_CONFIG
             )
+        except pywintypes.error as e:
+            if e.winerror == 1060:
+                return "Not Found"
+            return f"Config Failed ({e.strerror})"
+        except Exception as e:
+            return f"Config Failed ({e})"
+        try:
             win32service.ChangeServiceConfig(
                 svc_handle,
                 win32service.SERVICE_NO_CHANGE,
@@ -193,10 +200,19 @@ class ServiceManager:
                 None,
                 None,
             )
-            win32service.CloseServiceHandle(svc_handle)
             return "Startup Set to Manual"
-
         except pywintypes.error as e:
             if e.winerror == 1060:
                 return "Not Found"
             return f"Config Failed ({e.strerror})"
+        except Exception as e:
+            # W-5 (audit 2026-10-13): a non-win32 failure here previously
+            # propagated out of _optimize_services, aborting the remaining
+            # services and failing the whole step. Report it per-service,
+            # like every other failure path in this class.
+            return f"Config Failed ({e})"
+        finally:
+            # W-5: every OpenService success path must release its handle —
+            # ChangeServiceConfig raising previously leaked it (the W-4
+            # pattern from _stop_service_safely, applied here too).
+            win32service.CloseServiceHandle(svc_handle)
