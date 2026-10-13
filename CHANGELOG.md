@@ -5,6 +5,23 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+### Performance
+- Headless `--dry-run` no longer imports tkinter or the GUI modules
+  (deferred until the window is actually built), cutting preview startup
+  substantially
+- Temp purge and Downloads scans are faster: removed a redundant
+  per-directory existence probe from the purge walk, and the Downloads
+  scan now compares epoch timestamps instead of building a datetime
+  object for every file
+- Stats header polls no longer run on the UI thread — the periodic
+  snapshot (which can spawn `powercfg`) is fetched on a worker thread
+  and rendered back on the UI thread, so the window cannot freeze when
+  the power-plan cache expires
+
+### Removed
+- Dead GUI modules `source/gui/layout.py` and `source/gui/entry.py`
+  (imported nowhere) and a write-only attribute in the progress panel
+
 ### Fixed
 - Service startup changes no longer leak the service handle when
   `ChangeServiceConfig` fails, and a failure is reported per-service instead
