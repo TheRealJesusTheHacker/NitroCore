@@ -133,6 +133,12 @@ class ServiceManager:
             if e.winerror == 1060:
                 return "Not Found on System"
             return f"Stop Failed ({e.strerror})"
+        except Exception as e:
+            # BH2-1 (bug hunt 2026-10-13): the W-5 generic guard was applied
+            # to _set_service_startup_safely but not here — a non-win32
+            # failure from OpenService propagated out of _optimize_services,
+            # aborting the remaining services and losing every result.
+            return f"Stop Failed ({e})"
         try:
             status = win32service.QueryServiceStatus(svc_handle)
             if status[1] == win32service.SERVICE_STOPPED:
@@ -152,6 +158,10 @@ class ServiceManager:
             if e.winerror == 1060:
                 return "Not Found on System"
             return f"Stop Failed ({e.strerror})"
+        except Exception as e:
+            # BH2-1: same hole on the query/control path — report the
+            # failure for this service instead of killing the whole step.
+            return f"Stop Failed ({e})"
         finally:
             # W-4 (audit 2026-10-11): every OpenService success path must
             # release its handle — QueryServiceStatus/ControlService can
@@ -169,9 +179,19 @@ class ServiceManager:
                 return False
             if state == win32service.SERVICE_STOPPED:
                 return True
-            if state != win32service.SERVICE_STOP_PENDING:
+            if state not in (
+                win32service.SERVICE_STOP_PENDING,
+                win32service.SERVICE_RUNNING,
+            ):
                 # Service settled in a non-stopped state (e.g. paused).
                 return False
+            # BH2-2 (bug hunt 2026-10-13): SERVICE_RUNNING must keep
+            # polling too. ControlService returns before the service has
+            # necessarily reported STOP_PENDING, and a fast service can go
+            # straight from RUNNING to STOPPED — bailing on the first
+            # RUNNING read reported "timed out" for stops that actually
+            # succeeded a moment later. A service that ignores the stop
+            # still fails truthfully at the deadline.
             time.sleep(0.5)
         return False
 
