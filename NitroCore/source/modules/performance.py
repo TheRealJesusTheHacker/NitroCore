@@ -1,6 +1,7 @@
 import subprocess
 
 import psutil
+
 from source.utils.config import Config
 from source.utils.platform import IS_WINDOWS, hidden_subprocess_kwargs, system_tool_path
 from source.utils.preview import preview
@@ -103,6 +104,12 @@ class PerformanceTuner:
         run_kwargs = {
             "stdout": subprocess.PIPE,
             "stderr": subprocess.PIPE,
+            # W-6 (audit 2026-10-13): every other subprocess site in the app
+            # is time-bounded; these powercfg calls were not, so a hung
+            # powercfg would wedge the worker thread (and the GUI busy
+            # state) forever. A timeout surfaces as a Power Plan Error via
+            # the handlers below instead.
+            "timeout": 30,
             **hidden_subprocess_kwargs(),
         }
 

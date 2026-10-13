@@ -43,6 +43,46 @@ def test_dry_run_power_plan_records_preview_without_powercfg(monkeypatch):
     assert any("Balanced" in entry for entry in entries)
 
 
+def test_power_plan_calls_are_time_bounded(monkeypatch):
+    # W-6 (audit 2026-10-13): the powercfg calls in optimize_power_plan were
+    # the only subprocess sites in the app without a timeout — a hung
+    # powercfg would wedge the worker thread forever.
+    from types import SimpleNamespace
+
+    monkeypatch.setattr(perf_module, "IS_WINDOWS", True)
+    monkeypatch.setattr(Config, "DRY_RUN", False, raising=False)
+    monkeypatch.setattr(PerformanceTuner, "_ultimate_scheme_present", lambda self: True)
+    calls = []
+
+    def fake_run(args, **kwargs):
+        calls.append(kwargs)
+        return SimpleNamespace(returncode=0, stdout=b"", stderr=b"")
+
+    monkeypatch.setattr(perf_module.subprocess, "run", fake_run)
+
+    result = PerformanceTuner().optimize_power_plan()
+
+    assert result == "Power Plan: Switched to Ultimate Performance"
+    assert calls and all(kwargs.get("timeout") for kwargs in calls)
+
+
+def test_power_plan_timeout_reports_error_instead_of_hanging(monkeypatch):
+    import subprocess
+
+    monkeypatch.setattr(perf_module, "IS_WINDOWS", True)
+    monkeypatch.setattr(Config, "DRY_RUN", False, raising=False)
+    monkeypatch.setattr(PerformanceTuner, "_ultimate_scheme_present", lambda self: True)
+
+    def fake_run(args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd="powercfg", timeout=30)
+
+    monkeypatch.setattr(perf_module.subprocess, "run", fake_run)
+
+    result = PerformanceTuner().optimize_power_plan()
+
+    assert result.startswith("Power Plan Error")
+
+
 def test_dry_run_process_priority_records_preview(monkeypatch):
     # psutil.process_iter is read-only; dry run must not call proc.nice()
     monkeypatch.setattr(perf_module, "IS_WINDOWS", True)
