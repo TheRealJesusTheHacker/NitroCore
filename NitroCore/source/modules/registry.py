@@ -50,17 +50,8 @@ class RegistryOptimizer:
 
     def _read_registry_value(self, hive, sub_key, value_name):
         """Best-effort read of the current value (safe; used for previews)."""
-        if winreg is None:
-            return None
-        try:
-            key = winreg.OpenKey(hive, sub_key, 0, winreg.KEY_READ)
-            try:
-                value, _ = winreg.QueryValueEx(key, value_name)
-                return value
-            finally:
-                winreg.CloseKey(key)
-        except OSError:
-            return None
+        value, _ = self._read_registry_value_full(hive, sub_key, value_name)
+        return value
 
     def _read_registry_value_full(self, hive, sub_key, value_name):
         """Best-effort read of (value, type); (None, None) when absent."""

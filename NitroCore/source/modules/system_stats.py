@@ -18,6 +18,12 @@ _POWER_PLAN_NAMES = {
     "a1841308-3541-4fab-bc81-715741643351": "Power Saver",
 }
 
+# Compiled once: _query_power_plan runs this against powercfg output.
+_GUID_RE = re.compile(
+    r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})",
+    re.IGNORECASE,
+)
+
 # Power plan changes rarely; cache it instead of spawning powercfg on every poll.
 _POWER_PLAN_TTL_SECONDS = 120.0
 
@@ -62,12 +68,10 @@ class SystemStats:
             and now - self._disk_cached_at < _DISK_USAGE_TTL_SECONDS
         ):
             return self._disk_cache
+        drive = os.environ.get("SystemDrive", "C:")
         try:
-            usage = psutil.disk_usage(os.environ.get("SystemDrive", "C:") + "\\")
-            self._disk_cache = (
-                f"{usage.free // (1024 ** 3)} GB free on "
-                f"{os.environ.get('SystemDrive', 'C:')}"
-            )
+            usage = psutil.disk_usage(drive + "\\")
+            self._disk_cache = f"{usage.free // (1024 ** 3)} GB free on {drive}"
         except Exception:
             self._disk_cache = "N/A"
         self._disk_cached_at = now
@@ -100,11 +104,7 @@ class SystemStats:
                 timeout=5,
                 **hidden_subprocess_kwargs(),
             )
-            match = re.search(
-                r"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})",
-                result.stdout,
-                re.IGNORECASE,
-            )
+            match = _GUID_RE.search(result.stdout)
             if match:
                 guid = match.group(1).lower()
                 return _POWER_PLAN_NAMES.get(guid, "Custom Plan")

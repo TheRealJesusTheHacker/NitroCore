@@ -20,11 +20,9 @@ class PerformanceTuner:
             matched = []
             for proc in psutil.process_iter(["name", "pid"]):
                 try:
-                    if (
-                        proc.info["name"]
-                        and proc.info["name"].lower() in target_processes
-                    ):
-                        matched.append(f"{proc.info['name']} (PID {proc.info['pid']})")
+                    name = proc.info["name"]
+                    if name and name.lower() in target_processes:
+                        matched.append(f"{name} (PID {proc.info['pid']})")
                 except (
                     psutil.NoSuchProcess,
                     psutil.AccessDenied,
@@ -48,7 +46,8 @@ class PerformanceTuner:
 
         for proc in psutil.process_iter(["name"]):
             try:
-                if proc.info["name"] and proc.info["name"].lower() in target_processes:
+                name = proc.info["name"]
+                if name and name.lower() in target_processes:
                     proc.nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS)
                     adjusted_count += 1
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):

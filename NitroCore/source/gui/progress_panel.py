@@ -79,13 +79,11 @@ class ProgressPanel:
         self.summary_lbl.pack(anchor="w")
 
         # Hide the bar and summary line while idle so the panel stays compact.
-        self._bar_visible = False
         self._summary_visible = False
         self.bar.pack_forget()
         self.summary_lbl.pack_forget()
 
     def _show_bar(self, visible: bool) -> None:
-        self._bar_visible = visible
         if visible:
             self.bar.pack(fill="x", pady=(8, 4))
             if self._summary_visible:
