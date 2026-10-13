@@ -5,23 +5,21 @@ NitroCore Windows System Optimizer - Primary Application Entry Point.
 import ctypes
 import os
 import sys
-import tkinter as tk
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from source import __version__
-from source.gui import theme
-from source.gui.button import CustomButton
-from source.gui.dialogs import ConfirmDialog, RestoreFailedDialog, RestorePointDialog
-from source.gui.fonts import FontEngine
-from source.gui.frame import CustomFrame
-from source.gui.label import CustomLabel
-from source.gui.tabs import TabbedInterface
-from source.gui.window import Window
 from source.utils.config import Config
 from source.utils.lifecycle import LifecycleManager
 from source.utils.platform import IS_WINDOWS
 from source.utils.restore_point import create_restore_point
+
+# GUI imports (tkinter + source.gui.*) are deliberately deferred into
+# _import_gui(), which run() calls only after the headless --dry-run path
+# has returned. Importing tkinter and the widget modules costs a large
+# share of startup time, and a read-only preview should not pay it. The
+# names are bound as module globals before any GUI method can execute —
+# every method that uses them is reachable only through run().
 
 
 def is_admin() -> bool:
@@ -50,6 +48,27 @@ def play_beep() -> None:
         ctypes.windll.kernel32.Beep(800, 150)
     except Exception:
         pass
+
+
+def _import_gui() -> None:
+    """Bind the GUI modules as globals (see the note at the top of this file)."""
+    global tk, theme, CustomButton, ConfirmDialog, RestoreFailedDialog
+    global RestorePointDialog, FontEngine, CustomFrame, CustomLabel
+    global TabbedInterface, Window
+    import tkinter as tk
+
+    from source.gui import theme
+    from source.gui.button import CustomButton
+    from source.gui.dialogs import (
+        ConfirmDialog,
+        RestoreFailedDialog,
+        RestorePointDialog,
+    )
+    from source.gui.fonts import FontEngine
+    from source.gui.frame import CustomFrame
+    from source.gui.label import CustomLabel
+    from source.gui.tabs import TabbedInterface
+    from source.gui.window import Window
 
 
 class NitroCoreApplication:
@@ -412,6 +431,8 @@ class NitroCoreApplication:
             # preview should never fight the user for elevation.
             self._run_headless_preview()
             return
+
+        _import_gui()
 
         if not is_admin():
             # L-1: non-Windows-safe message path — ctypes.windll crashes on
