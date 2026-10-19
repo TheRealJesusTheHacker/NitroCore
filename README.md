@@ -1,4 +1,4 @@
-# ⚡ NitroCore — Windows System Optimizer
+# NitroCore — Windows System Optimizer
 
 [![CI](https://github.com/TheRealJesusTheHacker/NitroCore/actions/workflows/ci.yml/badge.svg)](https://github.com/TheRealJesusTheHacker/NitroCore/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/TheRealJesusTheHacker/NitroCore)](https://github.com/TheRealJesusTheHacker/NitroCore/releases)
@@ -6,14 +6,16 @@
 [![Platform: Windows](https://img.shields.io/badge/platform-Windows-0078D6)](https://www.microsoft.com/windows)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+**Status:** Released. Current version 1.1.3, as stated in `pyproject.toml` — distributed via winget, as a standalone `.exe` from GitHub Releases, and from source (Python 3.9+, Windows).
+
 ## What is NitroCore?
 
 **NitroCore is a Windows system optimizer with a safety-first design.** Over time, a Windows PC accumulates junk files, runs background services you don't need, and ships with settings that favor battery life and visual flair over raw speed. NitroCore cleans the junk, quiets the background noise, and flips the right switches — through one dashboard, with a restore point offered before anything risky and a preview mode that shows every change before it happens.
 
 The core idea: **two one-click optimization profiles** that encode real tuning knowledge, so you don't need to know what the registry is to benefit from it:
 
-- **🎮 Gaming** — maximum FPS and lowest latency. Aggressive power plan, full registry tuning, and background service reduction. It trades automatic patching for speed and tells you so, explicitly.
-- **🛡️ Cybersecurity** — stable tools and patch-friendly. Visual performance tweaks and temp cleanup, while Windows Update and BITS stay alive so security tooling and patches keep flowing.
+- **Gaming** — maximum FPS and lowest latency. Aggressive power plan, full registry tuning, and background service reduction. It trades automatic patching for speed and tells you so, explicitly.
+- **Cybersecurity** — stable tools and patch-friendly. Visual performance tweaks and temp cleanup, while Windows Update and BITS stay alive so security tooling and patches keep flowing.
 
 Every profile runs the same five-step pipeline — **Registry → Temp Files → Disk Cleanup → Services → Performance** — but each step scopes its behavior to the active profile. High-impact steps (registry, services, and disk cleanup on the Gaming profile) offer a Windows restore point before they run, and if restore-point creation fails, the pipeline **stops** and asks you what to do instead of silently proceeding without its safety net.
 
@@ -25,7 +27,7 @@ Every profile runs the same five-step pipeline — **Registry → Temp Files →
 
 ## Features
 
-### 🗂️ Tabbed dashboard
+### Tabbed dashboard
 
 The GUI is a custom-built tkinter interface (980×780) with six tabs. Every tab carries a risk label — **High**, **Medium**, or **Low** — so you know what you're getting into before you click:
 
@@ -38,11 +40,11 @@ The GUI is a custom-built tkinter interface (980×780) with six tabs. Every tab 
 | Performance Tuning | Low | Switches to the **Ultimate Performance** power plan via `powercfg` (checks first so it never clones a duplicate scheme; falls back to **High Performance** if Ultimate is unavailable) and raises `explorer.exe` / `dwm.exe` to **Above Normal** priority via psutil. |
 | Status & Logs | Low | Live scrolling log of every step as it runs. Full logs are also saved to `%APPDATA%\NitroCore\logs`. |
 
-### 📊 Live stats header
+### Live stats header
 
 CPU %, RAM (% and GB used/total), free disk space, and the active power-plan name — polled continuously, with the expensive queries cached (disk 30 s, power plan 120 s) and the power-plan cache invalidated the moment a pipeline changes it.
 
-### 👁️ Preview Mode (`--dry-run`)
+### Preview Mode (`--dry-run`)
 
 Run the whole pipeline without changing anything:
 
@@ -52,11 +54,11 @@ python main.py --dry-run
 
 In dry-run mode every mutating module records a human-readable *"would do"* entry instead of acting, and the app prints a numbered report plus a `PREVIEW ONLY — no changes were made.` footer. Dry runs skip the admin-elevation gate and the single-instance lock entirely — a read-only preview never fights you for privileges. Restore-point creation is skipped in preview mode (nothing will change, so there's nothing to roll back).
 
-### 🛟 Restore-point safety net
+### Restore-point safety net
 
 Before high-impact steps, NitroCore offers to create a system restore point via PowerShell `Checkpoint-Computer` (`-RestorePointType MODIFY_SETTINGS`, run with `-NoProfile -NonInteractive`). If creation fails, the run **blocks** with a dialog: *Try Again / Continue Without It / Abort* — it never silently proceeds without the safety net.
 
-### 🖥️ Command-line usage
+### Command-line usage
 
 ```powershell
 # Full GUI (must run as administrator)
@@ -79,7 +81,7 @@ There's also a hidden `--fallout` flag. And if you click the title bar 7 times�
 - **`source/gui/`** — custom tkinter widgets (buttons, dialogs, tabs, theme, fonts) — no stock-ttk look.
 - Every Windows-only assumption is centralized in `source/utils/platform.py` (`IS_WINDOWS`), so the app degrades gracefully instead of crashing on other platforms. No `shell=True` anywhere in the codebase — all subprocess calls use argument lists.
 
-## 📥 Installation
+## Installation
 
 ### Option A — winget (easiest)
 
@@ -121,9 +123,9 @@ pip install -r requirements-dev.txt
 python -m pytest NitroCore\tests -v
 ```
 
-> **🖼️ Screenshot:** a GUI screenshot is on the to-do list — it has to be captured on a real Windows machine, which isn't available in this dev environment. (Follow-up for Skyler.)
+> **Screenshot:** a GUI screenshot is on the to-do list — it has to be captured on a real Windows machine, which isn't available in this dev environment.
 
-## 🔐 Verified downloads
+## Verified downloads
 
 Every release ships:
 
@@ -132,12 +134,12 @@ Every release ships:
 
 Release binaries are currently **unsigned** — Windows SmartScreen will warn on first run. Verify the hash before trusting the binary. (Code signing is a planned manual release step.)
 
-## 🗺️ Roadmap
+## Roadmap
 
 - **Code-signed release binaries** — planned manual release step (see SECURITY.md); kills the SmartScreen warning.
 - GUI screenshot for this README (needs a Windows capture).
 
-## 🤝 Contributing
+## Contributing
 
 Pull requests are welcome. A few ground rules:
 
@@ -146,7 +148,7 @@ Pull requests are welcome. A few ground rules:
 - Run the checks before pushing: `python -m pytest NitroCore/tests`, `ruff check NitroCore`, `black --check NitroCore`.
 - Use the PR template's safety checklist.
 
-## 💰 Donations
+## Donations
 
 If this tool earned its keep, BTC is welcome:
 
@@ -154,12 +156,16 @@ If this tool earned its keep, BTC is welcome:
 bc1qvydns2fmyjzj55wzxq7ta28nxdhcmu9l9m6yg0
 ```
 
-## 📬 Contact
+## Contact
 
 Business inquiries: **Sentinelsafeguard@outlook.com**
 
 Security vulnerabilities: **do not open a public issue** — email Sentinelsafeguard@outlook.com instead. See [SECURITY.md](SECURITY.md).
 
-## 📄 License
+## Changelog
 
-MIT — see [LICENSE](LICENSE).
+All notable changes are documented in [CHANGELOG.md](CHANGELOG.md).
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for the full text.
