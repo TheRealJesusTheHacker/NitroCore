@@ -5,7 +5,7 @@ Features optimized file-stream configuration parsers and proper folder alignment
 
 from pathlib import Path
 
-from setuptools import find_packages, setup
+from setuptools import setup
 
 # Base folder location mapping
 BASE_DIR = Path(__file__).resolve().parent
@@ -58,11 +58,20 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
     ],
-    # Automatically tells setuptools that all source logic lives in 'source/'
-    # (M-5: was incorrectly pointed at a nonexistent 'src/' layout, which
-    # built empty packages)
-    packages=find_packages(where="source"),
-    package_dir={"": "source"},
+    # Ship the 'source' package itself, exactly as the code imports it
+    # (every module uses absolute imports like `from source.gui import
+    # theme`, and main.py does `from source import __version__`).
+    # The previous form — find_packages(where="source") with
+    # package_dir={"": "source"} — installed the SUBpackages as generic
+    # top-level packages named 'gui', 'modules' and 'utils': the wheel
+    # was no longer empty, but every import inside it still referenced
+    # 'source.*', which the wheel did not contain, so an installed wheel
+    # failed on first import (and polluted site-packages with three
+    # collision-prone generic names). An explicit list is used so a
+    # stray directory can never silently join the distribution; the
+    # PyInstaller/.exe path (nitrocore.spec, run from this directory)
+    # does not read this list and is unaffected.
+    packages=["source", "source.gui", "source.modules", "source.utils"],
     # Bundle core manifest text parameters alongside binary wheels
     package_data={
         "": ["LICENSE", "README.md", "VERSION"],
