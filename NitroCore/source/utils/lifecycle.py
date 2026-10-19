@@ -30,6 +30,14 @@ class LifecycleManager:
         )
 
         if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
+            # CreateMutex returned a handle to the EXISTING mutex; we are
+            # about to exit, but drop the handle explicitly instead of
+            # leaking it (and keep cls._mutex from ever holding a handle
+            # this branch does not own).
+            try:
+                cls._mutex.Close()
+            except Exception:
+                pass
             cls._mutex = None
             if IS_WINDOWS:
                 ctypes.windll.user32.MessageBoxW(
