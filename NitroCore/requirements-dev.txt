@@ -27,7 +27,7 @@ flake8==7.1.2
 
 # Packaging & Distribution Pipelines
 setuptools==75.8.2
-wheel==0.45.1
+wheel==0.48.0
 twine==6.1.0
 
 # Dev-time asset generation (assets/create_icon.py; never shipped in the binary)
