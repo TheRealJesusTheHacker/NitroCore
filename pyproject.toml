@@ -12,6 +12,25 @@ license = { text = "MIT" }
 requires-python = ">=3.9"
 authors = [{ name = "JesusTheHacker" }]
 keywords = ["windows", "system-optimizer", "gaming", "cybersecurity", "python"]
+# Mirror NitroCore/requirements.txt (the canonical pin list). pywin32 is
+# Windows-only, so it carries a platform marker here: the unmarked pin in
+# requirements.txt is consumed by the Windows build host, while this
+# project table may also be built on Linux (docs/CI) where pywin32 has
+# no wheels.
+dependencies = [
+    "psutil==7.0.0",
+    "pywin32==310; sys_platform == 'win32'",
+]
+
+# The importable package is NitroCore/source (imported everywhere as
+# `source.*`). Without this section a root-level build fell back to
+# setuptools auto-discovery, which failed metadata generation outright
+# (multiple top-level directories). This finds the same package the
+# NitroCore/setup.py build ships; the PyInstaller .exe path does not
+# read this file's packaging sections.
+[tool.setuptools.packages.find]
+where = ["NitroCore"]
+include = ["source", "source.*"]
 
 [tool.pytest.ini_options]
 testpaths = ["NitroCore/tests"]
