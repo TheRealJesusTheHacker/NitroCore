@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 jobs:
   build-exe:
@@ -26,22 +27,47 @@ jobs:
         run: |
           cd NitroCore
           pyinstaller --noconfirm nitrocore.spec
+      - name: Build portable edition (PyInstaller one-folder)
+        run: |
+          cd NitroCore
+          pyinstaller --noconfirm --distpath dist-portable --workpath build-portable nitrocore-portable.spec
+      - name: Assemble NitroCorePortable.zip
+        shell: pwsh
+        run: |
+          $stage = Join-Path $PWD "NitroCorePortable"
+          New-Item -ItemType Directory -Force $stage | Out-Null
+          Copy-Item -Recurse -Force "NitroCore/dist-portable/NitroCoreOptimizer/*" $stage
+          Copy-Item -Force "NitroCore/portable/README-PORTABLE.txt" $stage
+          if (-not (Test-Path (Join-Path $stage "NitroCoreOptimizer.exe"))) {
+            Write-Host "Portable staging is missing NitroCoreOptimizer.exe"
+            exit 1
+          }
+          Compress-Archive -Path "$stage/*" -DestinationPath "NitroCore/dist/NitroCorePortable.zip" -Force
+          Get-Item "NitroCore/dist/NitroCorePortable.zip" | Select-Object Name, Length
       - name: Generate SHA256 hashes
         shell: pwsh
         run: |
           cd NitroCore/dist
-          Get-ChildItem *.exe | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash, $_.Name } | Out-File -Encoding ascii SHA256SUMS.txt
+          "NitroCoreOptimizer.exe", "NitroCorePortable.zip" | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_ -Algorithm SHA256).Hash, $_ } | Out-File -Encoding ascii SHA256SUMS.txt
           Get-Content SHA256SUMS.txt
       - name: Attest build provenance
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4
         with:
           subject-path: |
             NitroCore/dist/*.exe
+            NitroCore/dist/NitroCorePortable.zip
             NitroCore/dist/SHA256SUMS.txt
       - name: Upload to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           files: |
             NitroCore/dist/*.exe
+            NitroCore/dist/NitroCorePortable.zip
             NitroCore/dist/SHA256SUMS.txt
           generate_release_notes: true
+      - name: List built artifacts (manual dispatch runs)
+        if: github.event_name == 'workflow_dispatch'
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse NitroCore/dist, NitroCore/dist-portable | Select-Object FullName, Length
