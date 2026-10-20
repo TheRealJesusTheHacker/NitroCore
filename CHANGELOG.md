@@ -13,6 +13,8 @@ bug-fix, performance, and packaging work accumulated on `main`
 since 1.1.3 (itemized below). No new optimizer behavior is
 introduced beyond those itemized fixes and performance changes.
 
+Release: https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4
+
 ### Added
 - Portable edition packaging: `NitroCore/nitrocore-portable.spec`
   (PyInstaller one-folder build of the same `main.py` entry point,

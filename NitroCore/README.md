@@ -4,7 +4,7 @@ This folder is the NitroCore application itself: entry point, importable `source
 
 👉 **Full documentation — features, profiles, install options (winget / .exe / source / pip), usage, safety model, and roadmap — is in the [main README](../README.md).**
 
-Current version: **1.1.3**, read at build time from [`VERSION`](VERSION) by `setup.py`, and kept in sync with `pyproject.toml` and `source/__init__.py` — `tests/test_version.py` asserts all three agree.
+Current version: **1.1.4**, read at build time from [`VERSION`](VERSION) by `setup.py`, and kept in sync with `pyproject.toml` and `source/__init__.py` — `tests/test_version.py` asserts all three agree.
 
 ## Quick start (from source)
 
@@ -33,7 +33,7 @@ python main.py --dry-run
 - `requirements.txt` — pinned runtime dependencies (`psutil==7.0.0`, `pywin32==310`)
 - `requirements-dev.txt` — pinned test/lint tooling; deliberately Linux-safe (does not pull in `pywin32`)
 - `nitrocore.spec` — PyInstaller spec used to build the release `.exe`
-- `nitrocore-portable.spec` — PyInstaller one-folder spec for the portable edition; the release workflow zips its output as `NitroCorePortable.zip` (ships starting with the next release after 1.1.3)
+- `nitrocore-portable.spec` — PyInstaller one-folder spec for the portable edition; the release workflow zips its output as `NitroCorePortable.zip` (shipped starting with [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4))
 - `portable/` — `README-PORTABLE.txt`, the honest what's-in-the-zip note the release workflow copies into `NitroCorePortable.zip`
 - `setup.py` — setuptools build for the `source` package; version from `VERSION`, dependencies from `requirements.txt`
 - `VERSION` — the version file for this folder's build

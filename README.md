@@ -8,7 +8,7 @@
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D6?style=flat-square)](https://www.microsoft.com/windows)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
-**Status:** Released. Current version **1.1.3** — the same version string is carried in `pyproject.toml`, `NitroCore/VERSION`, and `source/__init__.py` (`__version__`), and a test (`tests/test_version.py`) asserts they stay in sync. Distributed via winget, as a standalone `.exe` from GitHub Releases, and from source (Python 3.9+, Windows). A portable edition (`NitroCorePortable.zip`, a one-folder build with no installer — see Option B2 below) is wired into the release workflow and ships starting with the next release after 1.1.3; the 1.1.3 release itself ships only the single-file `.exe` and `SHA256SUMS.txt`. NitroCore is **not published on PyPI** — there is no publish workflow in this repo, and the pip paths below build and install from this source tree.
+**Status:** Released. Current version **1.1.4** — the same version string is carried in `pyproject.toml`, `NitroCore/VERSION`, and `source/__init__.py` (`__version__`), and a test (`tests/test_version.py`) asserts they stay in sync. Distributed via winget, as a standalone `.exe` from GitHub Releases, and from source (Python 3.9+, Windows). A portable edition (`NitroCorePortable.zip`, a one-folder build with no installer — see Option B2 below) ships as of [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4); the 1.1.3 release and earlier ship only the single-file `.exe` and `SHA256SUMS.txt`. NitroCore is **not published on PyPI** — there is no publish workflow in this repo, and the pip paths below build and install from this source tree.
 
 ## Contents
 
@@ -142,11 +142,11 @@ The winget manifests for the current version (1.1.3) are published in microsoft/
 
 3. Right-click → **Run as administrator**. NitroCore needs elevation to modify system settings; without it, it exits with an "Access Denied" message and exit code 1 instead of half-working.
 
-### Option B2 — Portable edition (`.zip`, no install) — starting with the next release
+### Option B2 — Portable edition (`.zip`, no install) — shipped in v1.1.4
 
-The portable edition is the same application built as a folder (PyInstaller one-folder build from `NitroCore/nitrocore-portable.spec`) instead of a single file: no installer, no setup step. The build path is in the repo and the release workflow (`.github/workflows/release.yml`) builds and zips it on a Windows runner — but the first release that actually ships it is the next one after 1.1.3. The 1.1.3 release (and every earlier one) lists only `NitroCoreOptimizer.exe` and `SHA256SUMS.txt`; if a Releases page does not list `NitroCorePortable.zip`, that release predates the portable edition.
+The portable edition is the same application built as a folder (PyInstaller one-folder build from `NitroCore/nitrocore-portable.spec`) instead of a single file: no installer, no setup step. The release workflow (`.github/workflows/release.yml`) builds and zips it on a Windows runner, and it ships as of [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4). The 1.1.3 release (and every earlier one) lists only `NitroCoreOptimizer.exe` and `SHA256SUMS.txt`; if a Releases page does not list `NitroCorePortable.zip`, that release predates the portable edition.
 
-Once a release lists it:
+From v1.1.4 onward:
 
 1. Download `NitroCorePortable.zip` from that release and verify it against `SHA256SUMS.txt` from the same release (same `certutil` check as Option B, run on the `.zip`).
 2. Unzip it anywhere — a USB stick works. Keep the folder together: `NitroCoreOptimizer.exe` needs its `_internal` folder beside it.
@@ -179,7 +179,7 @@ pip install .
 
 ```powershell
 python -m build --wheel
-pip install dist\nitrocore-1.1.3-py3-none-any.whl
+pip install dist\nitrocore-1.1.4-py3-none-any.whl
 ```
 
 Two honest caveats:
@@ -249,7 +249,7 @@ black --check NitroCore
 
 **Verified test count (2026-10-20, from a fresh clone of HEAD `ad8ee2c`):** `pytest --collect-only` collects **134 tests**; a full run on Linux (Python 3.12, `psutil==7.0.0`, `pytest==8.3.5`) reports **133 passed, 1 skipped**. The suite only exercises non-mutating logic and dry-run paths — no test mutates the registry, services, or filesystem — and Windows-only paths are marked `windows_only`. Test files map to the modules they cover (`test_registry_undo.py`, `test_services.py`, `test_temp_files_dryrun.py`, `test_version.py`, and the rest under `NitroCore/tests/`).
 
-CI (`.github/workflows/ci.yml`) runs on every push and pull request to `main`: a byte-compile check on Ubuntu and on Windows, the pytest suite on Ubuntu, and ruff + black checks. CodeQL analysis (`.github/workflows/codeql.yml`) runs on push, pull request, and a weekly schedule. Releases are built by `.github/workflows/release.yml` on `v*` tags (a manual `workflow_dispatch` run builds the same artifacts without uploading a release): PyInstaller builds the `.exe` on a Windows runner, the same job also builds the portable one-folder edition from `nitrocore-portable.spec` and zips it as `NitroCorePortable.zip`, `SHA256SUMS.txt` is generated covering both downloads, build-provenance attestations are created, and the files are uploaded to the GitHub Release. The portable zip ships starting with the first tag cut after the portable build path landed — releases up to and including 1.1.3 contain only the `.exe` and `SHA256SUMS.txt`. There is no PyPI publish step anywhere in the repo.
+CI (`.github/workflows/ci.yml`) runs on every push and pull request to `main`: a byte-compile check on Ubuntu and on Windows, the pytest suite on Ubuntu, and ruff + black checks. CodeQL analysis (`.github/workflows/codeql.yml`) runs on push, pull request, and a weekly schedule. Releases are built by `.github/workflows/release.yml` on `v*` tags (a manual `workflow_dispatch` run builds the same artifacts without uploading a release): PyInstaller builds the `.exe` on a Windows runner, the same job also builds the portable one-folder edition from `nitrocore-portable.spec` and zips it as `NitroCorePortable.zip`, `SHA256SUMS.txt` is generated covering both downloads, build-provenance attestations are created, and the files are uploaded to the GitHub Release. The portable zip ships starting with [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4) — releases up to and including 1.1.3 contain only the `.exe` and `SHA256SUMS.txt`. There is no PyPI publish step anywhere in the repo.
 
 Building the `.exe` locally uses the same spec the release workflow uses:
 
@@ -270,7 +270,7 @@ pyinstaller --noconfirm nitrocore-portable.spec
 
 Every release ships:
 
-- **`NitroCorePortable.zip`** — the portable edition (starting with the next release after 1.1.3; earlier releases ship the single-file `.exe` only).
+- **`NitroCorePortable.zip`** — the portable edition (shipped starting with [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4); earlier releases ship the single-file `.exe` only).
 - **`SHA256SUMS.txt`** — hashes for every release artifact, so you can confirm your download wasn't tampered with.
 - **Signed build-provenance attestations** — cryptographic proof the binaries were built from this repo's code.
 
@@ -280,10 +280,10 @@ Release binaries are currently **unsigned** — Windows SmartScreen will warn on
 
 From [CHANGELOG.md](CHANGELOG.md)'s Unreleased section and the project's own notes:
 
-- **Portable edition, first shipped zip** — the build path has landed (one-folder spec `NitroCore/nitrocore-portable.spec`, release-workflow zip step, `README-PORTABLE.txt`); the first `NitroCorePortable.zip` ships with the next release after 1.1.3.
+- **Portable edition** — shipped: the first `NitroCorePortable.zip` was released in [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4) (one-folder spec `NitroCore/nitrocore-portable.spec`, release-workflow zip step, `README-PORTABLE.txt`).
 - **Code-signed release binaries** — planned manual release step (see SECURITY.md); removes the SmartScreen warning.
 - **GUI screenshot for this README** — needs a capture on a real Windows machine, which isn't available in the current dev environment.
-- The Unreleased changelog entries (headless-preview startup, temp/Downloads scan performance, stats polling off the UI thread, and the bug-hunt #2 fixes) are already on `main` ahead of the 1.1.3 release — see the changelog for the itemized list.
+- The changelog entries for headless-preview startup, temp/Downloads scan performance, stats polling off the UI thread, and the bug-hunt #2 fixes shipped in v1.1.4 — see the changelog for the itemized list.
 
 ## Contributing
 
