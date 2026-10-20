@@ -237,7 +237,17 @@ class DiskCleanup:
                             # RecursionError: pathologically deep trees skip
                             # that subtree instead of failing the whole run.
                             continue
-            except PermissionError:
+            except OSError:
+                # BH sweep #2: this was PermissionError-only, so a
+                # top-level scandir failure of any other kind — the
+                # Downloads path replaced by a plain file
+                # (NotADirectoryError), or the folder vanishing between
+                # the exists() probe and the scan (FileNotFoundError) —
+                # crashed clean_downloads instead of reporting what was
+                # (not) cleaned. Subdirectory scans were already covered
+                # by the per-entry OSError handler at the call site;
+                # only the outermost call could escape. TempFileCleaner's
+                # purge has always caught OSError here.
                 pass
 
         _purge_old_files(downloads_path, execute=not dry_run)
