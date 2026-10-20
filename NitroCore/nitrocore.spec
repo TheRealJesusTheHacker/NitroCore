@@ -49,5 +49,10 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon='assets/icon.ico',
-    uac_admin=True,
+    # asInvoker on purpose (v1.1.5 field fix): a requireAdministrator
+    # manifest makes CreateProcess-based launchers (Technician's
+    # Toolkit, schedulers) fail with WinError 740 before the program
+    # runs. main.py raises the UAC prompt itself at startup instead —
+    # the program still runs fully elevated, it just asks itself.
+    uac_admin=False,
 )

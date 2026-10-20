@@ -2,7 +2,8 @@
 # PyInstaller spec for the NitroCore PORTABLE edition — a one-folder
 # build of the exact same application as nitrocore.spec (same entry
 # point main.py, same datas, same hiddenimports, same icon, same
-# uac_admin elevation request). The only difference is layout:
+# asInvoker manifest — the program raises the UAC prompt itself at
+# startup; see nitrocore.spec). The only difference is layout:
 #
 #   * nitrocore.spec            -> one file:  dist/NitroCoreOptimizer.exe
 #   * nitrocore-portable.spec  -> one folder: dist/NitroCoreOptimizer/
@@ -68,7 +69,8 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon='assets/icon.ico',
-    uac_admin=True,
+    # asInvoker on purpose — see nitrocore.spec (v1.1.5 field fix).
+    uac_admin=False,
 )
 
 coll = COLLECT(

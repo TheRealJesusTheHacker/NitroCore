@@ -3,7 +3,7 @@ NitroCore - Windows System Optimizer
 Professional, thread-safe system optimization architecture.
 """
 
-__version__ = "1.1.4"
+__version__ = "1.1.5"
 __author__ = "NitroCore Team"
 __description__ = "Professional Windows system optimization utility"
 

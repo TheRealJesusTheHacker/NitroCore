@@ -12,6 +12,7 @@ class Config:
     CLICK_COUNTER = 0
     ACTIVE_PROFILE = GAMING
     DRY_RUN = False
+    SELF_CHECK = False
 
     @classmethod
     def parse_arguments(cls) -> None:
@@ -27,8 +28,15 @@ class Config:
             action="store_true",
             help="Preview mode: print what would change without modifying the system",
         )
+        parser.add_argument(
+            "--self-check",
+            action="store_true",
+            help="Headless health check: print one line and exit (no changes, no elevation)",
+        )
         args, _ = parser.parse_known_args()
         if args.fallout:
             cls.PI_BOY_MODE = True
         if args.dry_run:
             cls.DRY_RUN = True
+        if args.self_check:
+            cls.SELF_CHECK = True

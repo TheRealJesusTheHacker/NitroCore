@@ -140,7 +140,7 @@ The winget manifests for the current version (1.1.3) are published in microsoft/
    certutil -hashfile NitroCoreOptimizer.exe SHA256
    ```
 
-3. Right-click → **Run as administrator**. NitroCore needs elevation to modify system settings; without it, it exits with an "Access Denied" message and exit code 1 instead of half-working.
+3. Run it — double-click is enough. NitroCore needs elevation to modify system settings, so it asks for it itself when it starts (one UAC prompt). If you decline the prompt, it exits with an "Access Denied" message and exit code 1 instead of half-working.
 
 ### Option B2 — Portable edition (`.zip`, no install) — shipped in v1.1.4
 
@@ -150,7 +150,7 @@ From v1.1.4 onward:
 
 1. Download `NitroCorePortable.zip` from that release and verify it against `SHA256SUMS.txt` from the same release (same `certutil` check as Option B, run on the `.zip`).
 2. Unzip it anywhere — a USB stick works. Keep the folder together: `NitroCoreOptimizer.exe` needs its `_internal` folder beside it.
-3. Run `NitroCoreOptimizer.exe` from that folder as administrator, exactly as in Option B.
+3. Run `NitroCoreOptimizer.exe` from that folder — it asks for elevation itself, exactly as in Option B. (Since v1.1.5 it also starts correctly when another program launches it, e.g. from the Technician's Toolkit bundle; earlier builds could only be started from Explorer or a shell.)
 
 Portable means *no install*, not *no footprint*: NitroCore still writes its log and registry-undo snapshots under `%APPDATA%\NitroCore`, and its tuning still applies to the machine it runs on. The full honest list ships inside the zip as `README-PORTABLE.txt` (source: `NitroCore/portable/README-PORTABLE.txt`).
 
@@ -165,7 +165,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Run from an elevated shell — the GUI path enforces the admin gate described above.
+The GUI path enforces the admin gate described above — started from a normal shell, the program relaunches itself elevated (one UAC prompt) rather than refusing to run.
 
 ### Option D — pip install from source / local wheel
 
@@ -190,7 +190,7 @@ Two honest caveats:
 ## Usage
 
 ```powershell
-# Full GUI (must run as administrator)
+# Full GUI (the program asks for elevation itself at startup)
 python main.py
 
 # Headless dry-run preview of the active profile — changes nothing,
@@ -212,7 +212,7 @@ Long operations run on daemon worker threads (`source/modules/async_worker.py`),
 
 ## How it works
 
-- **`NitroCore/main.py`** — entry point: parses flags, runs the headless preview and returns if `--dry-run` is set, otherwise enforces the admin gate (exit code 1 without elevation), enforces single-instance via `LifecycleManager`, then builds the GUI. GUI imports are deferred until after the preview path so a dry run never pays the tkinter import cost.
+- **`NitroCore/main.py`** — entry point: parses flags, runs the headless preview and returns if `--dry-run` is set, otherwise enforces the admin gate (relaunches itself elevated via the UAC prompt; exit code 1 if the user declines), enforces single-instance via `LifecycleManager`, then builds the GUI. GUI imports are deferred until after the preview path so a dry run never pays the tkinter import cost.
 - **`source/modules/`** — the five pipeline workers (`registry`, `temp_files`, `disk_cleanup`, `services`, `performance`) plus `system_stats` (telemetry for the header) and `async_worker` (daemon-thread dispatch so long operations never freeze the UI).
 - **`source/utils/profiles.py`** — profile definitions and the pipeline layout (`get_pipeline`, `step_requires_restore_prompt`, `execute_step`).
 - **`source/utils/preview.py`** — the process-wide dry-run recorder behind Preview Mode (`preview.start()` / `record()` / `report()`).

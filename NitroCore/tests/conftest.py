@@ -32,7 +32,13 @@ def _isolate_global_state():
 
     saved = {
         name: getattr(Config, name)
-        for name in ("PI_BOY_MODE", "CLICK_COUNTER", "ACTIVE_PROFILE", "DRY_RUN")
+        for name in (
+            "PI_BOY_MODE",
+            "CLICK_COUNTER",
+            "ACTIVE_PROFILE",
+            "DRY_RUN",
+            "SELF_CHECK",
+        )
     }
     preview.reset()
     yield

@@ -29,6 +29,121 @@ def is_admin() -> bool:
         return False
 
 
+def _quote_cmdline_arg(arg: str) -> str:
+    """Quote one argument for a Windows command line (CommandLineToArgvW rules)."""
+    if arg and not any(c in arg for c in ' \t"'):
+        return arg
+    parts = ['"']
+    backslashes = 0
+    for ch in arg:
+        if ch == "\\":
+            backslashes += 1
+            continue
+        if ch == '"':
+            parts.append("\\" * (2 * backslashes + 1))
+            parts.append('"')
+        else:
+            parts.append("\\" * backslashes)
+            parts.append(ch)
+        backslashes = 0
+    parts.append("\\" * (2 * backslashes))
+    parts.append('"')
+    return "".join(parts)
+
+
+def elevation_command() -> tuple:
+    """(executable, parameter string) to re-run this program elevated.
+
+    Frozen (PyInstaller): the executable is the .exe itself and only the
+    user's arguments carry over. From source: the interpreter re-runs
+    this file, so the file path leads the parameters.
+    """
+    args = list(sys.argv[1:])
+    if getattr(sys, "frozen", False):
+        params = args
+    else:
+        params = [os.path.abspath(__file__), *args]
+    return sys.executable, " ".join(_quote_cmdline_arg(a) for a in params)
+
+
+def _shell_execute_runas(executable: str, params: str, cwd: str) -> int:
+    """ShellExecuteW with the "runas" verb; returns the raw result code."""
+    return ctypes.windll.shell32.ShellExecuteW(
+        None, "runas", executable, params, cwd, 1
+    )
+
+
+def relaunch_elevated() -> bool:
+    """Re-start this program with administrator rights via the UAC prompt.
+
+    Returns True when Windows accepted the request (the elevated copy
+    takes over; this process should exit). False on non-Windows, when
+    the user declines the prompt, or when the request fails — the
+    caller then falls back to the Access Denied exit.
+    """
+    if not IS_WINDOWS:
+        return False
+    executable, params = elevation_command()
+    try:
+        result = _shell_execute_runas(executable, params, os.getcwd())
+    except Exception:
+        return False
+    # ShellExecuteW returns a value greater than 32 on success.
+    return result > 32
+
+
+def ensure_admin_or_exit() -> None:
+    """Admin gate: elevate in place, or exit with the Access Denied message.
+
+    NitroCore ships with an asInvoker manifest so that ANY launcher can
+    start it. A requireAdministrator manifest makes CreateProcess-based
+    starters (the Technician's Toolkit launcher, task schedulers, other
+    tools) fail with WinError 740 — "The requested operation requires
+    elevation" — before the program runs at all (field report
+    2026-10-20: NitroCore would not start from the Toolkit bundle while
+    double-clicking the same .exe worked, because Explorer uses
+    ShellExecute and can show the prompt). The elevation request
+    therefore happens here instead: exactly one UAC prompt, raised by
+    the program itself, and the program runs elevated exactly as
+    before once the user accepts.
+    """
+    if is_admin():
+        return
+    if relaunch_elevated():
+        sys.exit(0)
+    # L-1: non-Windows-safe message path — ctypes.windll crashes on
+    # Linux/macOS (MessageBoxW exists only on Windows).
+    show_blocking_message(
+        "Access Denied",
+        "NitroCore requires Administrative Privileges to modify system registries.",
+    )
+    sys.exit(1)
+
+
+def run_self_check() -> int:
+    """--self-check: prove the program starts; change nothing.
+
+    Headless and read-only; never needs elevation and never shows the
+    admin gate. Prints one line and, when the environment variable
+    NITROCORE_SELF_CHECK_OUT names a file, writes the same line there —
+    a windowed build has no console for a caller to read, so the file
+    is the machine-checkable proof. Exit code 0 means healthy.
+    """
+    line = f"NitroCore {__version__} self-check OK"
+    try:
+        print(line)
+    except Exception:
+        pass
+    out_path = os.environ.get("NITROCORE_SELF_CHECK_OUT")
+    if out_path:
+        try:
+            with open(out_path, "w", encoding="utf-8") as handle:
+                handle.write(line + "\n")
+        except OSError:
+            return 1
+    return 0
+
+
 def show_blocking_message(title: str, text: str, icon: int = 0x10) -> None:
     """Show a blocking message box on Windows; print to stderr elsewhere."""
     if IS_WINDOWS:
@@ -425,6 +540,10 @@ class NitroCoreApplication:
     def run(self):
         Config.parse_arguments()
 
+        if Config.SELF_CHECK:
+            # Headless health proof: no GUI, no admin gate, no changes.
+            sys.exit(run_self_check())
+
         if Config.DRY_RUN:
             # Headless preview: print the report to stdout, change nothing.
             # Skips the admin gate and single-instance mutex — a read-only
@@ -434,14 +553,7 @@ class NitroCoreApplication:
 
         _import_gui()
 
-        if not is_admin():
-            # L-1: non-Windows-safe message path — ctypes.windll crashes on
-            # Linux/macOS (MessageBoxW exists only on Windows).
-            show_blocking_message(
-                "Access Denied",
-                "NitroCore requires Administrative Privileges to modify system registries.",
-            )
-            sys.exit(1)
+        ensure_admin_or_exit()
 
         LifecycleManager.enforce_single_instance()
 

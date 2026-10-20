@@ -31,6 +31,36 @@ jobs:
         run: |
           cd NitroCore
           pyinstaller --noconfirm --distpath dist-portable --workpath build-portable nitrocore-portable.spec
+      - name: Staged start proof (launcher-style spawn, incl. non-admin user)
+        shell: pwsh
+        run: |
+          # The v1.1.4 field failure (WinError 740 from any
+          # CreateProcess-based launcher) must never ship again:
+          # prove the built executables carry no requireAdministrator
+          # manifest and that the portable starts the way the
+          # Technician's Toolkit launcher starts it — in the
+          # standalone AND bundle layouts, and as a non-administrator
+          # user. Runs before packaging, so a failure publishes
+          # nothing. See NitroCore/tools/staged_start_proof.py.
+          $ErrorActionPreference = 'Stop'
+          $proof = Join-Path $PWD "proof-tmp"
+          python NitroCore/tools/staged_start_proof.py "NitroCore/dist-portable/NitroCoreOptimizer" "NitroCore/dist/NitroCoreOptimizer.exe" $proof
+          net user diagstd "Diag!Pass-2026" /add /y
+          icacls $proof /grant "diagstd:(OI)(CI)M" /T /Q | Out-Null
+          $pw = ConvertTo-SecureString "Diag!Pass-2026" -AsPlainText -Force
+          $cred = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\diagstd", $pw)
+          $py = (Get-Command python).Source
+          $spawner = Join-Path $PWD "NitroCore\tools\staged_start_spawner.py"
+          $bundleExe = Join-Path $proof "bundle\NitroCoreOptimizer.exe"
+          foreach ($mode in @("selfcheck", "plain")) {
+            $verdict = Join-Path $proof "verdict-$mode.json"
+            $out = Join-Path $proof "bundle\selfcheck-$mode.out"
+            $p = Start-Process -FilePath $py -ArgumentList "`"$spawner`" `"$bundleExe`" `"$verdict`" $mode `"$out`"" -Credential $cred -Wait -PassThru -WindowStyle Hidden
+            Write-Host "spawner ($mode) process exit: $($p.ExitCode)"
+            if (-not (Test-Path $verdict)) { throw "staged start proof: no verdict written for mode $mode" }
+            Get-Content $verdict
+            python -c "import json,sys; v=json.load(open(sys.argv[1])); m=sys.argv[2]; assert v['user_is_admin'] is False, ('vacuous: spawner ran elevated', v); assert v['spawn']=='OK', v; assert ((v['rc']==0 and v['out_exists']) if m=='selfcheck' else True), v; print('standard-user', m, 'verdict OK')" $verdict $mode
+          }
       - name: Assemble NitroCorePortable.zip
         shell: pwsh
         run: |

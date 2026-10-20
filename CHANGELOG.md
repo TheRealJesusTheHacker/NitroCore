@@ -5,6 +5,45 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+## [1.1.5] - 2026-10-20
+
+Field fix: NitroCore would not start when another program launched it.
+
+Release: https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.5
+
+### Fixed
+- **Start failure from launchers (WinError 740).** The 1.1.4
+  executables carried a `requireAdministrator` manifest. Windows
+  Explorer can start such a program (it shows the UAC prompt via
+  ShellExecute), but a program that starts NitroCore directly —
+  the Technician's Toolkit launcher, a task scheduler, a script —
+  uses CreateProcess, which cannot show the prompt and refuses the
+  start outright: "The requested operation requires elevation."
+  In the Toolkit, NitroCore's card therefore showed "could not be
+  started" while Argus and the other tools started normally
+  (field report, 2026-10-20; reproduced on a Windows runner with a
+  non-administrator account in both the standalone portable layout
+  and the bundle layout). The executables now ship with an
+  `asInvoker` manifest — any launcher can start them — and
+  NitroCore raises the UAC prompt itself at startup
+  (`relaunch_elevated()` in `main.py`): accept it and the program
+  runs fully elevated exactly as before; decline it and the
+  program exits with the same "Access Denied" message as before.
+  No optimizer behavior changes.
+
+### Added
+- **`--self-check` mode.** A headless health proof in the fleet's
+  staged-self-check pattern: prints one line
+  (`NitroCore 1.1.5 self-check OK`), optionally writes it to the
+  file named by the `NITROCORE_SELF_CHECK_OUT` environment
+  variable, and exits 0. No GUI, no changes, no elevation. The
+  release workflow now runs a staged start proof on its Windows
+  runner before anything is published: it assembles the
+  portable in both the standalone layout and a bundle-style
+  layout and starts it the way the Toolkit launcher does —
+  including as a non-administrator user — so this failure mode
+  cannot ship again unnoticed.
+
 ## [1.1.4] - 2026-10-20
 
 Packaging release that ships the portable edition

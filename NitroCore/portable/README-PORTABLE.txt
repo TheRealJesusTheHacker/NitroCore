@@ -15,11 +15,12 @@ HOW TO RUN IT
 1. Unzip the whole NitroCorePortable.zip. Do not run the .exe
    from inside the zip: NitroCoreOptimizer.exe needs its
    _internal folder beside it, exactly as unzipped.
-2. Right-click NitroCoreOptimizer.exe and choose
-   "Run as administrator". NitroCore tunes system settings, so
-   Windows will ask for elevation (the .exe requests it itself);
-   without admin rights it shows "Access Denied" and exits
-   instead of half-working.
+2. Run NitroCoreOptimizer.exe - a plain double-click is fine,
+   and so is starting it from another program (for example the
+   Technician's Toolkit launcher). NitroCore tunes system
+   settings, so it asks for elevation itself when it starts
+   (one Windows prompt); if you decline the prompt it shows
+   "Access Denied" and exits instead of half-working.
 3. Pick a profile (Gaming or Cybersecurity) and run a tab, or
    press Run All. High-impact steps offer a system restore
    point first, exactly as in the regular edition.
