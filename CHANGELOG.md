@@ -5,6 +5,14 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+## [1.1.4] - 2026-10-20
+
+Packaging release that ships the portable edition
+(`NitroCorePortable.zip`) for the first time, together with the
+bug-fix, performance, and packaging work accumulated on `main`
+since 1.1.3 (itemized below). No new optimizer behavior is
+introduced beyond those itemized fixes and performance changes.
+
 ### Added
 - Portable edition packaging: `NitroCore/nitrocore-portable.spec`
   (PyInstaller one-folder build of the same `main.py` entry point,
@@ -13,8 +21,8 @@ All notable changes to NitroCore are documented here. The format is based on
   builds the portable folder on its Windows runner, zips it as
   `NitroCorePortable.zip`, covers it in `SHA256SUMS.txt` and the
   build-provenance attestation, and uploads it with the release.
-  The first release to ship the portable zip is the next one after
-  1.1.3; 1.1.3 and earlier ship only the single-file .exe.
+  This release (1.1.4) is the first to ship the portable zip;
+  1.1.3 and earlier ship only the single-file .exe.
   "Portable" means no installer - NitroCore still requires admin
   rights and still writes logs/undo snapshots under
   %APPDATA%\NitroCore (documented in README-PORTABLE.txt).
