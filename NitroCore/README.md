@@ -33,6 +33,8 @@ python main.py --dry-run
 - `requirements.txt` — pinned runtime dependencies (`psutil==7.0.0`, `pywin32==310`)
 - `requirements-dev.txt` — pinned test/lint tooling; deliberately Linux-safe (does not pull in `pywin32`)
 - `nitrocore.spec` — PyInstaller spec used to build the release `.exe`
+- `nitrocore-portable.spec` — PyInstaller one-folder spec for the portable edition; the release workflow zips its output as `NitroCorePortable.zip` (ships starting with the next release after 1.1.3)
+- `portable/` — `README-PORTABLE.txt`, the honest what's-in-the-zip note the release workflow copies into `NitroCorePortable.zip`
 - `setup.py` — setuptools build for the `source` package; version from `VERSION`, dependencies from `requirements.txt`
 - `VERSION` — the version file for this folder's build
 - `MANIFEST.in` / `LICENSE` — packaging manifest and the MIT license text (same license as the repo-root [`LICENSE`](../LICENSE))
