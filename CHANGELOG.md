@@ -5,6 +5,50 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+## [1.1.6] - 2026-10-20
+
+Visual release: NitroCore gets its own colors. No optimizer behavior
+changes — same layout, same words, same safety model. The 1.1.5
+launcher fix (asInvoker manifest, self-elevation at startup, the
+release workflow's staged start proof) is untouched, and the staged
+start proof still gates this release before anything is published.
+
+Release: https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.6
+
+### Changed
+- **New palette — "nitrous."** The interface now wears NitroCore's own
+  namesake colors instead of the generic grey-and-orange theme it
+  shipped with: carbon-black surfaces, a nitrous-azure primary, and
+  cool steel text. The two profiles keep distinct accent colors, now
+  both from the nitrous family — Gaming is azure (`#2EA3FF`),
+  Cybersecurity is pale nitrous (`#7CC4FF`); they were orange and teal.
+  All colors live in one place (`source/gui/theme.py`); the profile
+  accents in `source/utils/profiles.py` are pinned to it by test.
+- **Readable by measurement, not by eye.** Text painted on
+  accent-colored buttons is now dark instead of white — white on the
+  new azure measures only ~2.7:1. Every text/background pairing the
+  interface renders now measures at least 4.5:1 (WCAG AA), including
+  hover and pressed states, the risk badges, and disabled buttons.
+  One quiet fix falls out of this: the High-risk badge previously
+  measured ~4.35:1; its pill tint is shallower now and it passes.
+- **Danger reads as danger, fleet-wide.** Destructive-action buttons
+  now use the Sentinel fleet's danger red (`#B03A2E` with white text,
+  6.02:1) — the same red as the other Sentinel tools — instead of the
+  brighter red the old theme used for everything. Error *text* in the
+  log keeps the brighter signal red on purpose: the darker fleet red
+  measures only ~3.4:1 as text on a dark surface and would be harder
+  to read.
+- The hidden Pip-Boy mode is unchanged, green and all. It's supposed
+  to look like that.
+
+### Added
+- **`tests/test_theme.py`.** Pins the palette constants to the design
+  values, pins the profile accents to the theme, recomputes the
+  derived tones (hover, soft border, faint, disabled) from their
+  documented formulas, asserts every rendered pairing measures
+  >= 4.5:1, and fails if a color literal ever appears in a gui module
+  outside `theme.py` again.
+
 ## [1.1.5] - 2026-10-20
 
 Field fix: NitroCore would not start when another program launched it.
