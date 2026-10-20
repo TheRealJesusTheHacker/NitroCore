@@ -23,6 +23,14 @@ All notable changes to NitroCore are documented here. The format is based on
   (imported nowhere) and a write-only attribute in the progress panel
 
 ### Fixed
+- Registry writes and registry-undo restores no longer leak the key
+  handle when the value write fails — `CloseKey` sat after the write in
+  both paths, the W-4/W-5 pattern already fixed for service handles
+  (bug hunt #2 2026-10-19; 3 new tests in `tests/test_bughunt2.py`)
+- Downloads cleanup no longer crashes when the top-level scan fails
+  with a non-PermissionError `OSError` (e.g. the Downloads path is a
+  plain file); it reports a zero-clean result like the temp purge does
+  (bug hunt #2 2026-10-19)
 - Service stops now report unexpected (non-Windows-API) failures
   per-service instead of aborting the whole services step and discarding
   every result — the same guard startup changes received in W-5, applied
