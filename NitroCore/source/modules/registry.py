@@ -174,6 +174,7 @@ class RegistryOptimizer:
             if hive is None:
                 failed += 1
                 continue
+            key = None
             try:
                 key = winreg.CreateKeyEx(
                     hive, entry["sub_key"], 0, winreg.KEY_SET_VALUE
@@ -192,10 +193,19 @@ class RegistryOptimizer:
                         winreg.DeleteValue(key, entry["value_name"])
                     except OSError:
                         pass
-                winreg.CloseKey(key)
                 restored += 1
             except Exception:
                 failed += 1
+            finally:
+                # BH sweep #2: CloseKey sat after the write, so a
+                # SetValueEx/deserialize failure leaked the key handle —
+                # the W-4/W-5 leak pattern already fixed in services.py,
+                # missed here. Close in finally, like the read path does.
+                if key is not None:
+                    try:
+                        winreg.CloseKey(key)
+                    except Exception:
+                        pass
         return (
             f"Registry undo: restored {restored} value(s)"
             + (f", {failed} failed" if failed else "")
@@ -232,15 +242,23 @@ class RegistryOptimizer:
                 "existed": old_type is not None,
             }
         )
+        key = None
         try:
             # Open or create the key path with write permissions
             key = winreg.CreateKeyEx(hive, sub_key, 0, winreg.KEY_SET_VALUE)
             winreg.SetValueEx(key, value_name, 0, value_type, value)
-            winreg.CloseKey(key)
             return True
         except Exception as e:
             print(f"Failed registry write [{sub_key}\\{value_name}]: {e}")
             return False
+        finally:
+            # BH sweep #2: same handle leak as restore_last_undo — a
+            # SetValueEx failure skipped CloseKey entirely.
+            if key is not None:
+                try:
+                    winreg.CloseKey(key)
+                except Exception:
+                    pass
 
     def _disable_hibernation(self):
         """Disable hibernation to free up disk space and reduce OS storage overhead"""
