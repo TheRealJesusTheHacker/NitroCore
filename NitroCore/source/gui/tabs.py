@@ -59,7 +59,7 @@ class TabbedInterface:
         panel_color: str = theme.CARD,
         fg_color: str = theme.TEXT,
         muted_color: str = theme.MUTED,
-        accent_color: str = "#FF6B35",
+        accent_color: str = theme.PRIMARY,
         on_title_click=None,
     ):
         self.parent = parent
@@ -139,7 +139,7 @@ class TabbedInterface:
         logo.delete("all")
         theme.rounded_rect(logo, 2, 2, 38, 38, 10, fill=self.accent_color, outline="")
         logo.create_text(
-            20, 21, text="N", font=FontEngine.get("display"), fill="#FFFFFF"
+            20, 21, text="N", font=FontEngine.get("display"), fill=theme.ON_PRIMARY
         )
 
     def _build_brand_header(self) -> None:
@@ -264,7 +264,7 @@ class TabbedInterface:
                 bg=self.panel_color,
                 fg=self.muted_color,
                 activebackground=self.accent_color,
-                activeforeground="#FFFFFF",
+                activeforeground=theme.ON_PRIMARY,
                 corner_radius=theme.RADIUS_MD,
             )
             btn.pack(side="left", padx=(0, theme.PAD_XS))
@@ -276,9 +276,9 @@ class TabbedInterface:
             command=self._run_all_optimizations,
             font=FontEngine.get("button"),
             bg=self.accent_color,
-            fg="#FFFFFF",
+            fg=theme.ON_PRIMARY,
             activebackground=self._darken_accent(),
-            activeforeground="#FFFFFF",
+            activeforeground=theme.ON_PRIMARY,
             corner_radius=theme.RADIUS_MD,
             padx=18,
         )
@@ -355,7 +355,7 @@ class TabbedInterface:
             bg=theme.BTN_SECONDARY_BG,
             fg=self.fg_color,
             activebackground=self.accent_color,
-            activeforeground="#FFFFFF",
+            activeforeground=theme.ON_PRIMARY,
             corner_radius=theme.RADIUS_MD,
             anchor="w",
             padx=theme.PAD_LG,
@@ -500,7 +500,7 @@ class TabbedInterface:
             bg=theme.BTN_SECONDARY_BG,
             fg=self.fg_color,
             activebackground=self.accent_color,
-            activeforeground="#FFFFFF",
+            activeforeground=theme.ON_PRIMARY,
             corner_radius=theme.RADIUS_MD,
             border_color=theme.BORDER,
         )
@@ -521,7 +521,7 @@ class TabbedInterface:
 
         for tid, btn in self._tab_buttons.items():
             if tid == tab_id:
-                btn.configure(bg=self.accent_color, fg="#FFFFFF")
+                btn.configure(bg=self.accent_color, fg=theme.ON_PRIMARY)
             else:
                 btn.configure(bg=self.panel_color, fg=self.muted_color)
 

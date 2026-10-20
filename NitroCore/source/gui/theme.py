@@ -1,10 +1,27 @@
 """NitroCore design system — one palette, one spacing scale, shared primitives.
 
 Everything visual in the GUI should come from here so the whole app feels
-like it was designed by one person. Tasteful dark theme, single accent color
-(the accent itself is profile-driven: orange for Gaming, teal for
-Cybersecurity), consistent type roles from FontEngine, and card-based
-surfaces with subtle borders.
+like it was designed by one person. The palette is NitroCore's own
+"namesake" identity (fleet palette program, 2026-10-20): nitrous — a
+carbon-black base, nitrous-azure primary, pale-nitrous accent, cool steel
+text. The accent stays profile-driven, and both profile accents now come
+from this palette: Gaming wears PRIMARY azure, Cybersecurity wears the
+pale ACCENT (see source/utils/profiles.py; tests/test_theme.py pins the
+two in sync so they cannot drift apart).
+
+Every text/background pairing in this palette measures at least 4.5:1
+(WCAG) — the pairs are pinned by tests/test_theme.py. Text painted on a
+PRIMARY/ACCENT fill is ON_PRIMARY (dark), never white: white on azure
+measures only ~2.7:1. Destructive fills are the fleet danger red
+(DANGER) with white text (6.02:1), the same red as every Sentinel tool;
+ERROR below is a different job — error *text* on dark surfaces, where
+the darker fleet red would measure ~3.4:1 and fail, so the brighter
+signal red is kept for text only.
+
+Roles with no palette constant of their own (hover, soft border, faint,
+disabled surface) are derived from the base constants with mix() —
+their literals below are those derivations, recomputed and pinned by
+tests/test_theme.py.
 """
 
 import tkinter as tk
@@ -12,20 +29,32 @@ import tkinter.font as tkfont
 from typing import Optional
 
 # ---------------------------------------------------------------- palette ---
-BG = "#1B1D21"  # app backdrop
-BG_SUNKEN = "#141619"  # sunken areas: log view, progress trough
-CARD = "#26282E"  # card surfaces
-CARD_HOVER = "#2E3138"  # card/button hover surface
-BTN_SECONDARY_BG = "#2E3138"
-BORDER = "#3B3E46"  # subtle card borders
-BORDER_SOFT = "#32353C"  # barely-there borders
-TEXT = "#F2F3F5"  # primary text
-MUTED = "#A9ADB3"  # secondary text
-FAINT = "#6E7279"  # captions, placeholders
-DISABLED_BG = "#2A2D33"
-DISABLED_FG = "#6E7279"
+BG = "#05070A"  # app backdrop (carbon black)
+BG_SUNKEN = "#070B10"  # sunken areas: log view, progress trough, inputs
+CARD = "#0A0F16"  # card surfaces (panel)
+CARD_HOVER = "#171C23"  # card/button hover surface — mix(TEXT, CARD, 0.06)
+BTN_SECONDARY_BG = CARD_HOVER
+BORDER = "#1D2A3A"  # card borders (panel border)
+BORDER_SOFT = "#141C28"  # barely-there borders — mix(BORDER, CARD, 0.50)
+TEXT = "#E2E9F0"  # primary text (cool steel)
+MUTED = "#8FA3B8"  # secondary text
+FAINT = "#7A8C9E"  # captions, placeholders — mix(MUTED, BG, 0.85)
+DISABLED_BG = "#080B10"  # disabled surfaces — mix(CARD, BG, 0.50)
+DISABLED_FG = "#74879C"  # disabled text
 
-# Semantic colors (status, logs, badges) — not the brand accent.
+# Brand accents (nitrous). PRIMARY is the Gaming profile accent; ACCENT
+# is the Cybersecurity profile accent.
+PRIMARY = "#2EA3FF"  # nitrous azure
+ACCENT = "#7CC4FF"  # pale nitrous
+ON_PRIMARY = "#02101F"  # text/glyphs painted on PRIMARY or ACCENT fills
+
+# Destructive-action fills (fleet danger red) and the text on them.
+DANGER = "#B03A2E"
+ON_DANGER = "#FFFFFF"
+
+# Semantic colors (status, logs, badges) — text roles on dark surfaces,
+# not the brand accent. ERROR is text-only; destructive *fills* use
+# DANGER above (see the module docstring).
 SUCCESS = "#3BA55D"
 WARNING = "#FAA61A"
 ERROR = "#ED4245"
@@ -240,7 +269,10 @@ class Badge(tk.Canvas):
     ):
         self._font = as_font(font or ("Segoe UI", 9, "bold"))
         self._fg = fg
-        self._pill_bg = pill_bg or tint(fg, CARD, 0.16)
+        # Pill stays close to the card so badge text keeps >= 4.5:1
+        # (at 0.16 the High-risk red measured 4.35:1 — pinned by
+        # tests/test_theme.py).
+        self._pill_bg = pill_bg or tint(fg, CARD, 0.10)
         self._radius = radius
         self._padx = padx
         self._pady = pady
@@ -282,7 +314,7 @@ class ToggleSwitch(tk.Canvas):
         variable: tk.BooleanVar,
         command=None,
         bg: str = BG,
-        accent: str = "#FF6B35",
+        accent: str = PRIMARY,
         width: int = 46,
         height: int = 26,
     ):

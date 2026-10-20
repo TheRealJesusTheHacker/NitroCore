@@ -16,9 +16,11 @@ def _icon_badge(parent: tk.Widget, bg: str, glyph: str, color: str) -> tk.Canvas
     """A small circular badge with a glyph — friendlier than a bare title."""
     canvas = tk.Canvas(parent, width=40, height=40, bg=bg, highlightthickness=0, bd=0)
     canvas.create_oval(2, 2, 38, 38, fill=color, outline="")
-    canvas.create_text(
-        20, 21, text=glyph, font=FontEngine.get("header"), fill="#FFFFFF"
-    )
+    # Glyph color follows the fill: white only on the danger red (the
+    # fleet pair, 6.02:1); dark on the bright accent/warning/success
+    # fills, where white would wash out.
+    glyph_fg = theme.ON_DANGER if color == theme.DANGER else theme.ON_PRIMARY
+    canvas.create_text(20, 21, text=glyph, font=FontEngine.get("header"), fill=glyph_fg)
     return canvas
 
 
@@ -34,7 +36,7 @@ class RestorePointDialog:
         bg: str = theme.CARD,
         fg: str = theme.TEXT,
         muted: str = theme.MUTED,
-        accent: str = "#FF6B35",
+        accent: str = theme.PRIMARY,
     ):
         self.result: Optional[DialogResult] = None
 
@@ -88,9 +90,9 @@ class RestorePointDialog:
                 command=lambda r=result: self._close(r),
                 font=FontEngine.get("button"),
                 bg=accent if is_primary else theme.BTN_SECONDARY_BG,
-                fg="#FFFFFF" if is_primary else fg,
+                fg=theme.ON_PRIMARY if is_primary else fg,
                 activebackground=theme.darken(accent, 0.85) if is_primary else accent,
-                activeforeground="#FFFFFF",
+                activeforeground=theme.ON_PRIMARY,
                 corner_radius=theme.RADIUS_MD,
                 border_color=None if is_primary else theme.BORDER,
             )
@@ -134,10 +136,11 @@ class ConfirmDialog:
         bg: str = theme.CARD,
         fg: str = theme.TEXT,
         muted: str = theme.MUTED,
-        accent: str = "#FF6B35",
+        accent: str = theme.PRIMARY,
     ):
         self.result = False
-        confirm_bg = theme.ERROR if danger else accent
+        confirm_bg = theme.DANGER if danger else accent
+        confirm_fg = theme.ON_DANGER if danger else theme.ON_PRIMARY
 
         self.top = tk.Toplevel(parent)
         self.top.title(title)
@@ -184,9 +187,9 @@ class ConfirmDialog:
             command=lambda: self._close(True),
             font=FontEngine.get("button"),
             bg=confirm_bg,
-            fg="#FFFFFF",
+            fg=confirm_fg,
             activebackground=theme.darken(confirm_bg, 0.85),
-            activeforeground="#FFFFFF",
+            activeforeground=confirm_fg,
             corner_radius=theme.RADIUS_MD,
         )
         confirm_btn.pack(side="left", padx=(0, 8))
@@ -199,7 +202,7 @@ class ConfirmDialog:
             bg=theme.BTN_SECONDARY_BG,
             fg=fg,
             activebackground=accent,
-            activeforeground="#FFFFFF",
+            activeforeground=theme.ON_PRIMARY,
             corner_radius=theme.RADIUS_MD,
             border_color=theme.BORDER,
         )
@@ -250,7 +253,7 @@ class RestoreFailedDialog:
         bg: str = theme.CARD,
         fg: str = theme.TEXT,
         muted: str = theme.MUTED,
-        accent: str = "#FF6B35",
+        accent: str = theme.PRIMARY,
     ):
         self.result: RestoreFailedResult = "abort"
 
@@ -309,9 +312,9 @@ class RestoreFailedDialog:
                 command=lambda r=result: self._close(r),
                 font=FontEngine.get("button"),
                 bg=accent if is_primary else theme.BTN_SECONDARY_BG,
-                fg="#FFFFFF" if is_primary else fg,
+                fg=theme.ON_PRIMARY if is_primary else fg,
                 activebackground=theme.darken(accent, 0.85) if is_primary else accent,
-                activeforeground="#FFFFFF",
+                activeforeground=theme.ON_PRIMARY,
                 corner_radius=theme.RADIUS_MD,
                 border_color=None if is_primary else theme.BORDER,
             )
@@ -341,7 +344,7 @@ class PreviewReportDialog:
         bg: str = theme.CARD,
         fg: str = theme.TEXT,
         muted: str = theme.MUTED,
-        accent: str = "#FF6B35",
+        accent: str = theme.PRIMARY,
     ):
         self.top = tk.Toplevel(parent)
         self.top.title("Preview Report — no changes made")
@@ -415,9 +418,9 @@ class PreviewReportDialog:
             command=self._close,
             font=FontEngine.get("button"),
             bg=accent,
-            fg="#FFFFFF",
+            fg=theme.ON_PRIMARY,
             activebackground=theme.darken(accent, 0.85),
-            activeforeground="#FFFFFF",
+            activeforeground=theme.ON_PRIMARY,
             corner_radius=theme.RADIUS_MD,
         )
         close_btn.pack(anchor="e", padx=20, pady=(0, 18))

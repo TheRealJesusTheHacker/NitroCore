@@ -43,7 +43,7 @@ class CustomButton:
         bg: str = theme.BTN_SECONDARY_BG,
         fg: str = theme.TEXT,
         activebackground: str = theme.CARD_HOVER,
-        activeforeground: str = "#FFFFFF",
+        activeforeground: str = theme.TEXT,
         corner_radius: int = theme.RADIUS_MD,
         anchor: str = "center",
         padx: int = 14,

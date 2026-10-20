@@ -10,13 +10,18 @@ PROFILE_META: Dict[str, Dict[str, str]] = {
         "label": "Gaming",
         "tagline": "Maximum FPS & lowest latency",
         "description": "Aggressive power plan, full registry tuning, background service reduction.",
-        "accent": "#FF6B35",
+        # Nitrous azure — theme.PRIMARY in source/gui/theme.py (the
+        # palette's single source of truth). tests/test_theme.py pins
+        # these two literals to the theme constants so they cannot
+        # drift apart.
+        "accent": "#2EA3FF",
     },
     CYBERSECURITY: {
         "label": "Cybersecurity",
         "tagline": "Stable tools & patch-friendly",
         "description": "Visual perf tweaks, temp cleanup, keeps Windows Update active.",
-        "accent": "#00D4AA",
+        # Pale nitrous — theme.ACCENT in source/gui/theme.py.
+        "accent": "#7CC4FF",
     },
 }
 

@@ -156,7 +156,7 @@ class ProfileSelector:
         dot.delete("all")
         if selected:
             dot.create_oval(2, 2, 16, 16, fill=accent, outline="")
-            dot.create_oval(6, 6, 12, 12, fill="#FFFFFF", outline="")
+            dot.create_oval(6, 6, 12, 12, fill=theme.ON_PRIMARY, outline="")
         else:
             dot.create_oval(2, 2, 16, 16, fill="", outline=theme.BORDER, width=2)
 

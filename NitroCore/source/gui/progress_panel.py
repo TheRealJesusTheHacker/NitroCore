@@ -21,7 +21,7 @@ class ProgressPanel:
         bg_color: str = theme.BG,
         fg_color: str = theme.TEXT,
         muted_color: str = theme.MUTED,
-        accent_color: str = "#FF6B35",
+        accent_color: str = theme.PRIMARY,
     ):
         self.bg_color = bg_color
         self.fg_color = fg_color

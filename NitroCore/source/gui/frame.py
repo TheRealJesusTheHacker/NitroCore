@@ -6,6 +6,8 @@ Optimized to provide strict layout nesting boundaries without UI manager locking
 import tkinter as tk
 from typing import Optional
 
+from source.gui import theme
+
 
 class CustomFrame:
     """
@@ -17,7 +19,7 @@ class CustomFrame:
     def __init__(
         self,
         parent: tk.Widget,
-        bg_color: str = "#2F3136",  # Discord-style deep panel background
+        bg_color: str = theme.CARD,  # panel surface from the theme palette
         borderwidth: int = 0,  # Zeroed out border by default for smooth panels
         relief: str = "flat",  # Flat uniform visual layer design
         border_color: Optional[str] = None,  # Subtle 1px border when set
