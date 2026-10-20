@@ -14,10 +14,10 @@ psutil==7.0.0
 # Testing & Metrics Frameworks
 # S-3 (audit 2026-10-11): exact pins (no >= ranges), same as requirements.txt.
 # All pins support Python >=3.9 (the project's requires-python floor).
-# pytest-cov==6.2.1 verified against PyPI (2026-10-11); the rest are
+# pytest-cov==7.1.0 verified against PyPI (2026-10-11); the rest are
 # long-standing stable releases with unchanged 3.9 compatibility.
 pytest==8.3.5
-pytest-cov==6.2.1
+pytest-cov==7.1.0
 coverage==7.10.6
 
 # Code Quality & Format Linter Engines
