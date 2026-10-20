@@ -5,6 +5,20 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+- Portable edition packaging: `NitroCore/nitrocore-portable.spec`
+  (PyInstaller one-folder build of the same `main.py` entry point,
+  same datas/hidden imports/icon/elevation as `nitrocore.spec`) and
+  `NitroCore/portable/README-PORTABLE.txt`. The release workflow now
+  builds the portable folder on its Windows runner, zips it as
+  `NitroCorePortable.zip`, covers it in `SHA256SUMS.txt` and the
+  build-provenance attestation, and uploads it with the release.
+  The first release to ship the portable zip is the next one after
+  1.1.3; 1.1.3 and earlier ship only the single-file .exe.
+  "Portable" means no installer - NitroCore still requires admin
+  rights and still writes logs/undo snapshots under
+  %APPDATA%\NitroCore (documented in README-PORTABLE.txt).
+
 ### Performance
 - Headless `--dry-run` no longer imports tkinter or the GUI modules
   (deferred until the window is actually built), cutting preview startup
