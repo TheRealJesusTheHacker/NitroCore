@@ -53,9 +53,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Continue'
-          net user diagstd "Diag!Passw0rd-2026" /add
+          net user diagstd "Diag!Pass-2026" /add /y
           icacls C:\diag /grant "diagstd:(OI)(CI)M" /T /Q | Out-Null
-          $pw = ConvertTo-SecureString "Diag!Passw0rd-2026" -AsPlainText -Force
+          $pw = ConvertTo-SecureString "Diag!Pass-2026" -AsPlainText -Force
           $cred = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\diagstd", $pw)
           $py = (Get-Command python).Source
           Write-Host "python at $py"
