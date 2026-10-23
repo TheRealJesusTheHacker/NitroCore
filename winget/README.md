@@ -5,7 +5,9 @@ Submitted to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs):
 (manifests at `manifests/t/TheRealJesusTheHacker/NitroCore/1.1.2/`).
 
 Version 1.1.3 manifests are also published
-(`manifests/t/TheRealJesusTheHacker/NitroCore/1.1.3/`) — 1.1.3 is the
+(`manifests/t/TheRealJesusTheHacker/NitroCore/1.1.3/`), and version
+1.1.6 manifests are published as well
+(`manifests/t/TheRealJesusTheHacker/NitroCore/1.1.6/`) — 1.1.6 is the
 current winget version.
 
 Install with: `winget install TheRealJesusTheHacker.NitroCore`

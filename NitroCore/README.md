@@ -28,9 +28,9 @@ python main.py --dry-run
   - `source/gui/` — dashboard UI: tabs, custom widgets, theme, fonts, profile selector, stats header, progress panel
   - `source/modules/` — the five pipeline workers (`registry`, `temp_files`, `disk_cleanup`, `services`, `performance`) plus `system_stats` and `async_worker`
   - `source/utils/` — profiles and pipeline layout, dry-run preview recorder, config/CLI parsing, restore points, platform helpers, logging, lifecycle (single-instance)
-- `tests/` — pytest suite (134 tests collected; non-mutating logic and dry-run paths only). Run it from the repo root: `python -m pytest NitroCore/tests`
+- `tests/` — pytest suite (196 tests collected; non-mutating logic and dry-run paths only). Run it from the repo root: `python -m pytest NitroCore/tests`
 - `assets/` — application icon (`icon.ico`) and its generator script (`create_icon.py`)
-- `requirements.txt` — pinned runtime dependencies (`psutil==7.0.0`, `pywin32==310`)
+- `requirements.txt` — pinned runtime dependencies (`psutil==7.0.0`, `pywin32==312`)
 - `requirements-dev.txt` — pinned test/lint tooling; deliberately Linux-safe (does not pull in `pywin32`)
 - `nitrocore.spec` — PyInstaller spec used to build the release `.exe`
 - `nitrocore-portable.spec` — PyInstaller one-folder spec for the portable edition; the release workflow zips its output as `NitroCorePortable.zip` (shipped starting with [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4))

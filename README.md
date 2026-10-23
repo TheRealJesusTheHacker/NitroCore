@@ -129,7 +129,7 @@ NitroCore runs elevated and changes system state, so the safety mechanisms are p
 winget install TheRealJesusTheHacker.NitroCore
 ```
 
-The winget manifests for the current version (1.1.3) are published in microsoft/winget-pkgs; see [winget/README.md](winget/README.md) for the manifest reference, installer URL, and verified SHA-256.
+The winget manifests for the current version (1.1.6) are published in microsoft/winget-pkgs; see [winget/README.md](winget/README.md) for the manifest reference, installer URL, and verified SHA-256.
 
 ### Option B — Ready-to-run .exe
 
@@ -179,13 +179,13 @@ pip install .
 
 ```powershell
 python -m build --wheel
-pip install dist\nitrocore-1.1.4-py3-none-any.whl
+pip install dist\nitrocore-1.1.6-py3-none-any.whl
 ```
 
 Two honest caveats:
 
 - There is **no console-script entry point** — neither `pyproject.toml` nor `setup.py` defines one, so pip does not create a `nitrocore` command. The application is run as `python main.py` from the `NitroCore\` folder (Option C), or via the `.exe` / winget installs. The pip path installs the `source` package itself, which is what the test suite and other tooling import.
-- Runtime dependencies are pinned exactly in `NitroCore/requirements.txt` (`psutil==7.0.0`, `pywin32==310`); `pywin32` is Windows-only, so on non-Windows platforms the corresponding entry in `pyproject.toml` carries a `sys_platform == 'win32'` marker and is skipped.
+- Runtime dependencies are pinned exactly in `NitroCore/requirements.txt` (`psutil==7.0.0`, `pywin32==312`); `pywin32` is Windows-only, so on non-Windows platforms the corresponding entry in `pyproject.toml` carries a `sys_platform == 'win32'` marker and is skipped.
 
 ## Usage
 
@@ -247,7 +247,7 @@ ruff check NitroCore
 black --check NitroCore
 ```
 
-**Verified test count (2026-10-20, from a fresh clone of HEAD `ad8ee2c`):** `pytest --collect-only` collects **134 tests**; a full run on Linux (Python 3.12, `psutil==7.0.0`, `pytest==8.3.5`) reports **133 passed, 1 skipped**. The suite only exercises non-mutating logic and dry-run paths — no test mutates the registry, services, or filesystem — and Windows-only paths are marked `windows_only`. Test files map to the modules they cover (`test_registry_undo.py`, `test_services.py`, `test_temp_files_dryrun.py`, `test_version.py`, and the rest under `NitroCore/tests/`).
+**Verified test count (2026-10-23, from a fresh clone of HEAD `9a9ce2e`):** `pytest --collect-only` collects **196 tests**; a full run on Linux (Python 3.12, `psutil==7.0.0`, `pytest==8.3.5`) reports **195 passed, 1 skipped**. The suite only exercises non-mutating logic and dry-run paths — no test mutates the registry, services, or filesystem — and Windows-only paths are marked `windows_only`. Test files map to the modules they cover (`test_registry_undo.py`, `test_services.py`, `test_temp_files_dryrun.py`, `test_version.py`, and the rest under `NitroCore/tests/`).
 
 CI (`.github/workflows/ci.yml`) runs on every push and pull request to `main`: a byte-compile check on Ubuntu and on Windows, the pytest suite on Ubuntu, and ruff + black checks. CodeQL analysis (`.github/workflows/codeql.yml`) runs on push, pull request, and a weekly schedule. Releases are built by `.github/workflows/release.yml` on `v*` tags (a manual `workflow_dispatch` run builds the same artifacts without uploading a release): PyInstaller builds the `.exe` on a Windows runner, the same job also builds the portable one-folder edition from `nitrocore-portable.spec` and zips it as `NitroCorePortable.zip`, `SHA256SUMS.txt` is generated covering both downloads, build-provenance attestations are created, and the files are uploaded to the GitHub Release. The portable zip ships starting with [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4) — releases up to and including 1.1.3 contain only the `.exe` and `SHA256SUMS.txt`. There is no PyPI publish step anywhere in the repo.
 
@@ -270,6 +270,7 @@ pyinstaller --noconfirm nitrocore-portable.spec
 
 Every release ships:
 
+- **`NitroCoreOptimizer.exe`** — the standalone single-file build.
 - **`NitroCorePortable.zip`** — the portable edition (shipped starting with [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4); earlier releases ship the single-file `.exe` only).
 - **`SHA256SUMS.txt`** — hashes for every release artifact, so you can confirm your download wasn't tampered with.
 - **Signed build-provenance attestations** — cryptographic proof the binaries were built from this repo's code.
