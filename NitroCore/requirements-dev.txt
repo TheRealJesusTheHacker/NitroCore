@@ -25,7 +25,10 @@ pytest-cov==7.1.0
 coverage==7.10.6
 
 # Code Quality & Format Linter Engines
-black==25.1.0
+# Sweep #4 (2026-10-23): black 25.1.0 -> 26.10.1 (cache-file-name
+# arbitrary-write and related advisories, fixed across 26.3.0-26.10.1);
+# `black --check NitroCore` verified clean under 26.10.1 (60 files).
+black==26.10.1
 ruff==0.9.10
 flake8==7.4.1
 
