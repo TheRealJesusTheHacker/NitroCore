@@ -12,6 +12,13 @@ current winget version.
 
 Install with: `winget install TheRealJesusTheHacker.NitroCore`
 
+## Manifest reference (v1.1.6)
+
+- PackageIdentifier: `TheRealJesusTheHacker.NitroCore`
+- Installer: https://github.com/TheRealJesusTheHacker/NitroCore/releases/download/v1.1.6/NitroCoreOptimizer.exe
+- InstallerSha256: `89F86CEDCC1CB5B71F48F185FEA9DCBF8B7DA3626FDC7CBB225DC0E5B32BF971`
+  (verified against the v1.1.6 release's SHA256SUMS.txt)
+
 ## Manifest reference (v1.1.3)
 
 - PackageIdentifier: `TheRealJesusTheHacker.NitroCore`
