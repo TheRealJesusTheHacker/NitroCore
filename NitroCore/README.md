@@ -23,7 +23,7 @@ python main.py --dry-run
 
 ## Layout
 
-- `main.py` — entry point: CLI flags (`--dry-run`, hidden `--fallout`), admin gate, single-instance mutex, GUI construction, headless preview runner
+- `main.py` — entry point: CLI flags (`--dry-run`, `--self-check`, hidden `--fallout`), admin gate, single-instance mutex, GUI construction, headless preview runner
 - `source/` — the importable package (this is what the wheel built from the repo-root `pyproject.toml` / this folder's `setup.py` ships)
   - `source/gui/` — dashboard UI: tabs, custom widgets, theme, fonts, profile selector, stats header, progress panel
   - `source/modules/` — the five pipeline workers (`registry`, `temp_files`, `disk_cleanup`, `services`, `performance`) plus `system_stats` and `async_worker`

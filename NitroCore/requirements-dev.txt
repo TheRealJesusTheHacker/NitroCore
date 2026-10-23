@@ -13,10 +13,14 @@ psutil==7.0.0
 
 # Testing & Metrics Frameworks
 # S-3 (audit 2026-10-11): exact pins (no >= ranges), same as requirements.txt.
-# All pins support Python >=3.9 (the project's requires-python floor).
+# Sweep #4 (2026-10-23): pytest bumped 8.3.5 -> 9.1.1 (the pin Argus
+# already uses) for the pytest tmpdir vulnerability fixed in 9.0.3
+# (GHSA-6w46-j5rx-g56g). pytest 9.x needs Python >= 3.10, so the DEV
+# tooling now requires 3.10+ (CI runs 3.11); the product's runtime
+# floor is unchanged at Python 3.9+.
 # pytest-cov==7.1.0 verified against PyPI (2026-10-11); the rest are
 # long-standing stable releases with unchanged 3.9 compatibility.
-pytest==8.3.5
+pytest==9.1.1
 pytest-cov==7.1.0
 coverage==7.10.6
 
@@ -31,7 +35,10 @@ wheel==0.48.0
 twine==6.1.0
 
 # Dev-time asset generation (assets/create_icon.py; never shipped in the binary)
-pillow==12.3.0
+# Sweep #4 (2026-10-23): 12.3.0 -> 13.0.0 — every Pillow vulnerability
+# disclosed against 12.3.0 is fixed in 13.0.0 (pip-audit/OSV, 2026-10-23);
+# create_icon.py verified working unchanged under 13.0.0.
+pillow==13.0.0
 
 # Static Type Analysis Definitions
 types-setuptools==84.0.0.20261006

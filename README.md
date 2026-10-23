@@ -199,9 +199,13 @@ python main.py --dry-run
 
 # Start directly in the hidden Pip-Boy theme
 python main.py --fallout
+
+# Headless health check: print one line and exit (no changes,
+# no elevation) — the release pipeline's staged start proof uses it
+python main.py --self-check
 ```
 
-Those are the only command-line flags: `--dry-run` and the hidden `--fallout`, both parsed in `source/utils/config.py` (`Config.parse_arguments()`). Everything else happens in the GUI:
+Those are the only command-line flags: `--dry-run`, `--self-check`, and the hidden `--fallout`, all parsed in `source/utils/config.py` (`Config.parse_arguments()`). Everything else happens in the GUI:
 
 1. **Pick a profile** — Gaming or Cybersecurity — on the selector cards at the top of the dashboard.
 2. **Run a single tab's action**, or press **Run All (<profile>)** to run Registry → Temp Files → Disk Cleanup → Services → Performance in order.
@@ -247,7 +251,7 @@ ruff check NitroCore
 black --check NitroCore
 ```
 
-**Verified test count (2026-10-23, from a fresh clone of HEAD `9a9ce2e`):** `pytest --collect-only` collects **196 tests**; a full run on Linux (Python 3.12, `psutil==7.0.0`, `pytest==8.3.5`) reports **195 passed, 1 skipped**. The suite only exercises non-mutating logic and dry-run paths — no test mutates the registry, services, or filesystem — and Windows-only paths are marked `windows_only`. Test files map to the modules they cover (`test_registry_undo.py`, `test_services.py`, `test_temp_files_dryrun.py`, `test_version.py`, and the rest under `NitroCore/tests/`).
+**Verified test count (2026-10-23, from a fresh clone of HEAD `ea374be` plus the Fleet Sweep #4 dev-pin updates):** `pytest --collect-only` collects **196 tests**; a full run on Linux (Python 3.12, `psutil==7.0.0`, `pytest==9.1.1`) reports **195 passed, 1 skipped**. The suite only exercises non-mutating logic and dry-run paths — no test mutates the registry, services, or filesystem — and Windows-only paths are marked `windows_only`. Test files map to the modules they cover (`test_registry_undo.py`, `test_services.py`, `test_temp_files_dryrun.py`, `test_version.py`, and the rest under `NitroCore/tests/`).
 
 CI (`.github/workflows/ci.yml`) runs on every push and pull request to `main`: a byte-compile check on Ubuntu and on Windows, the pytest suite on Ubuntu, and ruff + black checks. CodeQL analysis (`.github/workflows/codeql.yml`) runs on push, pull request, and a weekly schedule. Releases are built by `.github/workflows/release.yml` on `v*` tags (a manual `workflow_dispatch` run builds the same artifacts without uploading a release): PyInstaller builds the `.exe` on a Windows runner, the same job also builds the portable one-folder edition from `nitrocore-portable.spec` and zips it as `NitroCorePortable.zip`, `SHA256SUMS.txt` is generated covering both downloads, build-provenance attestations are created, and the files are uploaded to the GitHub Release. The portable zip ships starting with [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4) — releases up to and including 1.1.3 contain only the `.exe` and `SHA256SUMS.txt`. There is no PyPI publish step anywhere in the repo.
 

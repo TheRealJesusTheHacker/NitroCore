@@ -19,7 +19,7 @@ keywords = ["windows", "system-optimizer", "gaming", "cybersecurity", "python"]
 # no wheels.
 dependencies = [
     "psutil==7.0.0",
-    "pywin32==310; sys_platform == 'win32'",
+    "pywin32==312; sys_platform == 'win32'",
 ]
 
 # The importable package is NitroCore/source (imported everywhere as
