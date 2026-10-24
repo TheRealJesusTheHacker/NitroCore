@@ -33,7 +33,7 @@ ruff==0.9.10
 flake8==7.4.1
 
 # Packaging & Distribution Pipelines
-setuptools==83.0.0
+setuptools==84.1.0
 wheel==0.48.0
 twine==6.1.0
 
