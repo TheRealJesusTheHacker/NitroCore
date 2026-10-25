@@ -35,7 +35,7 @@ coverage==7.10.6
 # arbitrary-write and related advisories, fixed across 26.3.0-26.10.1);
 # `black --check NitroCore` verified clean under 26.10.1 (60 files).
 black==26.10.1
-ruff==0.9.10
+ruff==0.17.1
 flake8==7.4.1
 
 # Packaging & Distribution Pipelines
