@@ -3,10 +3,13 @@
 # ====================================================================
 # M-6: exact pins (no >= ranges). This binary requests admin elevation, so
 # reproducible builds matter — a drifted dependency lands in a privileged
-# artifact. Re-validate these pins on the Windows build host before release;
-# for full supply-chain lockdown, generate hashes with:
-#   pip hash -r requirements.txt
-# and enforce with `pip install --require-hashes`.
+# artifact. Re-validate these pins on the Windows build host before release.
+# HASH LOCK (2026-10-25, --require-hashes fleet rollout): the lockdown
+# is no longer a suggestion -- installs use the committed lock beside
+# this file:
+#   pip install --require-hashes -r requirements.lock.txt
+# and pip fails loudly on any hash mismatch. A pin bump here is not
+# landed until the lock is regenerated (procedure in the lock header).
 
 # Low-level Windows API interaction extensions
 pywin32==312

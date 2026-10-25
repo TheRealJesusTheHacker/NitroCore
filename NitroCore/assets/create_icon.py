@@ -5,7 +5,10 @@ import os
 try:
     from PIL import Image, ImageDraw
 except ImportError:
-    raise SystemExit("Install Pillow first: pip install pillow")
+    raise SystemExit(
+        "Install Pillow first (it is in the hash-locked dev set): "
+        "pip install --require-hashes -r requirements-dev.lock.txt"
+    )
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "assets", "icon.ico")

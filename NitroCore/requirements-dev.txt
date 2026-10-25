@@ -5,8 +5,14 @@
 # production requirements pin pywin32, which ships no Linux/macOS wheels,
 # and the pytest suite + linters run on ubuntu CI. The only runtime dep the
 # tests need is psutil (pinned to mirror requirements.txt). On a Windows
-# dev machine, install BOTH files:
-#   pip install -r requirements.txt -r requirements-dev.txt
+# dev machine, install BOTH locks:
+#   pip install --require-hashes -r requirements.lock.txt
+#   pip install --require-hashes -r requirements-dev.lock.txt
+# HASH LOCK (2026-10-25, --require-hashes fleet rollout): the .lock.txt
+# files beside the requirements files carry the full resolved sets with
+# a sha256 for every artifact, and pip fails loudly on any mismatch. The
+# plain .txt files remain the human-edited pin lists; a pin bump is not
+# landed until its lock is regenerated (procedure in each lock header).
 
 # Runtime dep needed by the test suite (mirrors requirements.txt pin)
 psutil==7.0.0

@@ -161,7 +161,7 @@ Requires Python 3.9+ on Windows.
 ```powershell
 git clone https://github.com/TheRealJesusTheHacker/NitroCore.git
 cd NitroCore\NitroCore
-pip install -r requirements.txt
+pip install --require-hashes -r requirements.lock.txt
 python main.py
 ```
 
@@ -169,7 +169,7 @@ The GUI path enforces the admin gate described above — started from a normal s
 
 ### Option D — pip install from source / local wheel
 
-The packaging in the root `pyproject.toml` (and `NitroCore/setup.py`) builds the importable `source` package — the same package `main.py` imports as `source.*`. From the repository root:
+The packaging in the root `pyproject.toml` (and `NitroCore/setup.py`) builds the importable `source` package — the same package `main.py` imports as `source.*`. For a fully hash-verified install, first install the runtime lock (`pip install --require-hashes -r NitroCore\requirements.lock.txt`, Option C) so the exact pinned dependencies are already in place, hash-verified, before running this. From the repository root:
 
 ```powershell
 pip install .
@@ -186,6 +186,7 @@ Two honest caveats:
 
 - There is **no console-script entry point** — neither `pyproject.toml` nor `setup.py` defines one, so pip does not create a `nitrocore` command. The application is run as `python main.py` from the `NitroCore\` folder (Option C), or via the `.exe` / winget installs. The pip path installs the `source` package itself, which is what the test suite and other tooling import.
 - Runtime dependencies are pinned exactly in `NitroCore/requirements.txt` (`psutil==7.0.0`, `pywin32==312`); `pywin32` is Windows-only, so on non-Windows platforms the corresponding entry in `pyproject.toml` carries a `sys_platform == 'win32'` marker and is skipped.
+- Hash locking (2026-10-25): every requirements file has a committed `.lock.txt` sibling carrying the full resolved set with a sha256 for every artifact, and every install instruction in this repo uses `pip install --require-hashes -r <lock>`, which fails loudly on any mismatch. One bounded exception: `pip install .` under build isolation fetches the `pyproject.toml` build requirement (`setuptools==84.1.0`, already an exact pin) without hash verification, because pip cannot hash-check build-isolated dependencies — install the dev lock first and add `--no-build-isolation` to close even that gap.
 
 ## Usage
 
@@ -240,7 +241,7 @@ NitroCore writes nothing else of its own outside the system locations its cleanu
 Clone the repo (Option C above), then install the dev requirements. On Windows, install both files; on Linux/macOS, the dev file alone is enough and is deliberately Linux-safe (it does not pull in `pywin32`):
 
 ```powershell
-pip install -r NitroCore\requirements-dev.txt
+pip install --require-hashes -r NitroCore\requirements-dev.lock.txt
 ```
 
 Run the suite, linters, and formatter check — the same commands CI runs:
@@ -259,7 +260,8 @@ Building the `.exe` locally uses the same spec the release workflow uses:
 
 ```powershell
 cd NitroCore
-pip install pyinstaller==6.11.1
+pip install --require-hashes -r requirements.lock.txt
+pip install --require-hashes -r requirements-release.lock.txt
 pyinstaller --noconfirm nitrocore.spec
 ```
 

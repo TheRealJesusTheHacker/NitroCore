@@ -20,9 +20,15 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
+        # Hash-locked (owner policy 2026-10-25): both installs verify
+        # hashes against the committed locks and fail loudly on any
+        # mismatch. The PyInstaller install that used to be an inline
+        # `pip install pyinstaller==6.11.1` (transitives floating) now
+        # goes through requirements-release.lock.txt, generated from
+        # the pins in requirements-release.txt.
         run: |
-          pip install -r NitroCore/requirements.txt
-          pip install pyinstaller==6.11.1
+          pip install --require-hashes -r NitroCore/requirements.lock.txt
+          pip install --require-hashes -r NitroCore/requirements-release.lock.txt
       - name: Build with PyInstaller
         run: |
           cd NitroCore

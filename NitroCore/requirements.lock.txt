@@ -1,0 +1,62 @@
+# NitroCore runtime hash lock -- DO NOT EDIT BY HAND.
+#
+# Source file: NitroCore/requirements.txt (exact pins; this lock is
+# the full resolved set -- both pins are direct, neither has
+# transitive dependencies).
+# Install with:  pip install --require-hashes -r NitroCore/requirements.lock.txt
+# Any hash mismatch or unlisted package FAILS the install. That is
+# the point: owner policy 2026-10-25 (--require-hashes fleet
+# rollout) -- a version bump is not landed until its hashes are
+# locked here.
+#
+# Generated: 2026-10-25, hashes ONLY from downloaded index
+# artifacts (`pip download` + `pip hash`, pip 26.2.2):
+#   pip download --no-deps --platform win_amd64 --only-binary=:all:
+#       --python-version <39|310|311|312|313> pywin32==312
+#   pip download --no-deps --platform win_amd64 --only-binary=:all:
+#       psutil==7.0.0
+#   pip download --no-deps psutil==7.0.0            (manylinux wheel)
+#   pip download --no-deps --no-binary=:all: psutil==7.0.0  (sdist)
+#   pip hash <each downloaded artifact>
+# pywin32 ships no sdist on PyPI that pip can use and no
+# non-Windows wheels at all; `pip download --no-binary=:all:
+# pywin32==312` returns "No matching distribution found" (observed
+# 2026-10-25) -- its entries below are wheel hashes only, which is
+# what a Windows install consumes.
+#
+# Platform coverage: Windows win_amd64, CPython 3.9-3.13 (the
+# pywin32 wheels are per-interpreter; psutil's win_amd64 wheel is
+# one cp37-abi3 file covering all of them). pywin32 carries the
+# same sys_platform == "win32" marker pyproject.toml gives it, so
+# on Linux this lock installs psutil only -- that is exactly what
+# the Linux clean-install proof proves (psutil's manylinux wheel +
+# sdist hashes below), and NO Linux install of pywin32 is claimed:
+# none exists. The 32-bit win32 and win_arm64 pywin32 wheels are
+# NOT in this lock; CI and release runners are win_amd64.
+#
+# Regeneration: re-run the downloads above for the pins in
+# requirements.txt, re-hash, then re-run the clean-venv install
+# proof and the tamper test before committing. NEVER hand-copy a
+# hash from anywhere but a downloaded index artifact.
+#
+# Build-system note (bounded exception): pyproject.toml pins
+# setuptools==84.1.0 as its build requirement. pip's build
+# isolation cannot hash-check build dependencies, so `pip
+# install .` fetches that one already-exact pin unverified by
+# hash. Mitigation: install the dev or release lock first (both
+# contain setuptools==84.1.0 with hashes) and build with
+# --no-build-isolation; the pin itself is unchanged.
+
+psutil==7.0.0 \
+    --hash=sha256:4b1388a4f6875d7e2aff5c4ca1cc16c545ed41dd8bb596cefea80111db353a34 \
+    --hash=sha256:4cf3d4eb1aa9b348dec30105c55cd9b7d4629285735a102beb4441e38db90553 \
+    --hash=sha256:7be9c3eba38beccb6495ea33afd982a44074b78f28c434a1f51cc07fd315c456
+    # hashes: manylinux_2_17 x86_64 wheel, win_amd64 wheel, sdist
+
+pywin32==312 ; sys_platform == "win32" \
+    --hash=sha256:5dbc35d2b5320dc07f25fa31269cfb767471002b17de5eb067d03da68c7cb2db \
+    --hash=sha256:b457f6d628a47e8a7346ce22acb7e1a46a4a78b52e1d17e1af56871bd19a93bc \
+    --hash=sha256:c53e878d15a1c44788082bfe712a905433473aa38f86375b7cf8b45e3acbaaf9 \
+    --hash=sha256:d11417d84412f859b722fad0841b3614459ed0047f7542d8362e77884f6b6e8a \
+    --hash=sha256:dc90147579a905b8635e1b0ec6514967dcb07e6e0d9c42f1477feef14cac23bb
+    # hashes: win_amd64 wheels for CPython 3.10, 3.12, 3.13, 3.11, 3.9

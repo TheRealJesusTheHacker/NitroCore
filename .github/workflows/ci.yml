@@ -34,7 +34,9 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: pip install -r NitroCore/requirements.txt
+        # Hash-locked (owner policy 2026-10-25): verified against
+        # NitroCore/requirements.lock.txt; fails loudly on mismatch.
+        run: pip install --require-hashes -r NitroCore/requirements.lock.txt
       - name: Byte-compile every module
         run: python -m compileall -q NitroCore
 
@@ -50,7 +52,9 @@ jobs:
         # requirements-dev.txt is Linux-safe: it does NOT pull in
         # requirements.txt (pywin32 has no Linux wheels). The suite only
         # exercises non-mutating logic and dry-run paths.
-        run: pip install -r NitroCore/requirements-dev.txt
+        # Hash-locked (owner policy 2026-10-25): installs the lock
+        # generated from those pins; fails loudly on any mismatch.
+        run: pip install --require-hashes -r NitroCore/requirements-dev.lock.txt
       - name: Run pytest
         run: python -m pytest NitroCore/tests -v
 
@@ -63,7 +67,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install linters
-        run: pip install -r NitroCore/requirements-dev.txt
+        run: pip install --require-hashes -r NitroCore/requirements-dev.lock.txt
       - name: Ruff check
         run: ruff check NitroCore
       - name: Black format check

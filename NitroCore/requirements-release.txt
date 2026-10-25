@@ -1,0 +1,22 @@
+# ====================================================================
+# NitroCore - Release Build Tooling (PyInstaller)
+# ====================================================================
+# The release workflow (.github/workflows/release.yml) builds the
+# .exe with PyInstaller on a Windows runner. This file is the pin
+# list for that install; it replaces the workflow's former inline
+# `pip install pyinstaller==6.11.1`, which left every transitive
+# dependency floating.
+#
+# Install it ONLY through the hash lock beside it:
+#   pip install --require-hashes -r requirements-release.lock.txt
+# (together with the runtime lock, requirements.lock.txt).
+# Owner policy 2026-10-25: every install verifies hashes against
+# the committed lock and fails loudly on mismatch.
+#
+# setuptools is pinned here at 84.1.0 -- the repo's own existing
+# pin (pyproject.toml [build-system] and requirements-dev.txt) --
+# instead of letting PyInstaller's setuptools>=42 requirement float
+# to whatever is newest on release day.
+
+pyinstaller==6.11.1
+setuptools==84.1.0

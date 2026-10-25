@@ -1,0 +1,85 @@
+# NitroCore release-build hash lock -- DO NOT EDIT BY HAND.
+#
+# Source file: NitroCore/requirements-release.txt (the release
+# workflow's PyInstaller tooling: pyinstaller==6.11.1, formerly an
+# inline unpinned-hash `pip install` in release.yml, plus
+# setuptools==84.1.0 -- the repo's own existing pin from
+# pyproject.toml [build-system] and requirements-dev.txt, locked
+# here instead of letting PyInstaller's setuptools>=42 float).
+# Install with:  pip install --require-hashes -r NitroCore/requirements-release.lock.txt
+# (in addition to the runtime lock, requirements.lock.txt).
+# Any hash mismatch or unlisted package FAILS the install -- owner
+# policy 2026-10-25 (--require-hashes fleet rollout).
+#
+# Generated: 2026-10-25, on Linux x86_64, CPython 3.12, with:
+#   pip-compile --generate-hashes --allow-unsafe \
+#       --output-file=requirements-release.lock.txt requirements-release.txt
+#   (pip-tools 7.6.2; hashes are the PyPI index artifact hashes for
+#   every file of every resolved release)
+# Windows-gated transitives the Linux resolution drops were added
+# with their markers, hashes from downloaded index artifacts:
+#   pywin32-ctypes==0.2.3  (pip-compile compat resolution)
+#   pefile==2023.2.7       (pip download + pip hash; the version
+#     PyInstaller's pefile!=2024.8.26,>=2022.5.30 resolves to)
+#
+# Platform coverage: Windows win_amd64 (the release platform,
+# CPython 3.11 in release.yml) + Linux x86_64 (clean-install proven
+# on CPython 3.12; the win32-gated entries skip on Linux).
+# macholib (PyInstaller's darwin-only dep) is not included: macOS
+# is not a build platform for this repo.
+#
+# Regeneration: re-run the command above, re-add the two win32-gated
+# entries, then re-run the clean-venv install proof and the tamper
+# test before committing. NEVER hand-copy a hash from anywhere but
+# a downloaded index artifact.
+
+altgraph==0.17.5 \
+    --hash=sha256:c87b395dd12fabde9c99573a9749d67da8d29ef9de0125c7f536699b4a9bc9e7 \
+    --hash=sha256:f3a22400bce1b0c701683820ac4f3b159cd301acab067c51c653e06961600597
+    # via pyinstaller
+
+packaging==26.3 \
+    --hash=sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+    # via
+    #   pyinstaller
+    #   pyinstaller-hooks-contrib
+
+pefile==2023.2.7 ; sys_platform == "win32" \
+    --hash=sha256:82e6114004b3d6911c77c3953e3838654b04511b8b66e8583db70c65998017dc \
+    --hash=sha256:da185cd2af68c08a6cd4481f7325ed600a88f6a813bad9dea07ab3ef73d8d8d6
+    # via pyinstaller (win32-gated; hashes from `pip download pefile==2023.2.7` + `pip hash`, 2026-10-25)
+
+pyinstaller==6.11.1 \
+    --hash=sha256:0d6475559c4939f0735122989611d7f739ed3bf02f666ce31022928f7a7e4fda \
+    --hash=sha256:208c0ef6dab0837a0a273ea32d1a3619a208e3d1fe3fec3785eea71a77fd00ce \
+    --hash=sha256:2e8365276c5131c9bef98e358fbc305e4022db8bedc9df479629d6414021956a \
+    --hash=sha256:32c742a24fe65d0702958fadf4040f76de85859c26bec0008766e5dbabc5b68f \
+    --hash=sha256:35e6b8077d240600bb309ed68bb0b1453fd2b7ab740b66d000db7abae6244423 \
+    --hash=sha256:44e36172de326af6d4e7663b12f71dbd34e2e3e02233e181e457394423daaf03 \
+    --hash=sha256:491dfb4d9d5d1d9650d9507daec1ff6829527a254d8e396badd60a0affcb72ef \
+    --hash=sha256:6d12c45a29add78039066a53fb05967afaa09a672426072b13816fe7676abfc4 \
+    --hash=sha256:7ac83c0dc0e04357dab98c487e74ad2adb30e7eb186b58157a8faf46f1fa796f \
+    --hash=sha256:ad84abf465bcda363c1d54eafa76745d77b6a8a713778348377dc98d12a452f7 \
+    --hash=sha256:ddc0fddd75f07f7e423da1f0822e389a42af011f9589e0269b87e0d89aa48c1f \
+    --hash=sha256:e21c7806e34f40181e7606926a14579f848bfb1dc52cbca7eea66eccccbfe977
+    # via -r release-input.txt
+
+pyinstaller-hooks-contrib==2026.9 \
+    --hash=sha256:2748767901acb5cecd1304652b6c7add5bffcff1d71d01207fe24a5d42942a56 \
+    --hash=sha256:fb3e67dd64122561724c48ad0366ac9e8c16e638b63bf7d85de03bf3fdbf06c3
+    # via pyinstaller
+
+# The following packages are considered to be unsafe in a requirements file:
+
+pywin32-ctypes==0.2.3 ; sys_platform == "win32" \
+    --hash=sha256:8a1513379d709975552d202d942d9837758905c8d01eb82b8bcc30918929e7b8 \
+    --hash=sha256:d162dc04946d704503b2edc4d55f3dba5c1d539ead017afa00142c38b9885755
+    # via -r compat-input.txt
+
+setuptools==84.1.0 \
+    --hash=sha256:23657205b63d4d31395ab917815247f694aafad28cd21316bf5fd45a51048ea0 \
+    --hash=sha256:5231689c6ac8156cd155cfb98c3fd6fb252c3e7e9bd3d78b64d3c55f132624c9
+    # via
+    #   -r release-input.txt
+    #   pyinstaller

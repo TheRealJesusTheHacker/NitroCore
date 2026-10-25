@@ -11,7 +11,7 @@ Current version: **1.1.6**, read at build time from [`VERSION`](VERSION) by `set
 Requires Python 3.9+ on Windows. Run from this folder **as administrator**:
 
 ```powershell
-pip install -r requirements.txt
+pip install --require-hashes -r requirements.lock.txt
 python main.py
 ```
 
@@ -30,8 +30,9 @@ python main.py --dry-run
   - `source/utils/` — profiles and pipeline layout, dry-run preview recorder, config/CLI parsing, restore points, platform helpers, logging, lifecycle (single-instance)
 - `tests/` — pytest suite (196 tests collected; non-mutating logic and dry-run paths only). Run it from the repo root: `python -m pytest NitroCore/tests`
 - `assets/` — application icon (`icon.ico`) and its generator script (`create_icon.py`)
-- `requirements.txt` — pinned runtime dependencies (`psutil==7.0.0`, `pywin32==312`)
-- `requirements-dev.txt` — pinned test/lint tooling; deliberately Linux-safe (does not pull in `pywin32`)
+- `requirements.txt` — pinned runtime dependencies (`psutil==7.0.0`, `pywin32==312`); install via its hash lock `requirements.lock.txt` (`pip install --require-hashes -r requirements.lock.txt`)
+- `requirements-dev.txt` — pinned test/lint tooling; deliberately Linux-safe (does not pull in `pywin32`); install via its hash lock `requirements-dev.lock.txt`
+- `requirements-release.txt` — pinned PyInstaller release tooling; install via its hash lock `requirements-release.lock.txt`
 - `nitrocore.spec` — PyInstaller spec used to build the release `.exe`
 - `nitrocore-portable.spec` — PyInstaller one-folder spec for the portable edition; the release workflow zips its output as `NitroCorePortable.zip` (shipped starting with [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4))
 - `portable/` — `README-PORTABLE.txt`, the honest what's-in-the-zip note the release workflow copies into `NitroCorePortable.zip`
