@@ -8,7 +8,7 @@
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D6?style=flat-square)](https://www.microsoft.com/windows)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
-**Status:** Released. Current version **1.1.6** — the same version string is carried in `pyproject.toml`, `NitroCore/VERSION`, and `source/__init__.py` (`__version__`), and a test (`tests/test_version.py`) asserts they stay in sync. (1.1.6 is a visual release: the interface now wears NitroCore's own nitrous-azure palette — no behavior changes; see the changelog.) Distributed via winget, as a standalone `.exe` from GitHub Releases, and from source (Python 3.9+, Windows). A portable edition (`NitroCorePortable.zip`, a one-folder build with no installer — see Option B2 below) ships as of [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4); the 1.1.3 release and earlier ship only the single-file `.exe` and `SHA256SUMS.txt`. NitroCore is **not published on PyPI** — there is no publish workflow in this repo, and the pip paths below build and install from this source tree.
+**Status:** Released. Current version **1.1.7** — the same version string is carried in `pyproject.toml`, `NitroCore/VERSION`, and `source/__init__.py` (`__version__`), and a test (`tests/test_version.py`) asserts they stay in sync. (1.1.7 is a dependency-maintenance release: build-tool security bumps and hash-locked installs — no behavior changes; see the changelog.) Distributed via winget, as a standalone `.exe` from GitHub Releases, and from source (Python 3.9+, Windows). A portable edition (`NitroCorePortable.zip`, a one-folder build with no installer — see Option B2 below) ships as of [v1.1.4](https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.4); the 1.1.3 release and earlier ship only the single-file `.exe` and `SHA256SUMS.txt`. NitroCore is **not published on PyPI** — there is no publish workflow in this repo, and the pip paths below build and install from this source tree.
 
 ## Contents
 
@@ -129,7 +129,7 @@ NitroCore runs elevated and changes system state, so the safety mechanisms are p
 winget install TheRealJesusTheHacker.NitroCore
 ```
 
-The winget manifests for the current version (1.1.6) are published in microsoft/winget-pkgs; see [winget/README.md](winget/README.md) for the manifest reference, installer URL, and verified SHA-256.
+The winget manifests for 1.1.6 are published in microsoft/winget-pkgs; see [winget/README.md](winget/README.md) for the manifest reference, installer URL, and verified SHA-256.
 
 ### Option B — Ready-to-run .exe
 
@@ -179,7 +179,7 @@ pip install .
 
 ```powershell
 python -m build --wheel
-pip install dist\nitrocore-1.1.6-py3-none-any.whl
+pip install dist\nitrocore-1.1.7-py3-none-any.whl
 ```
 
 Two honest caveats:

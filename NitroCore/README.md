@@ -4,7 +4,7 @@ This folder is the NitroCore application itself: entry point, importable `source
 
 👉 **Full documentation — features, profiles, install options (winget / .exe / source / pip), usage, safety model, and roadmap — is in the [main README](../README.md).**
 
-Current version: **1.1.6**, read at build time from [`VERSION`](VERSION) by `setup.py`, and kept in sync with `pyproject.toml` and `source/__init__.py` — `tests/test_version.py` asserts all three agree.
+Current version: **1.1.7**, read at build time from [`VERSION`](VERSION) by `setup.py`, and kept in sync with `pyproject.toml` and `source/__init__.py` — `tests/test_version.py` asserts all three agree.
 
 ## Quick start (from source)
 

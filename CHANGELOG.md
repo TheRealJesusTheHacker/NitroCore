@@ -5,6 +5,44 @@ All notable changes to NitroCore are documented here. The format is based on
 
 ## [Unreleased]
 
+## [1.1.7] - 2026-10-25
+
+Dependency-maintenance release. No optimizer behavior changes — same
+layout, same words, same safety model, and the release workflow's
+staged start proof still gates this release before anything is
+published.
+
+Release: https://github.com/TheRealJesusTheHacker/NitroCore/releases/tag/v1.1.7
+
+### Changed
+- **Dependency installs are hash-locked now** (fleet --require-hashes
+  policy, adopted 2026-10-25). The runtime, development, and release
+  dependency sets each have a committed lock
+  (`NitroCore/requirements.lock.txt`, `requirements-dev.lock.txt`,
+  and `requirements-release.lock.txt`), and every install path —
+  CI, the release workflow, and the documented from-source routes —
+  installs from a lock with `--require-hashes`. The release
+  workflow's PyInstaller install, previously an inline
+  `pip install pyinstaller==6.11.1` whose transitive dependencies
+  floated, now goes through the release lock. The locks' headers
+  record the bounded exceptions (build isolation, platform scope).
+- **Build-tool security bumps since 1.1.6** (fleet sweeps #4 and
+  #5): setuptools 75.8.2 → 84.1.0 in the build system and dev set
+  (through 83.0.0 for PYSEC-2026-34, then 84.1.0 for
+  GHSA-xmj3-9gf7-h52w), the pywin32 pin aligned 310 → 312 to match
+  the canonical pin list, and black 25.1.0 → 26.10.1 in the dev set
+  (PYSEC-2026-2120/2121). Build and development tooling only — no
+  runtime dependency changed.
+
+### Verified
+- A full functional bug hunt ran on this tree and found nothing to
+  fix: the full suite (195 passed, 1 skipped), `--help`,
+  `--self-check`, and a headless `--dry-run` preview all pass, and
+  the interface was built under a virtual display with all six
+  tabs visited and every registered button confirmed wired to a
+  real command.
+
+
 ## [1.1.6] - 2026-10-20
 
 Visual release: NitroCore gets its own colors. No optimizer behavior
