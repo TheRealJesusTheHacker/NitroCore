@@ -15,7 +15,7 @@
 # landed until its lock is regenerated (procedure in each lock header).
 
 # Runtime dep needed by the test suite (mirrors requirements.txt pin)
-psutil==7.0.0
+psutil==7.2.2
 
 # Testing & Metrics Frameworks
 # S-3 (audit 2026-10-11): exact pins (no >= ranges), same as requirements.txt.

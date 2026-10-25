@@ -14,7 +14,7 @@
 #   pip download --no-deps --platform win_amd64 --only-binary=:all:
 #       --python-version <39|310|311|312|313> pywin32==312
 #   pip download --no-deps --platform win_amd64 --only-binary=:all:
-#       psutil==7.0.0
+#       psutil==7.2.2
 #   pip download --no-deps psutil==7.0.0            (manylinux wheel)
 #   pip download --no-deps --no-binary=:all: psutil==7.0.0  (sdist)
 #   pip hash <each downloaded artifact>
@@ -47,7 +47,7 @@
 # contain setuptools==84.1.0 with hashes) and build with
 # --no-build-isolation; the pin itself is unchanged.
 
-psutil==7.0.0 \
+psutil==7.2.2 \
     --hash=sha256:4b1388a4f6875d7e2aff5c4ca1cc16c545ed41dd8bb596cefea80111db353a34 \
     --hash=sha256:4cf3d4eb1aa9b348dec30105c55cd9b7d4629285735a102beb4441e38db90553 \
     --hash=sha256:7be9c3eba38beccb6495ea33afd982a44074b78f28c434a1f51cc07fd315c456

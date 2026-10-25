@@ -15,5 +15,5 @@
 pywin32==312
 
 # Process metrics, memory telemetry, and CPU prioritization tracking
-psutil==7.0.0
+psutil==7.2.2
 
