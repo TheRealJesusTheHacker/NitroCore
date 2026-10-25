@@ -19,4 +19,4 @@
 # to whatever is newest on release day.
 
 pyinstaller==6.11.1
-setuptools==84.1.0
+setuptools==84.2.1

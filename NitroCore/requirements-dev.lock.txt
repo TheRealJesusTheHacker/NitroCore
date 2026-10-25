@@ -33,10 +33,10 @@
 # (pip-compile --generate-hashes, or pip download + pip hash).
 #
 # Build-system note (bounded exception): pyproject.toml pins
-# setuptools==84.1.0 as its build requirement. pip's build isolation
+# setuptools==84.2.1 as its build requirement. pip's build isolation
 # cannot hash-check build dependencies, so `pip install .` fetches
 # that one already-exact pin unverified by hash. Mitigation: install
-# this lock first (it contains setuptools==84.1.0 with hashes) and
+# this lock first (it contains setuptools==84.2.1 with hashes) and
 # build with --no-build-isolation; the pin itself is unchanged.
 
 backports-tarfile==1.2.0 ; python_version < "3.12" \
@@ -903,7 +903,7 @@ secretstorage==3.5.0 \
     --hash=sha256:f04b8e4689cbce351744d5537bf6b1329c6fc68f91fa666f60a380edddcd11be
     # via keyring
 
-setuptools==84.1.0 \
+setuptools==84.2.1 \
     --hash=sha256:23657205b63d4d31395ab917815247f694aafad28cd21316bf5fd45a51048ea0 \
     --hash=sha256:5231689c6ac8156cd155cfb98c3fd6fb252c3e7e9bd3d78b64d3c55f132624c9
     # via -r NitroCore/requirements-dev.txt
