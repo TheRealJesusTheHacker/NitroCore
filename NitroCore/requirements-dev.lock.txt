@@ -908,9 +908,9 @@ setuptools==84.1.0 \
     --hash=sha256:5231689c6ac8156cd155cfb98c3fd6fb252c3e7e9bd3d78b64d3c55f132624c9
     # via -r NitroCore/requirements-dev.txt
 
-twine==6.1.0 \
-    --hash=sha256:a47f973caf122930bf0fbbf17f80b83bc1602c9ce393c7845f289a3001dc5384 \
-    --hash=sha256:be324f6272eff91d07ee93f251edf232fc647935dd585ac003539b42404a8dbd
+twine==7.0.0 \
+    --hash=sha256:85cdb29c518efef867360ae4acd4b0dfd61c8654a22fca08e6f8539f05022177 \
+    --hash=sha256:b854164df26db268af05f49aa5c0344b10e27a494343ff05b1e0bad3b135f5a7
     # via -r NitroCore/requirements-dev.txt
 
 types-setuptools==84.0.0.20261006 \
