@@ -1,10 +1,22 @@
 name: Release
 
+# Releases are dispatch-only (defused 2026-10-27, applying the fleet
+# release-trigger lesson from Cyra): a stray v* tag push no longer
+# builds or publishes anything. Dispatch WITH a version (e.g. v1.1.8)
+# to cut a release — the workflow creates the tag and the release at
+# the dispatched commit if they do not exist yet, generates notes only
+# at that first creation, and never overwrites existing release notes
+# on a re-run. Dispatch with the version left empty for a dry run:
+# builds only, nothing is uploaded.
+
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version to create (e.g. v1.1.8). Leave empty for a dry run: builds only, nothing uploaded."
+        required: false
+        type: string
+        default: ""
 
 jobs:
   build-exe:
@@ -19,6 +31,16 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.11"
+      - name: Validate version input
+        if: inputs.version != ''
+        shell: pwsh
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          if ($env:VERSION_INPUT -notmatch '^v\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$') {
+            Write-Host "::error::version input '$env:VERSION_INPUT' is not a valid release version (expected vX.Y.Z, e.g. v1.1.8)"
+            exit 1
+          }
       - name: Install dependencies
         # Hash-locked (owner policy 2026-10-25): both installs verify
         # hashes against the committed locks and fail loudly on any
@@ -93,17 +115,28 @@ jobs:
             NitroCore/dist/*.exe
             NitroCore/dist/NitroCorePortable.zip
             NitroCore/dist/SHA256SUMS.txt
+      - name: Create the release if it does not exist yet
+        if: inputs.version != ''
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.version }}
+        run: |
+          gh release view "$env:RELEASE_TAG" *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create "$env:RELEASE_TAG" --target "$env:GITHUB_SHA" --title "$env:RELEASE_TAG" --generate-notes
+          }
       - name: Upload to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: inputs.version != ''
         uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
+          tag_name: ${{ inputs.version }}
           files: |
             NitroCore/dist/*.exe
             NitroCore/dist/NitroCorePortable.zip
             NitroCore/dist/SHA256SUMS.txt
-          generate_release_notes: true
-      - name: List built artifacts (manual dispatch runs)
-        if: github.event_name == 'workflow_dispatch'
+      - name: List built artifacts (dry runs)
+        if: inputs.version == ''
         shell: pwsh
         run: |
           Get-ChildItem -Recurse NitroCore/dist, NitroCore/dist-portable | Select-Object FullName, Length
