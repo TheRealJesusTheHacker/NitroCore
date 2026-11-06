@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Thanks for reporting. **Do not report security vulnerabilities here** —
-        email them to **sentinelsafeguard@outlook.com** instead (see SECURITY.md).
+        email them to **sentinel@sentinelsafeguard.net** instead (see SECURITY.md).
   - type: input
     id: version
     attributes:

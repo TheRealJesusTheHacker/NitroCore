@@ -16,7 +16,7 @@ seriously.
 
 **Do not open a public issue for a suspected vulnerability.** Instead, email:
 
-**sentinelsafeguard@outlook.com**
+**sentinel@sentinelsafeguard.net**
 
 Include:
 - A description of the issue and its potential impact

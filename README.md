@@ -309,9 +309,9 @@ Pull requests are welcome. A few ground rules:
 bc1qvydns2fmyjzj55wzxq7ta28nxdhcmu9l9m6yg0
 ```
 
-**Contact** — business inquiries: **Sentinelsafeguard@outlook.com**
+**Contact** — business inquiries: **sentinel@sentinelsafeguard.net**
 
-**Security vulnerabilities:** do not open a public issue — email Sentinelsafeguard@outlook.com instead. See [SECURITY.md](SECURITY.md).
+**Security vulnerabilities:** do not open a public issue — email sentinel@sentinelsafeguard.net instead. See [SECURITY.md](SECURITY.md).
 
 **Changelog** — all notable changes are documented in [CHANGELOG.md](CHANGELOG.md).
 

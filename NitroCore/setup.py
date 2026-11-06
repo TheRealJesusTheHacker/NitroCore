@@ -38,7 +38,7 @@ setup(
     name="nitrocore-optimizer",
     version=VERSION,
     author="NitroCore Team",
-    author_email="sentinelsafeguard@outlook.com",
+    author_email="sentinel@sentinelsafeguard.net",
     description="Professional, thread-safe Windows system optimization utility framework.",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
